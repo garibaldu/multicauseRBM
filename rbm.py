@@ -14,3 +14,14 @@ class RBM(object):
         self.hidden_bias = np.random.normal(size = num_hid)
 
         self.num_items = num_items
+
+    def num_hid(self):
+        return self.hidden.shape[1]
+
+    def num_vis(self):
+        return self.visible.shape[1]
+
+
+
+def random_hiddens_for_rbm(rbm):
+    return np.zeros((rbm.num_items, rbm.num_hid()))

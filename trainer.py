@@ -1,4 +1,5 @@
 import numpy as np
+import rbm
 
 
 class VanillaTrainier(object):
@@ -8,9 +9,9 @@ class VanillaTrainier(object):
         self.rbm = rbm
         self.sampler = sampler
 
-    def train(self, epochs, learning_rate = 0.002):
-        wake_vis = self.rbm.visible
-        wake_hid = self.rbm.hidden
+    def train(self, epochs, training ,learning_rate = 0.002):
+        wake_vis = training
+        wake_hid = rbm.random_hiddens_for_rbm(self.rbm)
 
         sleep_vis = wake_vis
         sleep_hid = self.sampler.visible_to_hidden(sleep_vis)

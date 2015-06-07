@@ -16,6 +16,11 @@ class VanillaSampler(object):
     def hidden_to_visible(self, hidden):
         return self.bernouli_flip(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
+    def reconstruction_given_visible(self, visible):
+        hid_given_vis = self.visible_to_hidden(visible)
+        vis_given_hid = self.hidden_to_visible(hid_given_vis)
+        return vis_given_hid 
+
 
 class PartitionedSampler(VanillaSampler):
 
