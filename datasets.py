@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-ROOT_DATA_PATH = "Datasets"
+ROOT_DATA_PATH = "datasets"
 
 DATA_FILE_EXTENSION = "{}s-img-dataset.npy"
 

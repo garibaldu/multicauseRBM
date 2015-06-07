@@ -1,5 +1,9 @@
 from scipy.special import expit
 import numpy as np
+from numpy import newaxis
+from performance import plot_correction_decorator
+
+
 
 class VanillaSampler(object):
 
@@ -18,7 +22,7 @@ class VanillaSampler(object):
 
     def reconstruction_given_visible(self, visible):
         hid_given_vis = self.visible_to_hidden(visible)
-        vis_given_hid = self.hidden_to_visible(hid_given_vis)
+        vis_given_hid = expit(np.dot(hid_given_vis, self.rbm.weights) + self.rbm.visible_bias)
         return vis_given_hid 
 
 
@@ -36,18 +40,15 @@ class PartitionedSampler(VanillaSampler):
 
     def visible_to_hidden(self, visible, num_samples):
         # grab a slice of the hiddens and visible that are the correct size
-        hidden_a = self.rbm_a.hidden[-(self.size):]
-        hidden_b = self.rbm_b.hidden[-(self.size):]
-        visible = visible[-(self.size):]
+        hidden_a = self.rbm_a.hidden[:(self.size)]
+        hidden_b = self.rbm_b.hidden[:(self.size)]
+        visible = visible[:self.size]
 
-        vis_bias_a = self.model_A.visible_bias
-        vis_bias_b = self.model_B.visible_bias
-        hid_bias_a = self.model_A.hidden_bias
-        hid_bias_b = self.model_B.hidden_bias
+        vis_bias_a = self.rbm_a.visible_bias
+        vis_bias_b = self.rbm_b.visible_bias
+        hid_bias_a = self.rbm_a.hidden_bias
+        hid_bias_b = self.rbm_b.hidden_bias
 
-
-        print("Clamped Visible")
-        plotter.plot(sampled_visible)
 
         for epoch in range(num_samples):
 
@@ -62,16 +63,23 @@ class PartitionedSampler(VanillaSampler):
             """
             Apply the correction to the weighted sum into the hiddens
             """
-            psi_a = np.dot(sampled_visible ,self.rbm_a.weights.transpose()) + correction_a.sum(2) + hid_bias_a
-            psi_b = np.dot(sampled_visible ,self.rbm_b.weights.transpose()) + correction_b.sum(2) + hid_bias_b
+            psi_a = np.dot(visible ,self.rbm_a.weights.transpose()) + correction_a.sum(2) + hid_bias_a
+            psi_b = np.dot(visible ,self.rbm_b.weights.transpose()) + correction_b.sum(2) + hid_bias_b
 
             # now, do we turn on he hiddens? Bernoulli sample to decide
             hidden_a = self.bernouli_flip(psi_a)
             hidden_b = self.bernouli_flip(psi_b)
 
+        return hidden_a, hidden_b
 
-        print("Complete")
-        return sampled_visible, hidden_a, hidden_b
+    def hidden_to_sample(self, hidden, rbm):
+        return expit(np.dot(hidden,rbm.weights) + rbm.visible_bias)
+
+    def reconstructions_given_visible(self, visible, num_samples):
+        hid_a, hid_b = self.visible_to_hidden(visible, num_samples)
+        vis_a = self.hidden_to_sample(hid_a, self.rbm_a)
+        vis_b = self.hidden_to_sample(hid_b, self.rbm_b)
+        return vis_a, vis_b
 
 
 def build_hinge_func(x):
@@ -98,6 +106,7 @@ def calc_correction(hidden_a, hidden_b, weights_a, weights_b):
     
     return correction_a, correction_b
         
+
 
 
     

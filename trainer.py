@@ -10,6 +10,7 @@ class VanillaTrainier(object):
         self.sampler = sampler
 
     def train(self, epochs, training ,learning_rate = 0.002):
+        self.rbm.visible = training
         wake_vis = training
         wake_hid = rbm.random_hiddens_for_rbm(self.rbm)
 
@@ -35,6 +36,8 @@ class VanillaTrainier(object):
 
             self.rbm.hidden_bias =  self.rbm.hidden_bias + learning_rate * (wake_hid - sleep_hid).sum(0)
             self.rbm.hidden_bias = np.mean(self.rbm.hidden_bias) * np.ones(self.rbm.hidden_bias.shape)
+
+        self.rbm.hidden = wake_hid
 
 
     def hebbian(self, visible, hidden):
