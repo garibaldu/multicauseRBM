@@ -3,34 +3,34 @@ import numpy as np
 
 class VanillaSampler(object):
 
-	def __init__(self, rbm):
-		self.rbm = rbm
+    def __init__(self, rbm):
+        self.rbm = rbm
 
-	def bernouli_flip(self, weighted_sum):
-		p = expit(weighted_sum) > np.random.rand(*weighted_sum.shape)
-		return np.where(p, 1, 0)
-	
-	def visible_to_hidden(self, visible):
-		return self.bernouli_flip(np.dot(visible, self.rbm.weights.transpose()) + self.rbm.visible_bias)
+    def bernouli_flip(self, weighted_sum):
+        p = expit(weighted_sum) > np.random.rand(*weighted_sum.shape)
+        return np.where(p, 1, 0)
+    
+    def visible_to_hidden(self, visible):
+        return self.bernouli_flip(np.dot(visible, self.rbm.weights.transpose()) + self.rbm.hidden_bias)
 
-	def hidden_to_visible(self, hidden):
-		return self.bernouli_flip(np.dot(hidden, self.rbm.weights) + self.rbm.hidden_bias)
+    def hidden_to_visible(self, hidden):
+        return self.bernouli_flip(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
 
 class PartitionedSampler(VanillaSampler):
 
-	def __init__(self, rbm_a, rbm_b, num_items = None):
-		self.rbm_a = rbm_a
-		self.rbm_b = rbm_b
+    def __init__(self, rbm_a, rbm_b, num_items = None):
+        self.rbm_a = rbm_a
+        self.rbm_b = rbm_b
 
-		if num_items == None:
-			self.size = self.rbm_a.num_items
-		else:
-			self.size = num_items
+        if num_items == None:
+            self.size = self.rbm_a.num_items
+        else:
+            self.size = num_items
 
 
-	def visible_to_hidden(self, visible, num_samples):
-		# grab a slice of the hiddens and visible that are the correct size
+    def visible_to_hidden(self, visible, num_samples):
+        # grab a slice of the hiddens and visible that are the correct size
         hidden_a = self.rbm_a.hidden[-(self.size):]
         hidden_b = self.rbm_b.hidden[-(self.size):]
         visible = visible[-(self.size):]

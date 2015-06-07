@@ -3,42 +3,38 @@ import numpy as np
 
 class VanillaTrainier(object):
 
-	
-	def __init__(self, rbm, sampler):
-		self.rbm = rbm
-		self.sampler = sampler
+    
+    def __init__(self, rbm, sampler):
+        self.rbm = rbm
+        self.sampler = sampler
 
-	def train(self, epochs):
-		wake_vis = self.visible
-		wake_hid = self.hidden
+    def train(self, epochs, learning_rate = 0.002):
+        wake_vis = self.rbm.visible
+        wake_hid = self.rbm.hidden
 
-		sleep_vis = wake_vis
-		sleep_hid = self.sampler.visible_to_hidden(sleep_vis)
+        sleep_vis = wake_vis
+        sleep_hid = self.sampler.visible_to_hidden(sleep_vis)
 
-		for epoch in range(0, epochs):
+        for epoch in range(0, epochs):
 
-			wake_hid = self.sampler.visible_to_hidden(wake_vis)
-			sleep_vis = self.sampler.visible_given_hidden(sleepH, sleepV.shape)
-			sleepH = self.hidden_given_visible(sleepV, sleepH.shape)
+            wake_hid = self.sampler.visible_to_hidden(wake_vis)
+            sleep_vis = self.sampler.hidden_to_visible(sleep_hid) # reconstruction based on training item
+            sleep_hid = self.sampler.visible_to_hidden(sleep_vis) # hidden based on reconstruction
 
-			# over the whole training set
-			hebbian_pos = self.hebbian(wakeV, wakeH)
-			hebbian_neg = self.hebbian(sleepV, sleepH)
+            hebbian_pos = self.hebbian(wake_vis, wake_hid)
+            hebbian_neg = self.hebbian(sleep_vis, sleep_hid)
 
-			# weight update
-			# TODO: make sure the hids are all different and check mean(1)?????
-			self.weights =  self.weights + self.learning_rate * (hebbian_pos - hebbian_neg).sum(1).transpose()
-			# bias updates 
-			self.visible_bias = self.visible_bias + self.learning_rate * (wakeV - sleepV).sum(0)
-			self.visible_bias = np.mean(self.visible_bias) * np.ones(self.visible_bias.shape)
+            # weight update
+            # TODO: make sure the hids are all different and check mean(1)?????
+            self.rbm.weights += learning_rate * (hebbian_pos - hebbian_neg).sum(0).transpose()
 
-			self.hidden_bias =  self.hidden_bias + self.learning_rate * (wakeH - sleepH).sum(0)
-			self.hidden_bias = np.mean(self.hidden_bias) * np.ones(self.hidden_bias.shape)
+            # bias updates 
+            self.rbm.visible_bias = self.rbm.visible_bias + learning_rate * (wake_vis - sleep_vis).sum(0)
+            self.rbm.visible_bias = np.mean(self.rbm.visible_bias) * np.ones(self.rbm.visible_bias.shape)
 
-		self.hidden = wakeH
-		print('finished')
+            self.rbm.hidden_bias =  self.rbm.hidden_bias + learning_rate * (wake_hid - sleep_hid).sum(0)
+            self.rbm.hidden_bias = np.mean(self.rbm.hidden_bias) * np.ones(self.rbm.hidden_bias.shape)
 
 
-
-	def hebbian(self, visible, hidden):
-		return visible[:,:,np.newaxis] * hidden.[np.newaxis, :,:]
+    def hebbian(self, visible, hidden):
+        return visible[:,:,np.newaxis] * hidden[:, np.newaxis,:]
