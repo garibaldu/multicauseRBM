@@ -3,8 +3,6 @@ import numpy as np
 from numpy import newaxis
 from performance import plot_correction_decorator
 
-
-
 class VanillaSampler(object):
 
     def __init__(self, rbm):
@@ -22,7 +20,7 @@ class VanillaSampler(object):
 
     def reconstruction_given_visible(self, visible):
         hid_given_vis = self.visible_to_hidden(visible)
-        vis_given_hid = expit(np.dot(hid_given_vis, self.rbm.weights) + self.rbm.visible_bias)
+        vis_given_hid = self.hidden_to_visible(hid_given_vis)
         return vis_given_hid 
 
 
@@ -73,7 +71,7 @@ class PartitionedSampler(VanillaSampler):
         return hidden_a, hidden_b
 
     def hidden_to_sample(self, hidden, rbm):
-        return expit(np.dot(hidden,rbm.weights) + rbm.visible_bias)
+        return self.bernouli_flip(np.dot(hidden,rbm.weights) + rbm.visible_bias)
 
     def reconstructions_given_visible(self, visible, num_samples):
         hid_a, hid_b = self.visible_to_hidden(visible, num_samples)

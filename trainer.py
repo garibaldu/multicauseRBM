@@ -23,6 +23,7 @@ class VanillaTrainier(object):
             sleep_vis = self.sampler.hidden_to_visible(sleep_hid) # reconstruction based on training item
             sleep_hid = self.sampler.visible_to_hidden(sleep_vis) # hidden based on reconstruction
 
+
             hebbian_pos = self.hebbian(wake_vis, wake_hid)
             hebbian_neg = self.hebbian(sleep_vis, sleep_hid)
 
@@ -42,3 +43,4 @@ class VanillaTrainier(object):
 
     def hebbian(self, visible, hidden):
         return visible[:,:,np.newaxis] * hidden[:, np.newaxis,:]
+
