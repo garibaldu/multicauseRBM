@@ -16,6 +16,13 @@ def data_set_with_name(name, size = None):
     full_data_set = np.load(full_path_for_name(name))
     return flatten_data_set(full_data_set[:size])
 
+def labels_for_data_set(label, dataset):
+	labels = np.empty(dataset.shape[0])
+	labels.fill(label)
+	return labels
+
+
+
 def flatten_data_set(imgs):
     squashed = np.array(imgs)
     old_shape = squashed.shape

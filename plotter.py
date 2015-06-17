@@ -1,7 +1,7 @@
 # You're a wizard Harry plotter
 import numpy as np
 import matplotlib, math
-
+import time, datetime
 import matplotlib.pyplot as plt
 
 
@@ -118,6 +118,31 @@ def plot(data, subplot_titles = None, title = None,num_rows = 6, num_cols = 9):
 			i = i + 1 
 
 	plt.show()
+
+def save_plot(data, subplot_titles = None, title = None,num_rows = 6, num_cols = 9, filename = None):
+	# if it's not the shape i expect
+	if(filename == None):
+		filename = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d-%H:%M:%S') + ".png"
+
+	subplot_size = math.sqrt(data.shape[1])
+	subplot_shape = (subplot_size, subplot_size)
+	
+	if len(data.shape) > 2:
+		subplot_shape = (data.shape[1], data.shape[2])
+
+	i = 0
+	for r in range(num_rows):
+		for c in range(num_cols):
+			if i < len(data):
+				plt.title = title
+				plt.subplot(num_rows,num_cols, i + 1)
+				plt.imshow(np.reshape(data[i],subplot_shape), interpolation = 'nearest', cmap = 'copper', vmin = 0, vmax = 1)
+				plt.axis('off')
+				if subplot_titles is not None:
+					plt.title(subplot_titles[i])
+			i = i + 1 
+
+	plt.savefig(filename)
 
 def plot_matrix(matrix, columns = None, rows = None, title = None):
 	# Add a table at the bottom of the axes
