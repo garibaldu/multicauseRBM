@@ -30,6 +30,26 @@ class plot_correction_decorator(object):
         return result
         
 
+class Average_Decorator(object):
+
+    def __init__(self,run_times = 3):
+        
+        self.run_times = run_times
+
+    def __call__(self,f):
+
+        def wrapped_f(*args, **kwargs):
+            print("Inside wrapped_f()")
+            results = []
+            for i in range(self.run_times):
+                results.append(f(*args, **kwargs))
+            return results
+            print("After f(*args)")
+        return wrapped_f
+
+        
+
+
 class Result:
 
     def __init__(self, num_items, num_samples, rbm_a, rbm_b, data_a, data_b):
