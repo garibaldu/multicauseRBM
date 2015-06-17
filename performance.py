@@ -48,6 +48,11 @@ class Result:
         print("Constructing Composite Dataset")
         self.composite = datasets.composite_datasets(data_a, data_b)
 
+    def calculate_result(self):
+        self.run_vanilla()
+        self.run_partitioned()
+        self.imagewise_score()
+
     def run_vanilla(self):
         print("Generating Vanilla Samples")
         self.vis_van_a = self.van_data_a_sampler.reconstruction_given_visible(self.composite)
@@ -86,35 +91,43 @@ class Result:
         self.score_b = {"PART" : part_vis_b_score.sum(1), "VAN" : van_vis_b_score.sum(1)}
 
 
-    def win_images(self, score_a, score_b, data_a, data_b):
+    def win_images(self, score_a, score_b):
         part_a = score_a["PART"]
         part_b = score_b["PART"]
         van_a = score_a["VAN"]
         van_b = score_b["VAN"]
 
-        win_a = np.compress((part_a >= van_a), data_a, axis = 0)
-        win_b = np.compress((part_b >= van_b), data_b, axis = 0)
+        win_a = np.compress((part_a >= van_a), self.composite, axis = 0)
+        win_b = np.compress((part_b >= van_b), self.composite, axis = 0)
         return (win_a, win_b)
 
 
-    def equal_images(self,score_a, score_b, data_a, data_b):
+    def equal_images(self,score_a, score_b):
         part_a = score_a["PART"]
         part_b = score_b["PART"]
         van_a = score_a["VAN"]
         van_b = score_b["VAN"]
 
-        win_a = np.compress((part_a == van_a), data_a, axis = 0)
-        win_b = np.compress((part_b == van_b), data_b, axis = 0)
+        win_a = np.compress((part_a == van_a), self.composite, axis = 0)
+        win_b = np.compress((part_b == van_b), self.composite, axis = 0)
         return (win_a, win_b)
 
-    def lose_images(self,score_a, score_b, data_a, data_b):
+    def lose_images(self,score_a, score_b):
         part_a = score_a["PART"]
         part_b = score_b["PART"]
         van_a = score_a["VAN"]
         van_b = score_b["VAN"]
 
-        win_a = np.compress((part_a < van_a), data_a, axis = 0)
-        win_b = np.compress((part_b < van_b), data_b, axis = 0)
+        win_a = np.compress((part_a < van_a), self.composite, axis = 0)
+        win_b = np.compress((part_b < van_b), self.composite, axis = 0)
         return (win_a, win_b)
 
+    def plot_various_images(self):
+
+        win_a, win_b = self.win_images(self.score_a, self.score_b)
+        lose_a, lose_b = self.lose_images(self.score_a, self.score_b)
+        equal_a, equal_b = self.equal_images(self.score_a, self.score_b)
+        plotter.plot(win_a)
+        plotter.plot(lose_a)
+        plotter.plot(equal_a)
 
