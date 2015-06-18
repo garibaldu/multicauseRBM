@@ -2,29 +2,48 @@ from scipy.special import expit
 import numpy as np
 from numpy import newaxis
 from performance import plot_correction_decorator
+import logging
 
 class VanillaSampler(object):
+    """
+    Sampler, allows you to draw gibbs samples from a supplied rbm
+
+    Args:
+        rbm (rbm.RBM): The rbm to draw samples from.
+    """
 
     def __init__(self, rbm):
         self.rbm = rbm
 
-    def bernouli_flip(self, weighted_sum):
+    def __bernouli_flip__(self, weighted_sum):
         p = expit(weighted_sum) > np.random.rand(*weighted_sum.shape)
         return np.where(p, 1, 0)
     
     def visible_to_hidden(self, visible):
-        return self.bernouli_flip(np.dot(visible, self.rbm.weights.transpose()) + self.rbm.hidden_bias)
+        """
+        Generate a hidden pattern given a visible one.
+        """
+        return self.__bernouli_flip__(np.dot(visible, self.rbm.weights.transpose()) + self.rbm.hidden_bias)
 
     def hidden_to_visible(self, hidden):
+        """
+        Generate a Visible pattern given a hidden one.
+        """
         return expit(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
     def reconstruction_given_visible(self, visible):
+        """
+        Perform one gibbs alternation, taking a visible pattern and returning the reconstruction given that visible pattern. 
+        """
         hid_given_vis = self.visible_to_hidden(visible)
         vis_given_hid = self.hidden_to_visible(hid_given_vis)
         return vis_given_hid 
 
 
 class PartitionedSampler(VanillaSampler):
+    """
+    PartitionedSampler, uses new technique of applying correction to hidden update with the visibles clamped (as we aren't training).
+    """
 
     def __init__(self, rbm_a, rbm_b, num_items = None):
         self.rbm_a = rbm_a
@@ -39,9 +58,9 @@ class PartitionedSampler(VanillaSampler):
 
     def visible_to_hidden(self, visible, num_samples, hidden_a = None, hidden_b = None ):
         # grab a slice of the hiddens and visible that are the correct size
-        if(hidden_a == None):
+        if(hidden_a is None):
             hidden_a = np.zeros((self.size, self.rbm_a.hidden.shape[1]))#self.rbm_a.hidden[:(self.size)]
-        if(hidden_b == None):
+        if(hidden_b is None):
             hidden_b = np.zeros((self.size, self.rbm_b.hidden.shape[1]))#self.rbm_b.hidden[:(self.size)]
         visible = visible[:self.size]
 
@@ -62,7 +81,7 @@ class PartitionedSampler(VanillaSampler):
             phi_b = np.dot(hidden_b, weights_b) + vis_bias_b
 
             if (np.mod(epoch,2) == 0): 
-                print("{}% complete".format(epoch/num_samples * 100))
+                logging.debug("{}% complete".format(epoch/num_samples * 100))
 
             correction_a, correction_b = calc_correction(hidden_a, hidden_b, weights_a, weights_b)
             """
@@ -72,8 +91,8 @@ class PartitionedSampler(VanillaSampler):
             psi_b = np.dot(visible ,weights_b_T) + correction_b.sum(2) + hid_bias_b
 
             # now, do we turn on he hiddens? Bernoulli sample to decide
-            hidden_a = self.bernouli_flip(psi_a)
-            hidden_b = self.bernouli_flip(psi_b)
+            hidden_a = self.__bernouli_flip__(psi_a)
+            hidden_b = self.__bernouli_flip__(psi_b)
 
         return hidden_a, hidden_b
 

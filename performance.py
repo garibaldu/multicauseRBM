@@ -99,7 +99,7 @@ class Result:
         return a,b
 
     def visibles_for_partitioned(self):
-        return self.visibles_for_stored_hidden(len(self.stored_hiddens) - 1)
+        return self.visibles_for_stored_hidden(len(self.stored_hiddens)-1)
 
     def imagewise_score(self):
         part_vis_a, part_vis_b = self.visibles_for_partitioned()
@@ -117,8 +117,8 @@ class Result:
         van_a = score_a["VAN"]
         van_b = score_b["VAN"]
 
-        win_a = np.compress((part_a >= van_a), self.composite, axis = 0)
-        win_b = np.compress((part_b >= van_b), self.composite, axis = 0)
+        win_a = np.compress((part_a > van_a), self.composite, axis = 0)
+        win_b = np.compress((part_b > van_b), self.composite, axis = 0)
         return (win_a, win_b)
 
 
@@ -147,7 +147,10 @@ class Result:
         win_a, win_b = self.win_images(self.score_a, self.score_b)
         lose_a, lose_b = self.lose_images(self.score_a, self.score_b)
         equal_a, equal_b = self.equal_images(self.score_a, self.score_b)
+        print("Wins For Model A:{} plotting will only show 54 at maximum".format(win_a.shape[0]));
         plotter.plot(win_a)
+        print("Losses For Model A: {} plotting will only show 54 at maximum ".format(lose_a.shape[0]));
         plotter.plot(lose_a)
+        print("Tie For Model A: {} plotting will only show 54 at maximum ".format(equal_a.shape[0]));
         plotter.plot(equal_a)
 

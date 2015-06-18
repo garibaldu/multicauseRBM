@@ -1,5 +1,5 @@
 import numpy as np
-import os
+import os, pickle
 
 ROOT_DATA_PATH = "datasets"
 
@@ -28,3 +28,15 @@ def flatten_data_set(imgs):
     old_shape = squashed.shape
     squashed = squashed.reshape(old_shape[0], old_shape[1] * old_shape[2])
     return squashed
+
+
+def model_file_name(base_name):
+    return os.path.join('.', 'models','{}_model'.format(base_name))
+
+def load_models(names):
+    models = {}
+    for i in range(len(names)):
+        with open(model_file_name(names[i]), 'rb') as f:
+            current_model = pickle.load(f)
+        models[names[i]] = current_model
+    return models

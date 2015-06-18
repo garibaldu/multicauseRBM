@@ -2,6 +2,20 @@ import numpy as np
 from sklearn.neural_network import BernoulliRBM
 
 class RBM(object):
+    """A model class to represent a Restricted Boltzmann Machine (RBM), captures state and can be transformed from the Scikit learn RBM.
+
+
+   Args:
+        num_hid (int): The number of hidden units for the RBM
+        num_vis (int): The number of visible units for the RBM. For a `x` by `y` image this is equivalent to `x * y`
+        num_items (int): Number of items in the set the RBM will fit to.
+
+    Attributes:
+        weights (numpy array): The weight matrix that captures the model this RBM has been fitted to. Shape is (num_hid, num_vis)
+        visible_bias (numpy array): The bias into the visible layer of the RBM, or the background noise
+        hidden_bias (numpy array): The bias into the hidden layer of the RBM, or the background noise
+    """
+
 
     def __init__(self, num_hid, num_vis, num_items):
 
