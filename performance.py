@@ -71,7 +71,7 @@ class Result:
     def calculate_result(self):
         self.run_vanilla()
         self.run_partitioned()
-        self.imagewise_score()
+        self.score_a, self.score_b = self.imagewise_score()
 
     def run_vanilla(self):
         print("Generating Vanilla Samples")
@@ -101,14 +101,18 @@ class Result:
     def visibles_for_partitioned(self):
         return self.visibles_for_stored_hidden(len(self.stored_hiddens)-1)
 
-    def imagewise_score(self):
-        part_vis_a, part_vis_b = self.visibles_for_partitioned()
+    def imagewise_score_at_iter(self, hiddens_at_iteration):
+        part_vis_a, part_vis_b = self.visibles_for_stored_hidden(hiddens_at_iteration)
         part_vis_a_score = log_likelyhood_score(part_vis_a, self.vis_target_a)
         part_vis_b_score = log_likelyhood_score(part_vis_b, self.vis_target_b)
         van_vis_a_score = log_likelyhood_score(self.vis_van_a, self.vis_target_a)
         van_vis_b_score = log_likelyhood_score(self.vis_van_b, self.vis_target_b)
-        self.score_a = {"PART" : part_vis_a_score.sum(1), "VAN" : van_vis_a_score.sum(1)}
-        self.score_b = {"PART" : part_vis_b_score.sum(1), "VAN" : van_vis_b_score.sum(1)}
+        score_a = {"PART" : part_vis_a_score.sum(1), "VAN" : van_vis_a_score.sum(1)}
+        score_b = {"PART" : part_vis_b_score.sum(1), "VAN" : van_vis_b_score.sum(1)}
+        return score_a, score_b
+
+    def imagewise_score(self):
+        return self.imagewise_score_at_iter(len(self.stored_hiddens)-1)
 
 
     def win_images(self, score_a, score_b):
