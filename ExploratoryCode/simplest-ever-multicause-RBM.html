@@ -1673,10 +1673,20 @@ div#notebook {
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
 
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="2-visibles-2-rbms-with-2-hiddens-each-and-the-same-weights-">2 visibles, 2 rbms, with 2 hiddens each, and the same weights!</h1>
+<p>I&#39;m making a super simple example network here, to reality-check our thinking and test the thing out in the smallest possible example.</p>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">
-In&nbsp;[14]:
+In&nbsp;[1]:
 </div>
 <div class="inner_cell">
     <div class="input_area">
@@ -1694,14 +1704,134 @@ In&nbsp;[14]:
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
 <div class="prompt input_prompt">
+In&nbsp;[2]:
 </div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Two inputs. two rbms, both the same, having two units each!</p>
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># This is showing the action in hA when v is clamped on visible, </span>
+<span class="c"># and hB is the pattern on the hidden units of the OTHER rbm.</span>
+<span class="k">def</span> <span class="nf">do_APPROX_figure</span><span class="p">(</span><span class="n">fig_name</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">hB</span><span class="p">):</span>
+    <span class="n">hB</span> <span class="o">=</span> <span class="n">hB</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">pats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">hA_prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">pats</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">hA</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pats</span><span class="p">):</span>
+        <span class="n">hA</span> <span class="o">=</span> <span class="n">hA</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">phiA</span><span class="p">,</span> <span class="n">phiB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hA</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hB</span><span class="p">)</span>
+        <span class="n">phiA_alt</span> <span class="o">=</span> <span class="n">phiA</span> <span class="o">-</span> <span class="n">hA</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">w</span> 
+        <span class="n">phiB_alt</span> <span class="o">=</span> <span class="n">phiB</span> <span class="o">-</span> <span class="n">hB</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">w</span> 
+        <span class="c"># i.e. phi_alts should now be same shape as w in fact! :(</span>
+        <span class="n">sigA_to_A</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA_alt</span><span class="p">)</span>
+        <span class="n">sigAB_to_A</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA_alt</span> <span class="o">+</span> <span class="n">phiB</span><span class="p">)</span> 
+        <span class="n">effective_visA</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">sigA_to_A</span> <span class="o">-</span> <span class="n">sigAB_to_A</span>
+        <span class="n">our_psiA</span> <span class="o">=</span> <span class="p">(</span><span class="n">effective_visA</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">hA_prob</span><span class="p">[</span><span class="n">row</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">our_psiA</span><span class="p">)</span>
+
+    <span class="c">#I DON&#39;T BELIEVE THE FOLLOWING LINE WAS RIGHT AFTERALL.....</span>
+    <span class="c">#phiA = np.dot(pats, w) - np.dot((2*pats-1),w/2)</span>
+    <span class="c">#phiB = np.dot(hB, w)</span>
+    <span class="c">#sigA  = sigmoid(phiA) </span>
+    <span class="c">#sigAB = sigmoid(phiA + phiB)</span>
+    <span class="c">#effective_vis = v + sigA - sigAB</span>
+    <span class="c">#psiA = np.dot(v, w)</span>
+    <span class="c">#our_psiA = np.dot(effective_vis, w)</span>
+
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">259</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;visible&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">hB</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;rbmB&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">251</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;rbmA&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">252</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">hA_prob</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;orbm Pr(A)&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">253</span><span class="p">)</span>
+    <span class="n">psiA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">psiA</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;rbm Pr(A)&#39;</span><span class="p">)</span>
+    <span class="c">#colorbar()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">savefig</span><span class="p">(</span><span class="n">fig_name</span><span class="p">)</span>
+</pre></div>
+
 </div>
 </div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[3]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># This is showing the action in hA when v is clamped on visible, </span>
+<span class="c"># and hB is the pattern on the hidden units of the OTHER rbm.</span>
+<span class="k">def</span> <span class="nf">do_EXACT_figure</span><span class="p">(</span><span class="n">fig_name</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">hB</span><span class="p">):</span>
+    <span class="n">hB</span> <span class="o">=</span> <span class="n">hB</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">phiB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hB</span><span class="p">)</span>
+    <span class="n">pats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">hA_prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">pats</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">hA</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pats</span><span class="p">):</span>
+        <span class="n">hA</span> <span class="o">=</span> <span class="n">hA</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">phiA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hA</span><span class="p">)</span>
+        <span class="n">phiA0</span> <span class="o">=</span> <span class="n">phiA</span> <span class="o">-</span> <span class="n">hA</span><span class="o">*</span><span class="n">w</span> <span class="c"># phiA vector (cols) when each hidden in turn (rows) is off</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA0</span><span class="p">))</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">C</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA0</span> <span class="o">+</span> <span class="n">w</span><span class="p">))</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">C</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA0</span> <span class="o">+</span> <span class="n">w</span> <span class="o">+</span> <span class="n">phiB</span><span class="p">))</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">C</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA0</span> <span class="o">+</span> <span class="n">phiB</span><span class="p">))</span>
+        
+        <span class="n">our_psiA</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">hA_prob</span><span class="p">[</span><span class="n">row</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">our_psiA</span><span class="p">)</span>
+
+    <span class="c">#I DON&#39;T BELIEVE THE FOLLOWING LINE WAS RIGHT AFTERALL.....</span>
+    <span class="c">#phiA = np.dot(pats, w) - np.dot((2*pats-1),w/2)</span>
+    <span class="c">#phiB = np.dot(hB, w)</span>
+    <span class="c">#sigA  = sigmoid(phiA) </span>
+    <span class="c">#sigAB = sigmoid(phiA + phiB)</span>
+    <span class="c">#effective_vis = v + sigA - sigAB</span>
+    <span class="c">#psiA = np.dot(v, w)</span>
+    <span class="c">#our_psiA = np.dot(effective_vis, w)</span>
+
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">259</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;visible&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">hB</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;rbmB&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">251</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;rbmA&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">252</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">hA_prob</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;orbm Pr(A)&#39;</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">253</span><span class="p">)</span>
+    <span class="n">psiA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">imshow</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">psiA</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;copper&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;rbm Pr(A)&#39;</span><span class="p">)</span>
+    <span class="c">#colorbar()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">savefig</span><span class="p">(</span><span class="n">fig_name</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
@@ -1715,12 +1845,11 @@ In&nbsp;[14]:
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">
-In&nbsp;[103]:
+In&nbsp;[4]:
 </div>
 <div class="inner_cell">
     <div class="input_area">
-<div class="highlight"><pre><span class="n">w</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
-<span class="n">pats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+<div class="highlight"><pre><span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
 </pre></div>
 
 </div>
@@ -1728,23 +1857,26 @@ In&nbsp;[103]:
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="explaining-away-example-1">explaining away, example 1</h3>
+<p>We clamp a visible pattern that requires both the rbms to pitch in. The B network explains the right-most bit.</p>
+<p>Under regular rbm dynamics, the A network is ambivalent as to which hidden state to choose: all 4 are equally likely.</p>
+<p>But under orbm dynamics we would expect the A network to be asked to explain the left-most bit. </p>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">
-In&nbsp;[104]:
+In&nbsp;[5]:
 </div>
 <div class="inner_cell">
     <div class="input_area">
-<div class="highlight"><pre><span class="n">psiA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-<span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">imshow</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;hot&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">title</span><span class="p">(</span><span class="s">&#39;visible&#39;</span><span class="p">)</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
-<span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
-<span class="n">imshow</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">psiA</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;hot&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">title</span><span class="p">(</span><span class="s">&#39;hidden&#39;</span><span class="p">)</span>
-<span class="n">colorbar</span><span class="p">()</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span class="n">do_APPROX_figure</span><span class="p">(</span><span class="s">&#39;the_way&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">hB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]))</span>
 </pre></div>
 
 </div>
@@ -1759,112 +1891,97 @@ In&nbsp;[104]:
 
 
 <div class="output_png output_subarea ">
-<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWoAAAEKCAYAAAA7LB+5AAAABHNCSVQICAgIfAhkiAAAAAlwSFlz
-AAALEgAACxIB0t1+/AAAFypJREFUeJzt3X9sVfX9x/HXxXYbLZVCQaS9naXe2nZDy8Xya5NR3Bw/
-EiuKLgXdgBFkRAIkLtNtYRl+F7O6uWzINwssxaYCBZmE4laKKXrdBgHcRDC2QMustpfZ0FF+SbTl
-cr5/KFfuub8O90vbD+X5SE7W2/M5n37ucvbem8/5nM/bZVmWJQCAsQb09QAAALERqAHAcARqADAc
-gRoADEegBgDDEagBwHAE6gTNnDlTL730Utx2aWlpamlpkSTNnz9fK1eujNp2wIAB+ve//32thogb
-SE5Ojnbv3h32+7///e8qKCiIeh335PUhqa8HcL2qra111O7cuXPBn10ul1wuV08NCTewaPfW5MmT
-deTIkau+DmYho+5lvF8E03BPmo9AHUN5ebkeeeSRkN8tX75cy5cv19SpU1VRUSFJam5u1pQpU5Se
-nq7hw4errKws2N7+T8eOjg5997vf1c0336ySkhJ9+OGHEf/2p59+qh//+Me67bbbdOutt2rJkiX6
-5JNPeuBbor84ePCgioqKlJ6errKyMn366afy+XzKzs4OaTN27FjdfPPNKisrC7unfvOb3ygzM1Nu
-t1vr168PORfrnvT5fHK73frd736nESNGKDMzU5WVlT3+nW8UBOoY5syZo9raWp0/f16SFAgEtHXr
-Vj366KOSFPwn48qVKzV9+nSdPn1afr9fy5Yti9ifZVnauHGjfvGLX6ijo0NjxowJ9mX39NNPq7m5
-WYcOHVJzc7P8fr+eeeaZHviW6A8sy9LWrVu1a9cuvf/++zp8+LAqKytDpjW6uro0a9YszZs3T52d
-nXrkkUf0yiuvBNvU1dXp+eefV319vY4dO6b6+vqQvxHvnmxvb9fZs2d14sQJVVRU6IknntCZM2d6
-57+A/s5CTPfcc49VVVVlWZZlvfbaa5bH47Esy7JKSkqsiooKy7Is6wc/+IH1+OOPW21tbWHXu1wu
-6/jx45ZlWda8efOsOXPmBM+dP3/euummm4LXXW576dIlKzU1NXidZVnW3r17rVGjRvXMl8R1Lycn
-x9q4cWPw809+8hPrRz/6keXz+Sy3221ZlmW9+eabVmZmZsh13/jGN6yVK1dalmVZCxYssH76058G
-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
+<img src="data:image/png;base64,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
 "
 >
 </div>
@@ -1878,47 +1995,11 @@ AcBwBGoAMByBGgAMR6AGAMP9H6NK9AGwYV55AAAAAElFTkSuQmCC
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">
-In&nbsp;[131]:
+In&nbsp;[6]:
 </div>
 <div class="inner_cell">
     <div class="input_area">
-<div class="highlight"><pre><span class="n">v</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">hB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">phiA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">pats</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span><span class="n">w</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">phiB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hB</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-<span class="n">sigA</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA</span><span class="p">)</span> 
-<span class="n">sigAB</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA</span> <span class="o">+</span> <span class="n">phiB</span><span class="p">)</span>
-<span class="n">effective_vis</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">sigA</span> <span class="o">-</span> <span class="n">sigAB</span>
-<span class="n">our_psiA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">effective_vis</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">
-In&nbsp;[140]:
-</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class="highlight"><pre><span class="n">subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
-<span class="n">imshow</span><span class="p">(</span><span class="n">pats</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;hot&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">title</span><span class="p">(</span><span class="s">&#39;hidden A&#39;</span><span class="p">)</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
-<span class="n">subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">)</span>
-<span class="n">imshow</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">our_psiA</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;hot&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">title</span><span class="p">(</span><span class="s">&#39;hidA prob ours&#39;</span><span class="p">)</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
-<span class="n">subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">)</span>
-<span class="n">naive_psiA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-<span class="n">imshow</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">psiA</span><span class="p">),</span> <span class="n">interpolation</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s">&#39;hot&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">title</span><span class="p">(</span><span class="s">&#39;hidA prob naive&#39;</span><span class="p">)</span>
-<span class="c">#colorbar()</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
-<span class="n">savefig</span><span class="p">(</span><span class="s">&#39;the_way&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span class="n">do_EXACT_figure</span><span class="p">(</span><span class="s">&#39;the_way&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">hB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]))</span>
 </pre></div>
 
 </div>
@@ -1933,84 +2014,477 @@ In&nbsp;[140]:
 
 
 <div class="output_png output_subarea ">
-<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAX4AAADwCAYAAAAHFw/gAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz
-AAALEgAACxIB0t1+/AAAD3ZJREFUeJzt3GtQlHX7wPFrV2gUSlxOyoKCjTnlYSqdPDCpDVlRE+po
-GhJMNk6TVjPywnR0xqBymhq1cXplaQzgKUq0JrPDqJn+1WlMTQUz84iJ5gkhAdGF6/+ih/thdfGA
-yPp4fT+vdve+7/399v7tflmWVZeqqgAAzHAHewIAgLZF+AHAGMIPAMYQfgAwhvADgDGEHwCMMRH+
-pKQkWbduXcBtmzZtkgcffLDZYydMmCCzZs1qdrvb7ZZDhw7d8hytuZ1r0pZyc3MlKysr2NMIKtby
-5vXp00c2btzYJmMFYiL8LpdLXC5XwG1DhgyRffv2tejYtjBhwgQJDQ2VkydPBm0Ot0Nrr8nhw4fF
-7XbL66+/3qrzvJ5gPjfuFKzlzSspKZGhQ4e22XhXMhH+WxWsf+NWXV0txcXF0qtXL1myZElQ5nCn
-unJNCgsLpU+fPlJUVCSXLl1qtXHq6+tvah5txefzBWXc28H6WgaDmfDv3LlTHn74YenUqZOkp6dL
-XV2diIhs2LBBunbt6rdfv379pGPHjpKeni4XL170u585c+aI1+uVhIQEycvL89tWV1cnU6dOlcTE
-ROnSpYtMnjzZOX7Dhg2SkJAgH330kXTu3Fm8Xq/k5+dfc87FxcXSvXt3mTZtmhQUFLTCWbiztNaa
-qKosXrxYcnNzJSoqSr755ptmxzxy5Ii43W5ZuHChxMfHi9frlXnz5jnbc3Nz5YUXXpCsrCyJiIiQ
-goICKS8vlxEjRkhUVJQ88MADsmjRImd/l8slFy9elPT0dOnYsaP0799fdu/e3ez4W7Zskccee0w6
-deokAwYMkK1btzrbrvzIpOlHD43zzsvLk8TERBk+fLjU1dVJZmamREdHi8fjkQEDBsipU6eud9pv
-C4tr6Xa75ZNPPpGePXuKx+ORN99809l28OBBSUlJkejoaImJiZHMzEyprKx0ticlJcn69eulvLxc
-wsLCpKKiwu8cxcTEOD+o8vLypFevXhIZGSmpqalSVlbW7JxumBqQmJioAwcO1BMnTui5c+f0oYce
-0gULFqiq6k8//aQJCQmqqlpXV6fdunXT+fPnq8/n0xUrVmhoaKjOmjVLVVW/++477dy5s5aWlmp1
-dbWOHz9eXS6XHjx4UFVVs7OzdeTIkVpRUaH//POPpqWl6YwZM5xxQkJCNCcnR30+n65Zs0bDwsL0
-/Pnzzc47JSVFZ8+erVVVVdq+fXvdvn377TxNbaq11kRVdePGjXrvvfdqbW2tzpw5U9PS0pod9/Dh
-w+pyuTQjI0Nramp0z549GhMTo2vXrlVV1ZycHA0NDdWvv/5aVVVra2t1yJAh+sYbb2hdXZ3+9ttv
-GhMTo+vXr/fbv7i4WH0+n86dO1e7d++uly9fvmrss2fPaqdOnXTJkiVaX1+vy5cvV4/Ho+fOnVNV
-1aSkJF23bp2zf25urmZmZvrN++WXX9aamhqtra3VBQsWaFpamtbW1mpDQ4Pu2LFDq6qqWrwmLWVx
-LVVVXS6XpqWlaWVlpZaVlWlMTIx+//33qqp64MABXbt2rV66dElPnz6tQ4cO1ezsbOfYpmudkpKi
-CxcudLZNnTpVJ0+erKqqX331lfbo0UP37dun9fX1Onv2bE1OTr6J1QnMRPiTkpJ06dKlzvVp06bp
-pEmTVNX/ifnzzz+r1+v1OzY5Odl5Yr7yyitOyFVV9+/f74S/oaFBw8PDnR8CqqpbtmzR7t27O+N0
-6NBB6+vrne2xsbH6yy+/BJzz0aNH1e126x9//KGqqiNHjtQpU6a0+BzcaVprTVRVJ06cqOPHj1dV
-1Z07d2poaKieOnUq4LiNsWg8r41jT5w4UVX/ffEPGzbM2VZWVqbt2rXTCxcuOLfNmDFDJ0yY4Ow/
-ePBgZ1tDQ4PGxcXppk2brhq7sLBQBw4c6Hfb4MGDtaCgwDknTcOfk5NzVfgPHz7sbM/Ly9Pk5GTd
-vXt3wMfaViyupeq/4d+8ebNzfdy4cfrBBx8E3HfVqlX66KOPOtebrvWiRYs0JSXFGbNr167OmKmp
-qfrZZ585x9XX12tYWJiWlZUFHOdGmfmop0uXLs7lDh06yIULF67ap7y8XOLj4/1uS0xMdC6fOHHC
-79fWbt26OZdPnz4tNTU10r9/f/F4POLxeOTZZ5+VM2fOOPtERUWJ2/3fUx4WFhZwHiIiixcvlj59
-+kjPnj1FRGTs2LGybNmyu+qz3VtZE/3P57G1tbWyYsUKGTt2rIiIPPLII5KUlCTLli275thXrmN5
-eblzPSEhwW/8yMhICQ8P99v/+PHjAfd3uVySkJAgJ06cCPhYmj5nGh9L0/u6nqbzzsrKkmeeeUbS
-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
-RK5CYII=
+<img src="data:image/png;base64,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
 "
 >
 </div>
 
 </div>
 
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Fuckit. This seemed to be making sense Friday.
+But I think we&#39;d done the calculation wrong.
+However this still doesn&#39;t match the hand-calculated one, which DID seem sensible.</p>
+<p>What&#39;s alarming is that both calculations (exact and approx) seem to be agreeing on a shit answer.</p>
+<p><em>Note: we show the rbmA state alongside the orbm&#39;s Pr(A) here because in theory the orbm probabilities do depend on the existing state. However in this particular example they don&#39;t - perhaps because it&#39;s just so symmetrical.</em></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="explaining-away-example-2">explaining away, example 2</h3>
+<p>Suppose the entire visible pattern is nicely explained by the B network. What does this mean for the A one? </p>
+<p>The standard rbm would try to account for the image.</p>
+<p>In the orbm, here&#39;s what happens:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[8]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">do_EXACT_figure</span><span class="p">(</span><span class="s">&#39;the_way&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">hB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXsAAADmCAYAAAA0sSUiAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz
+AAALEgAACxIB0t1+/AAAE+9JREFUeJzt3XtwVOXBx/HfCUkgJhuyiSTkIknFIEQuii0Nlw7BwVQo
+WsYh5RIpkepMnYmAY7S2EBQ1VtFaR+u0lWkhIQSE1xpLTQYdNLYNMExHmhaTygTkkiXDwIRAgrnC
+8/7Rl31ZEjDB3cTwfD8zmWH3PPuc5yzLN4fNYXGMMUYAgOtaUH8vAAAQeMQeACxA7AHAAsQeACxA
+7AHAAsQeACwwoGOfkpKinTt39vcy+lxOTo7y8/P7exle1dXV+s53vtPj8Xl5efrd734XwBUBuNyA
+jr3jOHIcx69zbtiwQUFBQdq6datf5/WnQBz3RRs2bNCgQYPkcrk0dOhQ3XHHHXr//fev+pj8/Hw9
+8cQTXe7PyMhQdHS02tvbfe7Py8vTCy+8oI6ODr+uHcCVDdjYd3Z2BmTewsJCjRs3TkVFRQGZ/+s6
+f/68JCmQ/xZu6tSpampqUmNjo37yk5/oRz/6kc6cOdPtWurr61VRUaG5c+f6bDt8+LD27t2r2NhY
+/fnPf/bZNnz4cI0ePbrL/QACZ0DFPiUlRWvXrtWECRMUERGhzs5O7d27V7fddpuio6O1dOlStbW1
+SZIqKiqUlJSkl19+WbGxsUpISFBpaanKyso0atQoxcTE6MUXX/SZ/8iRI6qsrNT69ev14Ycf6sSJ
+E31yXDU1NcrIyJDb7dbYsWO1fft277acnBw98sgjmj17tiIiIlRRUSFJOnXqlDIzMxUZGamMjAwd
+PXrU+5igoCD99re/VWpqqiIjI7V69WodPHhQkydPVlRUlBYsWHDVs+qL30gcx9GDDz6olpYW1dbW
+6plnntG8efO0ePFiDR06VBs2bNCHH36oiRMnKjQ01GeOoqIizZw5U4sXL1ZhYWGXfWRkZHzl3xgA
++JEZQJKTk80dd9xh6urqTEtLi0lOTjbjxo0zdXV1pqGhwUydOtWsWrXKGGPMxx9/bIKDg81zzz1n
+Ojs7zbp160xMTIxZtGiRaW5uNp999pkJCwszX3zxhXf+Z5991sycOdMYY8yUKVPMr371q4AfU3t7
+uxk5cqT55S9/aTo6OsxHH31kXC6X+fzzz40xxixZssQMHTrU7Nq1yxhjTGtrq1myZIlxuVzmb3/7
+m2lrazPLly8306ZN887pOI6ZO3euaWpqMp999pkJDQ01M2bMMF988YU5c+aMSUtLM4WFhd2uZ/36
+9d65Ojo6zGuvvWYiIyPN2bNnzdNPP21CQkLMe++9Z4wxpqWlxeTl5Znc3Nwu84wcOdIUFxebAwcO
+mJCQEHPixAmf7e+8846ZOHHi138CAfTIgDqzdxxHy5YtU2JiooYMGSLHcZSbm6vExES53W6tXLlS
+mzdv9o4PCQnRypUrNWjQIM2fP18NDQ1asWKFwsPDlZaWprS0NFVVVXnHFxUVKSsrS5KUlZXVJ2/l
+7NmzR+fOndNTTz2l4OBgzZgxQ3PmzPE5jrlz52ry5MmSpMGDB0uS5syZo2nTpik0NFQFBQXavXu3
+PB6P9zFPPvmkIiIilJaWpnHjxmnWrFlKSUlRZGSkZs2apX379l11TW63W/Hx8Xr77bf17rvvyuVy
+SZKmTJmi++67T5I0ZMgQnTlzRhERET6P//vf/y6Px6P77rtPqampSktLU0lJic8Yl8ulxsbGr/HM
+AeiNARV7SbrpppuueHvEiBE6fvy493ZMTIz3B5lhYWGSpLi4OO/2sLAwnTt3TpJUWVmpw4cP6/77
+75ckzZs3T//+9799vhkEwvHjx7scU3Jysvc4HMfpst1xHCUlJXlvh4eHKzo62ufYLz/Oy283Nzdf
+cU3p6ek6ffq0Tp48qV27dumuu+7ybrt0v5LkdrvV1NTkc19hYaEyMzO93yCysrK6vJXT1NSkqKio
+K64BgH8F9/cCeuvyq1Aufa/66NGjSkhIuKZ5CwsLZYzRuHHjutz/6quvXtOcPZGQkKBjx47JGOM9
+tiNHjmj06NFXfdyxY8e8v25ublZDQ8M1H3tPdXcV0Pjx431C3tLSoq1bt+rChQuKj4+XJLW1tamx
+sVH/+te/NH78eEn//TnF7bffHtD1Avh/A+7M/lLGGL355pvyeDxqaGhQQUGBFixY0Ot5WltbtXXr
+Vq1bt05VVVXerzfeeEMlJSXeK2ACIT09XTfccIPWrl2rjo4OVVRU6C9/+Yv3OEw3V90YY1RWVqbK
+ykq1t7crPz9fkydPVmJi4hX3c+k83c3ZE909bubMmfr000+9l1eWlpYqODhYNTU13uexpqZG3/ve
+93zeFvvkk080a9asa1oHgN4b0LF3HEfZ2dnKzMzUyJEjlZqaqlWrVvlsv3x8d0pLSxUeHq4f//jH
+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
+AABJRU5ErkJggg==
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It&#39;s still trying, and just as hard...</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="learning">Learning</h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[143]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c"># Our convention: hiddens are rows, visibles are columns.</span>
+<span class="c"># So our weights are W[hid,vis].</span>
+<span class="c"># Our hidden states should always be column vectors.</span>
+<span class="c"># Our visible states should always be row vectors.</span>
+<span class="c"># psi always refers to hiddens, phi always to visibles: WATCH OUT FUKKAHS.</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+<span class="n">vpats</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span><span class="c"># our data points</span>
+<span class="n">eta</span> <span class="o">=</span> <span class="o">.</span><span class="mo">05</span> <span class="c"># learning rate</span>
+<span class="k">print</span><span class="p">(</span><span class="s">&#39;initial weights: </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">300</span><span class="p">):</span>
+    <span class="c"># Wake phase</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vpats</span><span class="p">:</span> <span class="c"># &#39;clamped&#39;</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> 
+        <span class="c">#print(&#39;shape of v should be 1,2: &#39;,v.shape)</span>
+        <span class="c"># SAMPLE from hA and hB</span>
+        <span class="c"># Start by initialising as if it were a vanilla RBM </span>
+        <span class="n">psiA</span><span class="p">,</span> <span class="n">psiB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">hA_prob</span><span class="p">,</span> <span class="n">hB_prob</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">psiA</span><span class="p">),</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">psiB</span><span class="p">)</span>
+        <span class="n">hA</span> <span class="o">=</span> <span class="p">(</span><span class="n">hA_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">hA_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">hB</span> <span class="o">=</span> <span class="p">(</span><span class="n">hB_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">hB_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c">#print(&#39;shape of hA should be 2,1: &#39;,hA.shape)</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">phiA</span><span class="p">,</span> <span class="n">phiB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hA</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hB</span><span class="p">)</span>
+            <span class="n">phiA_alt</span> <span class="o">=</span> <span class="n">phiA</span> <span class="o">-</span> <span class="n">hA</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">w</span> 
+            <span class="n">phiB_alt</span> <span class="o">=</span> <span class="n">phiB</span> <span class="o">-</span> <span class="n">hB</span><span class="o">*</span><span class="n">w</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">w</span> 
+            <span class="c"># i.e. phi_alts should now be same shape as w in fact! :(</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">step</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">t</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span> <span class="k">print</span><span class="p">(</span><span class="s">&#39;phiA_alt shape is &#39;</span><span class="p">,</span><span class="n">phiA_alt</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">sigA_to_A</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA_alt</span><span class="p">)</span>
+            <span class="n">sigB_to_B</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiB_alt</span><span class="p">)</span> 
+            <span class="n">sigAB_to_A</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA_alt</span> <span class="o">+</span> <span class="n">phiB</span><span class="p">)</span> 
+            <span class="n">sigAB_to_B</span>  <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiB_alt</span> <span class="o">+</span> <span class="n">phiA</span><span class="p">)</span> 
+            
+            <span class="n">effective_visA</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">sigA_to_A</span> <span class="o">-</span> <span class="n">sigAB_to_A</span>
+            <span class="n">effective_visB</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">sigB_to_B</span> <span class="o">-</span> <span class="n">sigAB_to_B</span>
+            <span class="n">our_psiA</span> <span class="o">=</span> <span class="p">(</span><span class="n">effective_visA</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">our_psiB</span> <span class="o">=</span> <span class="p">(</span><span class="n">effective_visB</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">hA_prob</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">our_psiA</span><span class="p">)</span>
+            <span class="n">hB_prob</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">our_psiB</span><span class="p">)</span>
+            <span class="n">hA</span> <span class="o">=</span> <span class="p">(</span><span class="n">hA_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">hA_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">hB</span> <span class="o">=</span> <span class="p">(</span><span class="n">hB_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">hB_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">dwA</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA_norm</span><span class="p">)</span><span class="o">*</span><span class="n">hA</span> <span class="o">+</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">sigAB_toA</span><span class="p">)</span><span class="o">*</span><span class="n">hA</span>
+        <span class="n">dwB</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiB_norm</span><span class="p">)</span><span class="o">*</span><span class="n">hB</span> <span class="o">+</span> <span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">sigAB_toB</span><span class="p">)</span><span class="o">*</span><span class="n">hB</span>
+        <span class="c">#COMBINE</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">eta</span> <span class="o">*</span> <span class="p">(</span><span class="n">dwA</span> <span class="o">+</span> <span class="n">dwB</span><span class="p">)</span>
+
+    <span class="c"># Sleep phase</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vpats</span><span class="p">:</span> <span class="c"># &#39;clamped&#39;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="c"># visibles to hiddens</span>
+            <span class="n">psiA</span><span class="p">,</span> <span class="n">psiB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+            <span class="n">hA_prob</span><span class="p">,</span> <span class="n">hB_prob</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">psiA</span><span class="p">),</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">psiB</span><span class="p">)</span>
+            <span class="n">hA</span> <span class="o">=</span> <span class="p">(</span><span class="n">hA_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">hA_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">hB</span> <span class="o">=</span> <span class="p">(</span><span class="n">hB_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">hB_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c"># hiddens to visibles</span>
+            <span class="n">phiA</span><span class="p">,</span> <span class="n">phiB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hA</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">hB</span><span class="p">)</span>
+            <span class="n">vA_prob</span><span class="p">,</span> <span class="n">vB_prob</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiA</span><span class="p">),</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">phiB</span><span class="p">)</span>
+            <span class="n">vA</span> <span class="o">=</span> <span class="p">(</span><span class="n">vA_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">vA_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">vB</span> <span class="o">=</span> <span class="p">(</span><span class="n">vB_prob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">vB_prob</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">dwA</span> <span class="o">=</span> <span class="n">visA</span><span class="o">*</span><span class="n">hA</span>
+        <span class="n">dwB</span> <span class="o">=</span> <span class="n">visB</span><span class="o">*</span><span class="n">hB</span>
+        <span class="c">#COMBINE</span>
+        <span class="c">#w = w - eta * (dwA + dwB)</span>
+    
+<span class="k">print</span><span class="p">(</span><span class="s">&#39;new weights: </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+initial weights: 
+ [[ 1. -1.]
+ [-1.  1.]]
+phiA_alt shape is  (2, 2)
+phiA_alt shape is  (2, 2)
+new weights: 
+ [[ 20.73028589  35.24945651]
+ [ 25.48169886  27.19015796]]
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[144]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">visAprob</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hA</span><span class="p">,</span><span class="n">w</span><span class="p">))</span>
+<span class="n">visA</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">visAprob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">psiAprob</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">visA</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span>
+<span class="n">hA</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">*</span><span class="p">(</span><span class="n">psiAprob</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">visA</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_text output_pyerr">
+<pre>
+<span class="ansired">---------------------------------------------------------------------------</span>
+<span class="ansired">ValueError</span>                                Traceback (most recent call last)
+<span class="ansigreen">&lt;ipython-input-144-91af2112cb29&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
+<span class="ansigreen">----&gt; 1</span><span class="ansiyellow"> </span>visAprob <span class="ansiyellow">=</span> sigmoid<span class="ansiyellow">(</span>np<span class="ansiyellow">.</span>dot<span class="ansiyellow">(</span>hA<span class="ansiyellow">,</span>w<span class="ansiyellow">)</span><span class="ansiyellow">)</span><span class="ansiyellow"></span>
+<span class="ansigreen">      2</span> visA <span class="ansiyellow">=</span> <span class="ansicyan">1.0</span><span class="ansiyellow">*</span><span class="ansiyellow">(</span>visAprob <span class="ansiyellow">&gt;</span> rng<span class="ansiyellow">.</span>random<span class="ansiyellow">(</span>size<span class="ansiyellow">=</span><span class="ansiyellow">(</span><span class="ansicyan">1</span><span class="ansiyellow">,</span><span class="ansicyan">2</span><span class="ansiyellow">)</span><span class="ansiyellow">)</span><span class="ansiyellow">)</span><span class="ansiyellow"></span>
+<span class="ansigreen">      3</span> psiAprob <span class="ansiyellow">=</span> sigmoid<span class="ansiyellow">(</span>np<span class="ansiyellow">.</span>dot<span class="ansiyellow">(</span>visA<span class="ansiyellow">,</span> w<span class="ansiyellow">)</span><span class="ansiyellow">)</span><span class="ansiyellow"></span>
+<span class="ansigreen">      4</span> hA <span class="ansiyellow">=</span> <span class="ansicyan">1.0</span><span class="ansiyellow">*</span><span class="ansiyellow">(</span>psiAprob <span class="ansiyellow">&gt;</span> rng<span class="ansiyellow">.</span>random<span class="ansiyellow">(</span>size<span class="ansiyellow">=</span><span class="ansiyellow">(</span><span class="ansicyan">1</span><span class="ansiyellow">,</span><span class="ansicyan">2</span><span class="ansiyellow">)</span><span class="ansiyellow">)</span><span class="ansiyellow">)</span><span class="ansiyellow"></span>
+<span class="ansigreen">      5</span> print<span class="ansiyellow">(</span>visA<span class="ansiyellow">)</span><span class="ansiyellow"></span>
+
+<span class="ansired">ValueError</span>: objects are not aligned</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="todo-">TODO:</h3>
+<ol>
+<li><p>two-bit learning</p>
+</li>
+<li><p>3-visible-bit RBMs, two of them with shared weights.</p>
+<p>Something like</p>
+<ul>
+<li>001 has logP=1</li>
+<li>011 has logP=2</li>
+<li>111 has logP=1</li>
+</ul>
+</li>
+<li><p>same but with two sets of weights, learning both of them.</p>
+</li>
+</ol>
+<p>Where the complement is</p>
+<ul>
+<li>110 has logP=1</li>
+<li>100 has logP=2</li>
+<li>000 has logP=1</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,)))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span> <span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre> 
+</pre></div>
+
+</div>
 </div>
 </div>
 
