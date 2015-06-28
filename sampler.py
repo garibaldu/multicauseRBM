@@ -19,7 +19,7 @@ class VanillaSampler(object):
         p = expit(weighted_sum) > np.random.rand(*weighted_sum.shape)
         return np.where(p, 1, 0)
     
-    def visible_to_hidden(self, visible):
+    def visible_to_hidden(self, visible, num_samples = 1):
         """
         Generate a hidden pattern given a visible one.
         """

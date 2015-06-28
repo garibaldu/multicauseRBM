@@ -2,7 +2,7 @@ import numpy as np
 import plotter, datasets, sampler, math
 from sklearn.utils.extmath import safe_sparse_dot
 from sklearn.utils.extmath import log_logistic
-
+from sklearn.linear_model import Perceptron
 
 def log_likelyhood_score(sample, target):
     """Lets find the log likelyhood"""
@@ -157,4 +157,10 @@ class Result:
         plotter.plot(lose_a)
         print("Tie For Model A: {} plotting will only show 54 at maximum ".format(equal_a.shape[0]));
         plotter.plot(equal_a)
+
+def classify(title, train, test, train_labels, test_labels):
+    classifier = Perceptron()
+    classifier.fit(train, train_labels)
+    print("{} {}".format(title,classifier.score(test, test_labels)))
+
 

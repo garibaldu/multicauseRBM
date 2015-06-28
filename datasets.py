@@ -1,5 +1,5 @@
 import numpy as np
-import os, pickle
+import os, pickle, sampler
 
 ROOT_DATA_PATH = "datasets"
 
@@ -11,6 +11,9 @@ def full_path_for_name(name):
 
 def composite_datasets(set_a, set_b):
     return np.maximum(set_a, set_b)
+
+def join_datasets(set_a, set_b):
+    return np.concatenate((set_a, set_b) ,axis = 0)
 
 def data_set_with_name(name, size = None):
     full_data_set = np.load(full_path_for_name(name))
@@ -40,3 +43,9 @@ def load_models(names):
             current_model = pickle.load(f)
         models[names[i]] = current_model
     return models
+
+def train_test_sets(full_data_set, train_size=300, test_size=300):
+    training = full_data_set[:train_size]
+    test = full_data_set[train_size:test_size]
+    return (training, test)
+
