@@ -181,14 +181,15 @@ class ApproximatedSampler(object):
         return expit(psi_a),expit(psi_b)  
 
     def approx_correction(self, h_a, h_b, w_a, w_b,v):
-        col_hid_a = h_a.reshape(2,1) # we reshape the hiddens to be a column vector
-        col_hid_b = h_b.reshape(2,1)
-        phi_a = np.dot(w_a, h_a) - (w_a * col_hid_a) # effective phi, we subtract activations for that h_j
-        phi_b = np.dot(w_b, h_b) - (w_b * col_hid_b)
+        print(h_a.shape)
+        col_hid_a = h_a.reshape(h_a.shape[0],1) # we reshape the hiddens to be a column vector
+        col_hid_b = h_b.reshape(h_b.shape[0],1)
+        phi_a = np.dot(h_a, w_a) - (w_a * col_hid_a) # effective phi, we subtract activations for that h_j
+        phi_b = np.dot(h_b, w_b) - (w_b * col_hid_b)
         sig_A = phi_a + w_a/2
         sig_B = phi_b + w_b/2
-        epsilon_a = np.dot(w_b,h_b)
-        epsilon_b = np.dot(w_a,h_a)
+        epsilon_a = np.dot(h_b,w_b)
+        epsilon_b = np.dot(h_a,w_a)
         sig_AB = sig_A + epsilon_a
         sig_BA = sig_B + epsilon_b
         c_a = expit(sig_A) - expit(sig_AB)
