@@ -181,7 +181,6 @@ class ApproximatedSampler(object):
         return expit(psi_a),expit(psi_b)  
 
     def approx_correction(self, h_a, h_b, w_a, w_b,v):
-        print(h_a.shape)
         col_hid_a = h_a.reshape(h_a.shape[0],1) # we reshape the hiddens to be a column vector
         col_hid_b = h_b.reshape(h_b.shape[0],1)
         phi_a = np.dot(h_a, w_a) - (w_a * col_hid_a) # effective phi, we subtract activations for that h_j
