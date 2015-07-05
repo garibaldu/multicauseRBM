@@ -133,6 +133,67 @@ def calc_correction(hidden_a, hidden_b, weights_a, weights_b):
         
 
 
+class ApproximatedSampler(object):
+
+    def __init__(self, w_a, w_b, v_bias_a, v_bias_b):
+        self.w_a = w_a
+        self.w_b = w_b
+        self.v_bias_a = v_bias_a
+        self.v_bias_b = v_bias_b
+
+    def __bernoulli_trial__(self,weighted_sum):
+        p = weighted_sum > np.random.rand(*weighted_sum.shape)
+        return np.where(p, 1,0)
+
+    def v_to_v(self, h_a, h_b, v , num_gibbs = 100):
+        generated_h_a, generated_h_b = self.v_to_h(h_a,h_b, v,num_gibbs = num_gibbs)
+        v_a, v_b = self.h_to_v(generated_h_a, generated_h_b)
+        return v_a, v_b
+
+    def v_to_h(self, h_a, h_b, v , num_gibbs = 100):
+        """return the hidden representations for the supplied visible pattern"""
+        hid_a = h_a
+        hid_b = h_b
+
+        for epoch in range(num_gibbs):
+            # get the bentness of the coin used for the bernoulli trial
+            psi_a, psi_b = self.p_hid(hid_a, hid_b, self.w_a, self.w_b,v)
+            hid_a = self.__bernoulli_trial__(psi_a)
+            hid_b = self.__bernoulli_trial__(psi_b) 
+        return hid_a, hid_b
+
+    def h_to_v(self, h_a, h_b):
+        phi_a, phi_b = self.p_vis(h_a, h_b, self.w_a, self.w_b)
+        v_a = self.__bernoulli_trial__(phi_a)
+        v_b = self.__bernoulli_trial__(phi_b)
+        return v_a, v_b
+
+    def p_vis(self, h_a, h_b, w_a, w_b):
+        phi_a = (w_a.T * h_a).sum(1)
+        phi_b = (w_b.T * h_b).sum(1)
+        return expit(phi_a), expit(phi_b)
+
+    def p_hid(self,h_a, h_b, w_a, w_b, v):
+        """calculate the probability that for the supplied hiddens, they will activate vector-wise"""
+        c_a, c_b = self.approx_correction(h_a, h_b, w_a, w_b,v)
+        psi_a = (w_a * (v + c_a)).sum(1) + self.v_bias_a # of course this isn't really the correction it's more of an ammendent (? word)
+        psi_b = (w_b * (v + c_b)).sum(1) + self.v_bias_b
+        return expit(psi_a),expit(psi_b)  
+
+    def approx_correction(self, h_a, h_b, w_a, w_b,v):
+        col_hid_a = h_a.reshape(2,1) # we reshape the hiddens to be a column vector
+        col_hid_b = h_b.reshape(2,1)
+        phi_a = np.dot(w_a, h_a) - (w_a * col_hid_a) # effective phi, we subtract activations for that h_j
+        phi_b = np.dot(w_b, h_b) - (w_b * col_hid_b)
+        sig_A = phi_a + w_a/2
+        sig_B = phi_b + w_b/2
+        epsilon_a = np.dot(w_b,h_b)
+        epsilon_b = np.dot(w_a,h_a)
+        sig_AB = sig_A + epsilon_a
+        sig_BA = sig_B + epsilon_b
+        c_a = expit(sig_A) - expit(sig_AB)
+        c_b = expit(sig_B) - expit(sig_BA)
+        return c_a, c_b
 
     
 
