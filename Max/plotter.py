@@ -174,3 +174,21 @@ def print_matrix(matrix, titles = []):
 	print(mat_str)
 
 
+def plot_dict(to_plot, title = "", size = None):
+    keys = []
+    vals = []
+    for key in to_plot:
+        keys.append(key)
+        vals.append(to_plot[key])
+
+    if size is not None:
+   		plt.figure(figsize=(30,15))
+    plt.title(title)
+    plt.bar(range(len(vals)), vals, align='center')
+    plt.xticks(range(len(keys)), keys, rotation='vertical')
+    plt.show()
+
+
+
+
+

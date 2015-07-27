@@ -29,7 +29,7 @@ class VanillaSampler(object):
         """
         Generate a Visible pattern given a hidden one.
         """
-        return expit(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
+        return self.__bernouli_flip__(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
     def reconstruction_given_visible(self, visible):
         """
@@ -38,6 +38,17 @@ class VanillaSampler(object):
         hid_given_vis = self.visible_to_hidden(visible)
         vis_given_hid = self.hidden_to_visible(hid_given_vis)
         return vis_given_hid 
+
+
+    # now I should look at the dreams and see if they are kosher
+    def dream(self, model, num_gibbs = 1000):
+        current_v = np.random.randint(2, size= model.visible.shape[1])
+        dream_hid = np.random.randint(2, size= model.visible.shape[1])
+
+        for i in range(num_gibbs):
+            dream_hid = self.visible_to_hidden(current_v)
+            current_v = self.hidden_to_visible(dream_hid)
+        return current_v
 
 
 class PartitionedSampler(VanillaSampler):
@@ -135,11 +146,11 @@ def calc_correction(hidden_a, hidden_b, weights_a, weights_b):
 
 class ApproximatedSampler(object):
 
-    def __init__(self, w_a, w_b, v_bias_a, v_bias_b):
+    def __init__(self, w_a, w_b, h_bias_a, h_bias_b):
         self.w_a = w_a
         self.w_b = w_b
-        self.v_bias_a = v_bias_a
-        self.v_bias_b = v_bias_b
+        self.h_bias_a = h_bias_a
+        self.h_bias_b = h_bias_b
 
     def __bernoulli_trial__(self,weighted_sum):
         p = weighted_sum > np.random.rand(*weighted_sum.shape)
@@ -176,9 +187,13 @@ class ApproximatedSampler(object):
     def p_hid(self,h_a, h_b, w_a, w_b, v):
         """calculate the probability that for the supplied hiddens, they will activate vector-wise"""
         c_a, c_b = self.approx_correction(h_a, h_b, w_a, w_b,v)
-        psi_a = (w_a * (v + c_a)).sum(1) + self.v_bias_a # of course this isn't really the correction it's more of an ammendent (? word)
-        psi_b = (w_b * (v + c_b)).sum(1) + self.v_bias_b
+        psi_a = self.psi(w_a,v,c_a, self.h_bias_a)# of course this isn't really the correction it's more of an ammendent (? word)
+        psi_b = self.psi(w_b,v,c_b, self.h_bias_b)
         return expit(psi_a),expit(psi_b)  
+
+    def psi(self,w,v, c, h_bias):
+        """Calculate the raw (non-expit'd) value the supplied w,v,c, and bias."""
+        return (w * (v + c)).sum(1) + h_bias
 
     def approx_correction(self, h_a, h_b, w_a, w_b,v):
         col_hid_a = h_a.reshape(h_a.shape[0],1) # we reshape the hiddens to be a column vector
