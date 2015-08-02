@@ -1,5 +1,9 @@
+import math
+
 import numpy as np
+
 from sklearn.neural_network import BernoulliRBM
+
 
 class RBM(object):
     """A model class to represent a Restricted Boltzmann Machine (RBM), captures state and can be transformed from the Scikit learn RBM.
@@ -44,3 +48,11 @@ def create_from_sklearn_rbm(sklearnRBM, num_vis, num_items):
 
 def random_hiddens_for_rbm(rbm):
     return np.zeros((rbm.num_items, rbm.num_hid()))
+
+
+
+def weights_into_hiddens(weights):
+    num_vis = math.sqrt(weights.shape[1])
+    return weights.reshape(weights.shape[0],num_vis,num_vis)
+
+

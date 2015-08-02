@@ -210,6 +210,16 @@ class ApproximatedSampler(object):
         c_b = expit(sig_B) - expit(sig_BA)
         return c_a, c_b
 
-    
+class LayerWiseApproxSampler(ApproximatedSampler):
+
+    def p_hid(self,h_a, h_b,w_a, w_b,v):
+        psi_a, psi_b = super().p_hid(h_a, h_b, w_a, w_b,v)
+        updated_h_a = self.__bernoulli_trial__(psi_a)
+        psi_a, psi_b = super().p_hid(updated_h_a, h_b, w_a, w_b,v)
+        updated_h_b = self.__bernoulli_trial__(psi_b)
+        psi_a, psi_b = super().p_hid(updated_h_a,updated_h_b, w_a, w_b,v)
+        return psi_a, psi_b
+        
+
 
 

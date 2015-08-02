@@ -74,11 +74,11 @@ class Plotter(object):
 			plot.plot_all()
 
 
-def plot_weights(weights):
+def plot_weights(weights, vis_dim = 28):
 	subplot_size = int(math.sqrt(weights.shape[1]))
 	n_hidden = weights.shape[0]
 	n_vis = weights.shape[1]
-	n_vis_dim = 28
+	n_vis_dim = vis_dim
 
 	W_per_h = weights.reshape(n_hidden,n_vis_dim, n_vis_dim)
 	nc = int(math.sqrt(n_hidden))
@@ -175,10 +175,10 @@ def print_matrix(matrix, titles = []):
 
 
 def plot_dict(to_plot, title = "", size = None):
-    keys = []
+    keys = list(to_plot.keys())
+    keys.sort()
     vals = []
-    for key in to_plot:
-        keys.append(key)
+    for key in keys:
         vals.append(to_plot[key])
 
     if size is not None:
@@ -188,7 +188,33 @@ def plot_dict(to_plot, title = "", size = None):
     plt.xticks(range(len(keys)), keys, rotation='vertical')
     plt.show()
 
+def image(data,title=""):
+	plt.title = title
+	plt.imshow(data, interpolation = 'nearest', cmap='cool')
+	plt.show()
 
+def images(data,title ="", titles = None, cmap = 'cool'):
+	plt.title = title
+	num_cols = 5
+	num_rows = math.ceil(data.shape[0]/num_cols)
+
+	
+	plots_so_far = 0
+	for r in range(num_rows):
+		for c in range(num_cols):
+			if plots_so_far < len(data):
+				plt.subplot(num_rows,num_cols, plots_so_far+1)
+				plt.axis('off')
+
+				plt.imshow(data[plots_so_far], interpolation = 'nearest', cmap=cmap)
+			else:
+				break
+			plots_so_far +=1
+	plt.tight_layout()
+	plt.show()
+
+def 
+	
 
 
 
