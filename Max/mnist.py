@@ -30,7 +30,7 @@ def read(dataset = "training", path = "."):
         img = array("B", fimg.read())
 
     imgs = np.array(img).reshape(size,rows,cols)
-    imgs = np.where(imgs > 0, 1,0) # normalise the dataset
+    # imgs = np.where(imgs > 0, 1,0) # normalise the dataset
     labels = np.array(lbl)
     
     return __raw_to_dict(imgs, labels)

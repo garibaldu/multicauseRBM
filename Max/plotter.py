@@ -4,17 +4,16 @@ import matplotlib, math
 import time, datetime
 import matplotlib.pyplot as plt
 
-
 class Plot(object):
 
 	def __init__(self, data, title = None, subplot_titles = None, c_map = 'copper'):
 
 		subplot_size = math.sqrt(data.shape[1])
 		subplot_shape = (subplot_size, subplot_size)
-	
+
 		if len(data.shape) > 2:
 			subplot_shape = (data.shape[1], data.shape[2])
-			
+
 		self.data = data
 		self.title = title
 		self.subplot_titles = subplot_titles
@@ -30,7 +29,7 @@ class Plot(object):
 					plot_subplot(grid_idx)
 				else:
 					break;
-				i = i + 1 
+				i = i + 1
 
 		plt.show()
 
@@ -101,7 +100,7 @@ def plot(data, subplot_titles = None, title = None,num_rows = 6, num_cols = 9):
 
 	subplot_size = math.sqrt(data.shape[1])
 	subplot_shape = (subplot_size, subplot_size)
-	
+
 	if len(data.shape) > 2:
 		subplot_shape = (data.shape[1], data.shape[2])
 
@@ -115,7 +114,7 @@ def plot(data, subplot_titles = None, title = None,num_rows = 6, num_cols = 9):
 				plt.axis('off')
 				if subplot_titles is not None:
 					plt.title(subplot_titles[i])
-			i = i + 1 
+			i = i + 1
 
 	plt.show()
 
@@ -126,7 +125,7 @@ def save_plot(data, subplot_titles = None, title = None,num_rows = 6, num_cols =
 
 	subplot_size = math.sqrt(data.shape[1])
 	subplot_shape = (subplot_size, subplot_size)
-	
+
 	if len(data.shape) > 2:
 		subplot_shape = (data.shape[1], data.shape[2])
 
@@ -140,7 +139,7 @@ def save_plot(data, subplot_titles = None, title = None,num_rows = 6, num_cols =
 				plt.axis('off')
 				if subplot_titles is not None:
 					plt.title(subplot_titles[i])
-			i = i + 1 
+			i = i + 1
 
 	plt.savefig(filename)
 
@@ -153,7 +152,7 @@ def plot_matrix(matrix, columns = None, rows = None, title = None):
 	ax.yaxis.set_visible(False)
 	plt.axis('off')
 	the_table = plt.table(cellText = matrix, colLabels = columns, rowLabels = rows, loc = "center")
-	
+
 	plt.show()
 
 
@@ -164,7 +163,7 @@ def print_matrix(matrix, titles = []):
 		pass
 
 
-	
+
 	for i in range(len(matrix)):
 		for j in range(len(matrix[i])):
 			mat_str = "{}\t{}".format(mat_str, matrix[i][j])
@@ -183,38 +182,53 @@ def plot_dict(to_plot, title = "", size = None):
 
     if size is not None:
    		plt.figure(figsize=(30,15))
-    plt.title(title)
+    plt.title = title
     plt.bar(range(len(vals)), vals, align='center')
     plt.xticks(range(len(keys)), keys, rotation='vertical')
     plt.show()
 
-def image(data,title=""):
+def image(data,title="",cmap = 'cool', show_colorbar = True, filename= None, color_range = None):
 	plt.title = title
-	plt.imshow(data, interpolation = 'nearest', cmap='cool')
+	vmin = None
+	vmax = None
+	if color_range:
+		vmin, vmax = color_range
+	plt.imshow(data, interpolation = 'nearest', cmap=cmap,vmin=vmin, vmax=vmax )
+	if show_colorbar:
+		plt.colorbar()
+
+	if filename is not None:
+		plt.savefig(filename)
 	plt.show()
 
-def images(data,title ="", titles = None, cmap = 'cool'):
-	plt.title = title
+def images(data,title ="", titles = None, cmap = 'cool',filename = None, color_range = None, fig_size = None):
+
 	num_cols = 5
 	num_rows = math.ceil(data.shape[0]/num_cols)
-
-	
 	plots_so_far = 0
+	vmin = None
+	vmax = None
+	if color_range:
+		vmin, vmax = color_range
+
+
+
+	ax = plt.gca()
+	ax.text(1,1,title)
+	if fig_size:
+		plt.figsize = fig_size
 	for r in range(num_rows):
 		for c in range(num_cols):
 			if plots_so_far < len(data):
 				plt.subplot(num_rows,num_cols, plots_so_far+1)
 				plt.axis('off')
 
-				plt.imshow(data[plots_so_far], interpolation = 'nearest', cmap=cmap)
+				plt.imshow(data[plots_so_far], interpolation = 'nearest', cmap=cmap,vmin =vmin, vmax = vmax)
+
 			else:
 				break
 			plots_so_far +=1
-	plt.tight_layout()
+	# plt.tight_layout()
+	if filename is not None:
+		plt.savefig(filename)
 	plt.show()
-
-def 
-	
-
-
-

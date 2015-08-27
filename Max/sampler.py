@@ -18,7 +18,7 @@ class VanillaSampler(object):
     def __bernouli_flip__(self, weighted_sum):
         p = expit(weighted_sum) > np.random.rand(*weighted_sum.shape)
         return np.where(p, 1, 0)
-    
+
     def visible_to_hidden(self, visible, num_samples = 1):
         """
         Generate a hidden pattern given a visible one.
@@ -31,25 +31,36 @@ class VanillaSampler(object):
         """
         return self.__bernouli_flip__(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
-    def reconstruction_given_visible(self, visible):
+    def reconstruction_given_visible(self, visible, return_sigmoid = False):
         """
-        Perform one gibbs alternation, taking a visible pattern and returning the reconstruction given that visible pattern. 
+        Perform one gibbs alternation, taking a visible pattern and returning the reconstruction given that visible pattern.
         """
         hid_given_vis = self.visible_to_hidden(visible)
-        vis_given_hid = self.hidden_to_visible(hid_given_vis)
-        return vis_given_hid 
+        if not return_sigmoid:
+            return  self.hidden_to_visible(hid_given_vis)
+        else:
+            return expit(np.dot(hid_given_vis, self.rbm.weights) + self.rbm.visible_bias)
 
 
     # now I should look at the dreams and see if they are kosher
-    def dream(self, model, num_gibbs = 1000):
+    def dream(self, model, num_gibbs = 1000, return_sigmoid = False):
         current_v = np.random.randint(2, size= model.visible.shape[1])
         dream_hid = np.random.randint(2, size= model.visible.shape[1])
 
         for i in range(num_gibbs):
             dream_hid = self.visible_to_hidden(current_v)
             current_v = self.hidden_to_visible(dream_hid)
+
+        if return_sigmoid:
+            current_v = expit(np.dot(dream_hid, self.rbm.weights) + self.rbm.visible_bias)
+
         return current_v
 
+
+class ContinuousSampler(VanillaSampler):
+
+    def hidden_to_visible(self, hidden):
+        return expit(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
 class PartitionedSampler(VanillaSampler):
     """
@@ -91,7 +102,7 @@ class PartitionedSampler(VanillaSampler):
             phi_a = np.dot(hidden_a, weights_a) + vis_bias_a
             phi_b = np.dot(hidden_b, weights_b) + vis_bias_b
 
-            if (np.mod(epoch,2) == 0): 
+            if (np.mod(epoch,2) == 0):
                 logging.debug("{}% complete".format(epoch/num_samples * 100))
 
             correction_a, correction_b = calc_correction(hidden_a, hidden_b, weights_a, weights_b)
@@ -121,8 +132,8 @@ class PartitionedSampler(VanillaSampler):
 def build_hinge_func(x):
     return np.log(expit(x))
 hinge = np.vectorize(build_hinge_func)
- 
-def calc_correction(hidden_a, hidden_b, weights_a, weights_b):        
+
+def calc_correction(hidden_a, hidden_b, weights_a, weights_b):
     phi_a = np.dot(hidden_a, weights_a)[:,newaxis,:]
     phi_b = np.dot(hidden_b, weights_b)[:,newaxis,:]
 
@@ -131,17 +142,16 @@ def calc_correction(hidden_a, hidden_b, weights_a, weights_b):
 
     on_weights_b =  (hidden_b[:,:,newaxis] * weights_b[newaxis,:,:])
     off_weights_b = (1 - hidden_b[:,:,newaxis]) * weights_b[newaxis,:,:]
-    
+
     j_off_a = phi_a - on_weights_a
     j_off_b = phi_b - on_weights_b
     j_on_a = phi_a + off_weights_a
     j_on_b = phi_b + off_weights_b
-    
+
     correction_a = np.log(expit(j_off_a))  - np.log(expit(j_off_a + phi_b)) + np.log(expit(j_on_a + phi_b)) - np.log(expit(j_on_a))
     correction_b = np.log(expit(j_off_b))  - np.log(expit(j_off_b + phi_a)) + np.log(expit(j_on_b + phi_a)) - np.log(expit(j_on_b))
-    
+
     return correction_a, correction_b
-        
 
 
 class ApproximatedSampler(object):
@@ -170,7 +180,7 @@ class ApproximatedSampler(object):
             # get the bentness of the coin used for the bernoulli trial
             psi_a, psi_b = self.p_hid(hid_a, hid_b, self.w_a, self.w_b,v)
             hid_a = self.__bernoulli_trial__(psi_a)
-            hid_b = self.__bernoulli_trial__(psi_b) 
+            hid_b = self.__bernoulli_trial__(psi_b)
         return hid_a, hid_b
 
     def h_to_v(self, h_a, h_b):
@@ -189,7 +199,7 @@ class ApproximatedSampler(object):
         c_a, c_b = self.approx_correction(h_a, h_b, w_a, w_b,v)
         psi_a = self.psi(w_a,v,c_a, self.h_bias_a)# of course this isn't really the correction it's more of an ammendent (? word)
         psi_b = self.psi(w_b,v,c_b, self.h_bias_b)
-        return expit(psi_a),expit(psi_b)  
+        return expit(psi_a),expit(psi_b)
 
     def psi(self,w,v, c, h_bias):
         """Calculate the raw (non-expit'd) value the supplied w,v,c, and bias."""
@@ -219,7 +229,45 @@ class LayerWiseApproxSampler(ApproximatedSampler):
         updated_h_b = self.__bernoulli_trial__(psi_b)
         psi_a, psi_b = super().p_hid(updated_h_a,updated_h_b, w_a, w_b,v)
         return psi_a, psi_b
-        
+
+
+class ContinuousApproxSampler(ApproximatedSampler):
+
+    def h_to_v(self, h_a, h_b):
+        return self.p_vis(h_a, h_b, self.w_a, self.w_b)
 
 
 
+# what a name! :(
+class ApproximatedMulDimSampler(ApproximatedSampler):
+
+    def phi_vis(self, h, w):
+        return np.dot(h, w)
+
+    def p_vis(self, h_a, h_b, w_a, w_b):
+        phi_a = self.phi_vis(h_a,w_a)
+        phi_b = self.phi_vis(h_b,w_b) 
+        return expit(phi_a), expit(phi_b)
+
+    def psi(self,w,v, c, h_bias):
+        return np.dot((v * c.sum(1)), w.T) + h_bias
+
+    def approx_correction(self,h_a, h_b, w_a, w_b,v):
+
+        phi_a = self.phi_i(h_a ,w_a)
+        phi_b = self.phi_i(h_b ,w_b)
+        sig_A = phi_a + w_a/2
+        sig_B = phi_b + w_b/2
+        epsilon_a = np.dot(h_b,w_b)[:,newaxis,:]
+        epsilon_b = np.dot(h_a,w_a)[:,newaxis,:]
+        sig_AB = sig_A + epsilon_a
+        sig_BA = sig_B + epsilon_b
+        c_a = expit(sig_A) - expit(sig_AB)
+        c_b = expit(sig_B) - expit(sig_BA)
+        return c_a, c_b
+
+    def phi_i(self, h,w):
+        col_hid = h.reshape(h.shape[0], h.shape[1], 1)# we reshape the hiddens to be a column vector
+        # TODO: DOES THIS MAKE SENSE? IS THIS HOW I REMOVE THE THINGS@!!!!@@!
+        phi_i = np.dot(h, w)[:,newaxis,:] - (w * col_hid) # effective phi, we subtract activations for that h_j
+        return phi_i

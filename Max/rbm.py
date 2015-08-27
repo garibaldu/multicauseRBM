@@ -46,13 +46,15 @@ def create_from_sklearn_rbm(sklearnRBM, num_vis, num_items):
     rbm.visible_bias = sklearnRBM.intercept_visible_
     rbm.hidden_bias = sklearnRBM.intercept_hidden_
 
+def random_visibles_for_rbm(rbm):
+    return np.random.randint(0,2,(rbm.num_items, rbm.num_vis()))
+
 def random_hiddens_for_rbm(rbm):
-    return np.zeros((rbm.num_items, rbm.num_hid()))
+    return np.random.randint(0,2,(rbm.num_items, rbm.num_hid()))
 
-
+def random_hidden_for_rbm(rbm):
+    return np.random.randint(0,2,rbm.num_hid())
 
 def weights_into_hiddens(weights):
     num_vis = math.sqrt(weights.shape[1])
     return weights.reshape(weights.shape[0],num_vis,num_vis)
-
-
