@@ -56,15 +56,18 @@ class VanillaSampler(object):
 
         return current_v
 
-
 class ContinuousSampler(VanillaSampler):
+    """
+    A continous flavour of the vanilla sampler, allows non-binary visible representation. Hiddens are still binary.
+    """
 
     def hidden_to_visible(self, hidden):
         return expit(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
 class PartitionedSampler(VanillaSampler):
     """
-    PartitionedSampler, uses new technique of applying correction to hidden update with the visibles clamped (as we aren't training).
+    PartitionedSampler
+    This is an older implementation of the full blown correction calculation. Works for 2 dimensional data.
     """
 
     def __init__(self, rbm_a, rbm_b, num_items = None):
@@ -105,7 +108,7 @@ class PartitionedSampler(VanillaSampler):
             if (np.mod(epoch,2) == 0):
                 logging.debug("{}% complete".format(epoch/num_samples * 100))
 
-            correction_a, correction_b = calc_correction(hidden_a, hidden_b, weights_a, weights_b)
+            correction_a, correction_b = self.calc_correction(hidden_a, hidden_b, weights_a, weights_b)
             """
             Apply the correction to the weighted sum into the hiddens
             """
@@ -127,34 +130,36 @@ class PartitionedSampler(VanillaSampler):
         vis_b = self.hidden_to_sample(hid_b, self.rbm_b)
         return vis_a, vis_b
 
+    def calc_correction(self, hidden_a, hidden_b, weights_a, weights_b):
+        phi_a = np.dot(hidden_a, weights_a)[:,newaxis,:]
+        phi_b = np.dot(hidden_b, weights_b)[:,newaxis,:]
 
+        on_weights_a = (hidden_a[:,:,newaxis] * weights_a[newaxis,:,:])
+        off_weights_a = (1 - hidden_a[:,:,newaxis]) * weights_a[newaxis,:,:]
+
+        on_weights_b =  (hidden_b[:,:,newaxis] * weights_b[newaxis,:,:])
+        off_weights_b = (1 - hidden_b[:,:,newaxis]) * weights_b[newaxis,:,:]
+
+        j_off_a = phi_a - on_weights_a
+        j_off_b = phi_b - on_weights_b
+        j_on_a = phi_a + off_weights_a
+        j_on_b = phi_b + off_weights_b
+
+        correction_a = np.log(expit(j_off_a))  - np.log(expit(j_off_a + phi_b)) + np.log(expit(j_on_a + phi_b)) - np.log(expit(j_on_a))
+        correction_b = np.log(expit(j_off_b))  - np.log(expit(j_off_b + phi_a)) + np.log(expit(j_on_b + phi_a)) - np.log(expit(j_on_b))
+
+        return correction_a, correction_b
 
 def build_hinge_func(x):
     return np.log(expit(x))
 hinge = np.vectorize(build_hinge_func)
 
-def calc_correction(hidden_a, hidden_b, weights_a, weights_b):
-    phi_a = np.dot(hidden_a, weights_a)[:,newaxis,:]
-    phi_b = np.dot(hidden_b, weights_b)[:,newaxis,:]
-
-    on_weights_a = (hidden_a[:,:,newaxis] * weights_a[newaxis,:,:])
-    off_weights_a = (1 - hidden_a[:,:,newaxis]) * weights_a[newaxis,:,:]
-
-    on_weights_b =  (hidden_b[:,:,newaxis] * weights_b[newaxis,:,:])
-    off_weights_b = (1 - hidden_b[:,:,newaxis]) * weights_b[newaxis,:,:]
-
-    j_off_a = phi_a - on_weights_a
-    j_off_b = phi_b - on_weights_b
-    j_on_a = phi_a + off_weights_a
-    j_on_b = phi_b + off_weights_b
-
-    correction_a = np.log(expit(j_off_a))  - np.log(expit(j_off_a + phi_b)) + np.log(expit(j_on_a + phi_b)) - np.log(expit(j_on_a))
-    correction_b = np.log(expit(j_off_b))  - np.log(expit(j_off_b + phi_a)) + np.log(expit(j_on_b + phi_a)) - np.log(expit(j_on_b))
-
-    return correction_a, correction_b
-
-
 class ApproximatedSampler(object):
+    """
+    Sampler that operates on a single instance at a time, as opposed to over the whole
+    dataset
+    """
+
 
     def __init__(self, w_a, w_b, h_bias_a, h_bias_b):
         self.w_a = w_a
@@ -162,7 +167,7 @@ class ApproximatedSampler(object):
         self.h_bias_a = h_bias_a
         self.h_bias_b = h_bias_b
 
-    def __bernoulli_trial__(self,weighted_sum):
+        def __bernoulli_trial__(self,weighted_sum):
         p = weighted_sum > np.random.rand(*weighted_sum.shape)
         return np.where(p, 1,0)
 
@@ -196,7 +201,7 @@ class ApproximatedSampler(object):
 
     def p_hid(self,h_a, h_b, w_a, w_b, v):
         """calculate the probability that for the supplied hiddens, they will activate vector-wise"""
-        c_a, c_b = self.approx_correction(h_a, h_b, w_a, w_b,v)
+        c_a, c_b = self.correction(h_a, h_b, w_a, w_b,v)
         psi_a = self.psi(w_a,v,c_a, self.h_bias_a)# of course this isn't really the correction it's more of an ammendent (? word)
         psi_b = self.psi(w_b,v,c_b, self.h_bias_b)
         return expit(psi_a),expit(psi_b)
@@ -205,7 +210,7 @@ class ApproximatedSampler(object):
         """Calculate the raw (non-expit'd) value the supplied w,v,c, and bias."""
         return (w * (v + c)).sum(1) + h_bias
 
-    def approx_correction(self, h_a, h_b, w_a, w_b,v):
+    def correction(self, h_a, h_b, w_a, w_b,v):
         col_hid_a = h_a.reshape(h_a.shape[0],1) # we reshape the hiddens to be a column vector
         col_hid_b = h_b.reshape(h_b.shape[0],1)
         phi_a = np.dot(h_a, w_a) - (w_a * col_hid_a) # effective phi, we subtract activations for that h_j
@@ -214,6 +219,51 @@ class ApproximatedSampler(object):
         sig_B = phi_b + w_b/2
         epsilon_a = np.dot(h_b,w_b)
         epsilon_b = np.dot(h_a,w_a)
+        sig_AB = sig_A + epsilon_a
+        sig_BA = sig_B + epsilon_b
+        c_a = expit(sig_A) - expit(sig_AB)
+        c_b = expit(sig_B) - expit(sig_BA)
+        return c_a, c_b
+
+class FullCorrection(ApproximatedSampler):
+
+    """
+    Single training sampler that works on an instance at time, but applies the
+    full correction.
+    """
+
+    def correction(self, h_a, h_b, w_a, w_b,v):
+        col_hid_a = h_a.reshape(h_a.shape[0],1) # we reshape the hiddens to be a column vector
+        col_hid_b = h_b.reshape(h_b.shape[0],1)
+        phi_a = np.dot(h_a, w_a)
+        phi_b = np.dot(h_b, w_b)
+
+        on_weights_a = (w_a * col_hid_a)
+        off_weights_a = 1 - on_weights_a
+        on_weights_b = (w_b * col_hid_b)
+        off_weights_b= 1 - on_weights_b
+
+        j_off_a = phi_a - on_weights_a
+        j_off_b = phi_b - on_weights_b
+        j_on_a = phi_a + off_weights_a
+        j_on_b = phi_b + off_weights_b
+
+        correction_a = np.log(expit(j_off_a))  - np.log(expit(j_off_a + phi_b)) + np.log(expit(j_on_a + phi_b)) - np.log(expit(j_on_a))
+        correction_b = np.log(expit(j_off_b))  - np.log(expit(j_off_b + phi_a)) + np.log(expit(j_on_b + phi_a)) - np.log(expit(j_on_b))
+
+        return correction_a, correction_b
+
+class DirtySampler(ApproximatedSampler):
+
+    def correction(self, h_a, h_b, w_a, w_b,v):
+
+        phi_a = np.dot(h_a, w_a)
+        phi_b = np.dot(h_b, w_b)
+        sig_A = phi_a
+        sig_B = phi_b
+        epsilon_a = np.dot(h_b,w_b)
+        epsilon_b = np.dot(h_a,w_a)
+
         sig_AB = sig_A + epsilon_a
         sig_BA = sig_B + epsilon_b
         c_a = expit(sig_A) - expit(sig_AB)
@@ -230,29 +280,36 @@ class LayerWiseApproxSampler(ApproximatedSampler):
         psi_a, psi_b = super().p_hid(updated_h_a,updated_h_b, w_a, w_b,v)
         return psi_a, psi_b
 
-
 class ContinuousApproxSampler(ApproximatedSampler):
+
+    """
+    A continous flavour of our ApproximatedSampler, allows nonbinary visible units.
+    """
 
     def h_to_v(self, h_a, h_b):
         return self.p_vis(h_a, h_b, self.w_a, self.w_b)
 
-
-
 # what a name! :(
 class ApproximatedMulDimSampler(ApproximatedSampler):
+    """
+    The ApproximatedSampler that works over mutliple dimensions, useful for
+    offline learning where we need to push the whole training set through at
+    once.
+    """
+
 
     def phi_vis(self, h, w):
         return np.dot(h, w)
 
     def p_vis(self, h_a, h_b, w_a, w_b):
         phi_a = self.phi_vis(h_a,w_a)
-        phi_b = self.phi_vis(h_b,w_b) 
+        phi_b = self.phi_vis(h_b,w_b)
         return expit(phi_a), expit(phi_b)
 
     def psi(self,w,v, c, h_bias):
         return np.dot((v * c.sum(1)), w.T) + h_bias
 
-    def approx_correction(self,h_a, h_b, w_a, w_b,v):
+    def correction(self,h_a, h_b, w_a, w_b,v):
 
         phi_a = self.phi_i(h_a ,w_a)
         phi_b = self.phi_i(h_b ,w_b)

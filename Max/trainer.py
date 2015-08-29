@@ -101,15 +101,15 @@ class ORBMTrainer(object):
         # logging.warn("Ensure to deal with the hidden bias")
 
         h_a, h_b = self.sampler.v_to_h(rand_h_a, rand_h_b, training, num_gibbs = num_gibbs)
-        # v_a, v_b = self.sampler.h_to_v(h_a, h_b)
-        # sleep_h_a = np.copy(h_a)
-        # sleep_h_b = np.copy(h_b)
-        # sleep_v_a = np.copy(v_a)
-        # sleep_v_b = np.copy(v_b)
+        v_a, v_b = self.sampler.h_to_v(h_a, h_b)
+        sleep_h_a = np.copy(h_a)
+        sleep_h_b = np.copy(h_b)
+        sleep_v_a = np.copy(v_a)
+        sleep_v_b = np.copy(v_b)
 
         for epoch in range(epochs):
             # wake phase
-            h_a, h_b = self.sampler.v_to_h(h_a, h_b, training, num_gibbs = 500)
+            h_a, h_b = self.sampler.v_to_h(h_a, h_b, training, num_gibbs = num_gibbs)
             v_a, v_b = self.sampler.h_to_v(h_a, h_b)
 
             phi_a = self.sampler.phi_vis(h_a, self.rbm_a.weights)
