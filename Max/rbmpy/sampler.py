@@ -1,7 +1,7 @@
 from scipy.special import expit
 import numpy as np
 from numpy import newaxis
-from performance import plot_correction_decorator
+from rbmpy.performance import plot_correction_decorator
 import logging
 
 class VanillaSampler(object):
@@ -167,7 +167,7 @@ class ApproximatedSampler(object):
         self.h_bias_a = h_bias_a
         self.h_bias_b = h_bias_b
 
-        def __bernoulli_trial__(self,weighted_sum):
+    def __bernoulli_trial__(self,weighted_sum):
         p = weighted_sum > np.random.rand(*weighted_sum.shape)
         return np.where(p, 1,0)
 

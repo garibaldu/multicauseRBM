@@ -1,5 +1,7 @@
 import numpy as np
-import plotter, datasets, sampler, math
+import rbmpy.plotter as plotter
+import rbmpy.datasets as datasets
+import math
 from sklearn.utils.extmath import safe_sparse_dot
 from sklearn.utils.extmath import log_logistic
 from sklearn.linear_model import Perceptron
@@ -24,16 +26,16 @@ class plot_correction_decorator(object):
         The __call__ method is not called until the
         decorated function is called.
         """
-        
+
         result = self.f(*args)
         plotter.plot_weights(result[0].sum(1))
         return result
-        
+
 
 class Average_Decorator(object):
 
     def __init__(self,run_times = 3):
-        
+
         self.run_times = run_times
 
     def __call__(self,f):
@@ -47,7 +49,7 @@ class Average_Decorator(object):
             print("After f(*args)")
         return wrapped_f
 
-        
+
 
 
 class Result:
@@ -79,8 +81,8 @@ class Result:
         self.vis_van_b = self.van_data_b_sampler.reconstruction_given_visible(self.composite)
 
     def run_partitioned(self, stored_hidden_interval = 10):
-        self.stored_hidden_interval = stored_hidden_interval # number of samples between stores of the hidden layer 
-        mini_batches =  math.floor(self.num_samples / self.stored_hidden_interval)                
+        self.stored_hidden_interval = stored_hidden_interval # number of samples between stores of the hidden layer
+        mini_batches =  math.floor(self.num_samples / self.stored_hidden_interval)
         print("Generating Partitioned Reconstructions (This may take a while)")
 
         stored_hiddens = {}
@@ -89,8 +91,8 @@ class Result:
         for batch in range(mini_batches):
             print("Running batch {} of {}".format(batch, mini_batches))
             hid_a, hid_b = self.part_sampler.visible_to_hidden(self.composite, num_samples = self.stored_hidden_interval,hidden_a = hid_a,hidden_b = hid_b)
-            stored_hiddens[batch] = (hid_a, hid_b) 
-            
+            stored_hiddens[batch] = (hid_a, hid_b)
+
         self.stored_hiddens = stored_hiddens
 
     def visibles_for_stored_hidden(self, iteration):
@@ -162,5 +164,3 @@ def classify(title, train, test, train_labels, test_labels):
     classifier = Perceptron()
     classifier.fit(train, train_labels)
     print("{} {}".format(title,classifier.score(test, test_labels)))
-
-

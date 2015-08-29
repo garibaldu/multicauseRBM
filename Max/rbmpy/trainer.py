@@ -1,7 +1,8 @@
 import numpy as np
-import rbm, logging
-from sampler import VanillaSampler
-from progress import Progress
+import rbmpy.rbm as rbm
+import logging
+from rbmpy.sampler import VanillaSampler
+from rbmpy.progress import Progress
 from scipy.special import expit
 
 

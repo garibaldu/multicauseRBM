@@ -1,5 +1,5 @@
 import numpy as np
-import os, pickle, sampler, math, logging
+import os, pickle, rbmpy.sampler, math, logging
 
 ROOT_DATA_PATH = "datasets"
 
