@@ -80,3 +80,7 @@ dreams and ensuring they make sense.
 ### (Deprecated) MNIST-ORBM ###
 
 My attempt at applying the ORBM to MNIST. Currently Deprecated.
+
+### (Deprecated) MNIST-ORBM-Inference ###
+
+My results for ORBM(full correction) on MNIST.

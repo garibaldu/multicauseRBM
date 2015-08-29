@@ -7,6 +7,9 @@ import datasets, performance, plotter, mnist, pickle
 
 import argparse
 
+from warnings import warn
+warn("Currently will not work. Relies on older buggy implementations. Use RBMs via notebooks instead")
+
 parser = argparse.ArgumentParser(description='Run some Restricted Bolzmann and Partitioned Restricted Boltzmann Sampling')
 parser.add_argument('RBM File Names', metavar='N', type=argparse.FileType('rb'), nargs='+',
                    help='2 model filenames to load')
@@ -42,8 +45,8 @@ def evaluate_models(models, num_samples, num_items):
 
 	vis_target_a = van_a_sampler.reconstruction_given_visible(a)
 	vis_target_b = van_b_sampler.reconstruction_given_visible(b)
-	 
-	  
+
+
 	score_part_a = performance.log_likelyhood_score(vis_part_a, vis_target_a)
 	score_van_a = performance.log_likelyhood_score(vis_van_a, vis_target_a)
 
@@ -54,8 +57,3 @@ def evaluate_models(models, num_samples, num_items):
 
 
 evaluate_models(dict_repr["RBM File Names"], dict_repr["NumSamples"], dict_repr["NumItems"])
-
-
-
-
-
