@@ -22,8 +22,9 @@ class VanillaTrainier(object):
     def __init__(self, rbm, sampler):
         self.rbm = rbm
         self.sampler = sampler
+        self.progess_logger = None
 
-    def train(self, epochs, training ,learning_rate = 0.002):
+    def train(self, epochs, training ,learning_rate = 0.002, logging_freq = None):
         """
         Train the rbm provided in the init to fit the given data.
 
@@ -33,6 +34,10 @@ class VanillaTrainier(object):
             learning_rate (Optional(float)): RBM's learning_rate, used in hebbian learning.
 
         """
+        if logging_freq:
+            self.progess_logger = Progress(self.__class__.__name__, epochs)
+            self.progess_logger.set_percentage_update_frequency(logging_freq)
+
         self.rbm.visible = training
         wake_vis = training
         wake_hid = rbm.random_hiddens_for_rbm(self.rbm)
@@ -60,6 +65,9 @@ class VanillaTrainier(object):
 
             self.rbm.hidden_bias =  self.rbm.hidden_bias + learning_rate * (wake_hid - sleep_hid).sum(0)
             self.rbm.hidden_bias = np.mean(self.rbm.hidden_bias) * np.ones(self.rbm.hidden_bias.shape)
+
+            if self.progess_logger:
+                self.progess_logger.set_completed_units(epoch)
 
         self.rbm.hidden = wake_hid
 
@@ -130,7 +138,7 @@ class ORBMTrainer(object):
 
              # now sleep phase
             rand_v = rbm.random_visibles_for_rbm(self.rbm_a)
-            # logging.warn("Ensure I sleep for the same lenght as the training ")
+            logging.warn("Ensure I sleep for the same lenght as the training ")
             # logging.warn("A and B are indepednat in the prior, so I should usea  VanillaSampler here!")
             sleep_h_a = sleep_a_sampler.visible_to_hidden(rand_v)
             sleep_h_b = sleep_b_sampler.visible_to_hidden(rand_v)

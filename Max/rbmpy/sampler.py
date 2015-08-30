@@ -3,6 +3,7 @@ import numpy as np
 from numpy import newaxis
 from rbmpy.performance import plot_correction_decorator
 import logging
+from collections import Counter
 
 class VanillaSampler(object):
     """
@@ -55,6 +56,18 @@ class VanillaSampler(object):
             current_v = expit(np.dot(dream_hid, self.rbm.weights) + self.rbm.visible_bias)
 
         return current_v
+
+
+def goodnight(model, sampler, hours_of_sleep, num_gibbs_per_hour):
+    """Generate a dictionary of reconstructions to the number of times they occurred"""
+    result_dict = Counter()
+    v_prime = sampler.dream(model, num_gibbs_per_hour)
+    reconstruction_dict = {} # the actual reconstructions that occurred
+    for i in range(hours_of_sleep):
+        v_prime = sampler.dream(model, num_gibbs_per_hour)
+        result_dict[tuple(v_prime)] += 1
+        reconstruction_dict[tuple(v_prime)] = v_prime
+    return result_dict, reconstruction_dict
 
 class ContinuousSampler(VanillaSampler):
     """
