@@ -26,11 +26,14 @@ class VanillaSampler(object):
         """
         return self.__bernouli_flip__(np.dot(visible, self.rbm.weights.transpose()) + self.rbm.hidden_bias)
 
-    def hidden_to_visible(self, hidden):
+    def hidden_to_visible(self, hidden, return_sigmoid = False):
         """
         Generate a Visible pattern given a hidden one.
         """
-        return self.__bernouli_flip__(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
+        if not return_sigmoid:
+            return self.__bernouli_flip__(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
+        else:
+            return expit(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
     def reconstruction_given_visible(self, visible, return_sigmoid = False):
         """
@@ -65,6 +68,18 @@ def goodnight(model, sampler, hours_of_sleep, num_gibbs_per_hour):
     reconstruction_dict = {} # the actual reconstructions that occurred
     for i in range(hours_of_sleep):
         v_prime = sampler.dream(model, num_gibbs_per_hour)
+        result_dict[tuple(v_prime)] += 1
+        reconstruction_dict[tuple(v_prime)] = v_prime
+    return result_dict, reconstruction_dict
+
+
+def orbm_goodnight(model_a, model_b, sampler, hours_of_sleep, num_gibbs_per_hour):
+    """Generate a dictionary of reconstructions to the number of times they occurred"""
+    result_dict = Counter()
+    v_prime = sampler.dream(model_a, model_b, num_gibbs_per_hour)
+    reconstruction_dict = {} # the actual reconstructions that occurred
+    for i in range(hours_of_sleep):
+        v_prime = sampler.dream(model_a, model_b, num_gibbs_per_hour)
         result_dict[tuple(v_prime)] += 1
         reconstruction_dict[tuple(v_prime)] = v_prime
     return result_dict, reconstruction_dict
@@ -184,6 +199,18 @@ class ApproximatedSampler(object):
         p = weighted_sum > np.random.rand(*weighted_sum.shape)
         return np.where(p, 1,0)
 
+    def dream(self, model_a, model_b, num_gibbs = 1000):
+        a_vanilla = VanillaSampler(model_a)
+        b_vanilla = VanillaSampler(model_b)
+
+        a_dream_v = a_vanilla.dream(model_a, num_gibbs, return_sigmoid = False)
+        b_dream_v = b_vanilla.dream(model_a, num_gibbs, return_sigmoid = False)
+
+
+        phi_a =  np.dot(a_vanilla.visible_to_hidden(a_dream_v), model_a.weights) + model_a.visible_bias
+        phi_b = np.dot(b_vanilla.visible_to_hidden(b_dream_v), model_b.weights) + model_b.visible_bias
+        return self.__bernoulli_trial__(expit(phi_a + phi_b))
+
     def v_to_v(self, h_a, h_b, v , num_gibbs = 100):
         generated_h_a, generated_h_b = self.v_to_h(h_a,h_b, v,num_gibbs = num_gibbs)
         v_a, v_b = self.h_to_v(generated_h_a, generated_h_b)
@@ -196,7 +223,7 @@ class ApproximatedSampler(object):
 
         for epoch in range(num_gibbs):
             # get the bentness of the coin used for the bernoulli trial
-            psi_a, psi_b = self.p_hid(hid_a, hid_b, self.w_a, self.w_b,v)
+            psi_a, psi_b = self.p_hid(hid_a, hid_b, self.w_a, self.w_b, v)
             hid_a = self.__bernoulli_trial__(psi_a)
             hid_b = self.__bernoulli_trial__(psi_b)
         return hid_a, hid_b
@@ -207,6 +234,9 @@ class ApproximatedSampler(object):
         v_b = self.__bernoulli_trial__(phi_b)
         return v_a, v_b
 
+    def phi(self,w,h):
+        return (w_a.T * h_a).sum(1)
+
     def p_vis(self, h_a, h_b, w_a, w_b):
         phi_a = (w_a.T * h_a).sum(1)
         phi_b = (w_b.T * h_b).sum(1)
@@ -214,7 +244,7 @@ class ApproximatedSampler(object):
 
     def p_hid(self,h_a, h_b, w_a, w_b, v):
         """calculate the probability that for the supplied hiddens, they will activate vector-wise"""
-        c_a, c_b = self.correction(h_a, h_b, w_a, w_b,v)
+        c_a, c_b = self.correction(h_a, h_b, w_a, w_b, v)
         psi_a = self.psi(w_a,v,c_a, self.h_bias_a)# of course this isn't really the correction it's more of an ammendent (? word)
         psi_b = self.psi(w_b,v,c_b, self.h_bias_b)
         return expit(psi_a),expit(psi_b)
@@ -310,7 +340,6 @@ class ApproximatedMulDimSampler(ApproximatedSampler):
     once.
     """
 
-
     def phi_vis(self, h, w):
         return np.dot(h, w)
 
@@ -341,3 +370,26 @@ class ApproximatedMulDimSampler(ApproximatedSampler):
         # TODO: DOES THIS MAKE SENSE? IS THIS HOW I REMOVE THE THINGS@!!!!@@!
         phi_i = np.dot(h, w)[:,newaxis,:] - (w * col_hid) # effective phi, we subtract activations for that h_j
         return phi_i
+
+
+class FullCorrectionMulDimSampler(ApproximatedMulDimSampler):
+
+    def correction(self, h_a, h_b, w_a, w_b, v):
+        phi_a = np.dot(h_a, w_a)[:,newaxis,:]
+        phi_b = np.dot(h_b, w_b)[:,newaxis,:]
+
+        on_w_a = (h_a[:,:,newaxis] * w_a[newaxis,:,:])
+        off_w_a = (1 - h_a[:,:,newaxis]) * w_a[newaxis,:,:]
+
+        on_w_b =  (h_b[:,:,newaxis] * w_b[newaxis,:,:])
+        off_w_b = (1 - h_b[:,:,newaxis]) * w_b[newaxis,:,:]
+
+        j_off_a = phi_a - on_w_a
+        j_off_b = phi_b - on_w_b
+        j_on_a = phi_a + off_w_a
+        j_on_b = phi_b + off_w_b
+
+        correction_a = np.log(expit(j_off_a))  - np.log(expit(j_off_a + phi_b)) + np.log(expit(j_on_a + phi_b)) - np.log(expit(j_on_a))
+        correction_b = np.log(expit(j_off_b))  - np.log(expit(j_off_b + phi_a)) + np.log(expit(j_on_b + phi_a)) - np.log(expit(j_on_b))
+
+        return correction_a, correction_b

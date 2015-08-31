@@ -48,7 +48,7 @@ class VanillaTrainier(object):
         for epoch in range(0, epochs):
 
             wake_hid = self.sampler.visible_to_hidden(wake_vis)
-            sleep_vis = self.sampler.hidden_to_visible(sleep_hid) # reconstruction based on training item
+            sleep_vis = self.sampler.hidden_to_visible(sleep_hid, return_sigmoid = True) # reconstruction based on training item
             sleep_hid = self.sampler.visible_to_hidden(sleep_vis) # hidden based on reconstruction
 
 
@@ -74,6 +74,8 @@ class VanillaTrainier(object):
 
     def __hebbian__(self, visible, hidden):
         return visible[:,:,np.newaxis] * hidden[:, np.newaxis,:]
+
+
 
 
 
@@ -106,20 +108,29 @@ class ORBMTrainer(object):
         # generate a random hidden pattern to start from
         rand_h_a = rbm.random_hiddens_for_rbm(self.rbm_a)
         rand_h_b = rbm.random_hiddens_for_rbm(self.rbm_b)
-        # logging.warn("Do persisent contrastive divergence")
         # logging.warn("Ensure to deal with the hidden bias")
 
         h_a, h_b = self.sampler.v_to_h(rand_h_a, rand_h_b, training, num_gibbs = num_gibbs)
-        v_a, v_b = self.sampler.h_to_v(h_a, h_b)
-        sleep_h_a = np.copy(h_a)
-        sleep_h_b = np.copy(h_b)
-        sleep_v_a = np.copy(v_a)
-        sleep_v_b = np.copy(v_b)
+
+        sleep_h_a = sleep_a_sampler.visible_to_hidden(training)
+        sleep_h_b = sleep_b_sampler.visible_to_hidden(training)
+
+        sleep_v_a = sleep_a_sampler.hidden_to_visible(sleep_h_a)
+        sleep_v_b = sleep_b_sampler.hidden_to_visible(sleep_h_b)
 
         for epoch in range(epochs):
             # wake phase
             h_a, h_b = self.sampler.v_to_h(h_a, h_b, training, num_gibbs = num_gibbs)
-            v_a, v_b = self.sampler.h_to_v(h_a, h_b)
+            # v_a, v_b = self.sampler.h_to_v(h_a, h_b)
+
+
+            # TODO , shou;ld be the effective phi, ORBM style
+            # Swap to mean
+            # Examine the sleep phase gradient.
+            # Zero out correction, what effect
+            # generate a dataset from the generative model
+            # think about the exact gradient.
+
 
             phi_a = self.sampler.phi_vis(h_a, self.rbm_a.weights)
             phi_b = self.sampler.phi_vis(h_b, self.rbm_b.weights)
@@ -127,24 +138,24 @@ class ORBMTrainer(object):
             d_w_a = np.dot(expit(phi_a).T, h_a).T
             d_w_b = np.dot(expit(phi_b).T, h_b).T
 
-            # logging.warn("Fix the d_w to do the dot")
 
              # to apply the perceptron lr part of the lr we need to find phi_a_b
-            phi_ab = expit(phi_a + phi_b)
+            sig_phi_ab = expit(phi_a + phi_b)
             # logging.warn("Fix the phi_ab see page 4")
-            d_w_a += np.dot((training - phi_ab).T, h_a).T
-            d_w_b += np.dot((training - phi_ab).T, h_b).T
+            d_w_a += np.dot((training - sig_phi_ab).T, h_a).T
+            d_w_b += np.dot((training - sig_phi_ab).T, h_b).T
 
 
-             # now sleep phase
-            rand_v = rbm.random_visibles_for_rbm(self.rbm_a)
-            logging.warn("Ensure I sleep for the same lenght as the training ")
+            # now sleep phase
             # logging.warn("A and B are indepednat in the prior, so I should usea  VanillaSampler here!")
-            sleep_h_a = sleep_a_sampler.visible_to_hidden(rand_v)
-            sleep_h_b = sleep_b_sampler.visible_to_hidden(rand_v)
+            sleep_h_a = sleep_a_sampler.visible_to_hidden(sleep_v_a)
+            sleep_h_b = sleep_b_sampler.visible_to_hidden(sleep_v_b)
 
             sleep_v_a = sleep_a_sampler.hidden_to_visible(sleep_h_a)
             sleep_v_b = sleep_b_sampler.hidden_to_visible(sleep_h_b)
+
+            sleep_h_a = sleep_a_sampler.visible_to_hidden(sleep_v_a)
+            sleep_h_b = sleep_b_sampler.visible_to_hidden(sleep_v_b)
 
             d_w_a -= (sleep_v_a[:,np.newaxis,:] * sleep_h_a[:,:,np.newaxis]).sum(0)
             d_w_b -= (sleep_v_b[:,np.newaxis,:] * sleep_h_b[:,:,np.newaxis]).sum(0)

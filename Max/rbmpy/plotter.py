@@ -174,18 +174,15 @@ def print_matrix(matrix, titles = []):
 
 
 def plot_dict(to_plot, title = "", size = None):
-    keys = list(to_plot.keys())
-    keys.sort()
-    vals = []
-    for key in keys:
-        vals.append(to_plot[key])
+	labels, values = zip(*to_plot.items())
 
-    if size is not None:
-   		plt.figure(figsize=(30,15))
-    plt.title = title
-    plt.bar(range(len(vals)), vals, align='center')
-    plt.xticks(range(len(keys)), keys, rotation='vertical')
-    plt.show()
+	indexes = np.arange(len(labels))
+	width = 1
+
+	plt.bar(indexes, values, width)
+	plt.xticks(indexes + width * 0.5, labels)
+	plt.show()
+
 
 def image(data,title="",cmap = 'cool', show_colorbar = True, filename= None, color_range = None):
 	plt.title = title
