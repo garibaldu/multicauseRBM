@@ -204,12 +204,17 @@ class ApproximatedSampler(object):
         b_vanilla = VanillaSampler(model_b)
 
         a_dream_v = a_vanilla.dream(model_a, num_gibbs, return_sigmoid = False)
-        b_dream_v = b_vanilla.dream(model_a, num_gibbs, return_sigmoid = False)
+        b_dream_v = b_vanilla.dream(model_b, num_gibbs, return_sigmoid = False)
 
 
-        phi_a =  np.dot(a_vanilla.visible_to_hidden(a_dream_v), model_a.weights) + model_a.visible_bias
-        phi_b = np.dot(b_vanilla.visible_to_hidden(b_dream_v), model_b.weights) + model_b.visible_bias
-        return self.__bernoulli_trial__(expit(phi_a + phi_b))
+        a_dream_h = a_vanilla.visible_to_hidden(a_dream_v)
+        b_dream_h = b_vanilla.visible_to_hidden(b_dream_v)
+
+        phi_a =  np.dot(a_dream_h, model_a.weights)
+        phi_b =  np.dot(b_dream_h, model_b.weights)
+        sig_ab = expit(phi_a + phi_b)
+        # print("phi_a {}\tphi_b {}\t\tdream_h_a {}\tdream_h_b {}\tSig_ab {}".format(phi_a, phi_b, a_dream_h, b_dream_h, sig_ab))
+        return self.__bernoulli_trial__(sig_ab)
 
     def v_to_v(self, h_a, h_b, v , num_gibbs = 100):
         generated_h_a, generated_h_b = self.v_to_h(h_a,h_b, v,num_gibbs = num_gibbs)
@@ -371,6 +376,23 @@ class ApproximatedMulDimSampler(ApproximatedSampler):
         phi_i = np.dot(h, w)[:,newaxis,:] - (w * col_hid) # effective phi, we subtract activations for that h_j
         return phi_i
 
+
+class DirtyCorrectionMulDimSampler(ApproximatedMulDimSampler):
+
+    def correction(self, h_a, h_b, w_a, w_b,v):
+
+        phi_a = np.dot(h_a, w_a)
+        phi_b = np.dot(h_b, w_b)
+        sig_A = phi_a
+        sig_B = phi_b
+        epsilon_a = np.dot(h_b,w_b)[:,newaxis,:]
+        epsilon_b = np.dot(h_a,w_a)[:,newaxis,:]
+
+        sig_AB = sig_A + epsilon_a
+        sig_BA = sig_B + epsilon_b
+        c_a = expit(sig_A) - expit(sig_AB)
+        c_b = expit(sig_B) - expit(sig_BA)
+        return c_a, c_b
 
 class FullCorrectionMulDimSampler(ApproximatedMulDimSampler):
 

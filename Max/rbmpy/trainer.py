@@ -97,7 +97,7 @@ class ORBMTrainer(object):
         self.progess_logger = Progress(__name__)
 
 
-    def train(self, epochs, training, learning_rate = 0.002, num_gibbs = 500,logging_freq = None):
+    def train(self, epochs, training, learning_rate = 0.004, num_gibbs = 10,logging_freq = None):
         sleep_a_sampler = VanillaSampler(self.rbm_a)
         sleep_b_sampler = VanillaSampler(self.rbm_b)
 
@@ -114,15 +114,19 @@ class ORBMTrainer(object):
 
         sleep_h_a = sleep_a_sampler.visible_to_hidden(training)
         sleep_h_b = sleep_b_sampler.visible_to_hidden(training)
-
+        #
         sleep_v_a = sleep_a_sampler.hidden_to_visible(sleep_h_a)
         sleep_v_b = sleep_b_sampler.hidden_to_visible(sleep_h_b)
+
+        # w_epsilon = 0.00005
 
         for epoch in range(epochs):
             # wake phase
             h_a, h_b = self.sampler.v_to_h(h_a, h_b, training, num_gibbs = num_gibbs)
             # v_a, v_b = self.sampler.h_to_v(h_a, h_b)
 
+            # self.rbm_a.weights *= (1 - w_epsilon)
+            # self.rbm_b.weights *``= (1 - w_epsilon)
 
             # TODO , shou;ld be the effective phi, ORBM style
             # Swap to mean
@@ -151,14 +155,21 @@ class ORBMTrainer(object):
             sleep_h_a = sleep_a_sampler.visible_to_hidden(sleep_v_a)
             sleep_h_b = sleep_b_sampler.visible_to_hidden(sleep_v_b)
 
-            sleep_v_a = sleep_a_sampler.hidden_to_visible(sleep_h_a)
-            sleep_v_b = sleep_b_sampler.hidden_to_visible(sleep_h_b)
+            sleep_phi_a = self.sampler.phi_vis(sleep_h_a, self.rbm_a.weights)
+            sleep_phi_b = self.sampler.phi_vis(sleep_h_b, self.rbm_b.weights)
+
+            sleep_v_a = self.sampler.__bernoulli_trial__(sleep_phi_a) #sleep_a_sampler.hidden_to_visible(sleep_h_a)
+            sleep_v_b = self.sampler.__bernoulli_trial__(sleep_phi_b) #sleep_b_sampler.hidden_to_visible(sleep_h_b)
 
             sleep_h_a = sleep_a_sampler.visible_to_hidden(sleep_v_a)
             sleep_h_b = sleep_b_sampler.visible_to_hidden(sleep_v_b)
 
-            d_w_a -= (sleep_v_a[:,np.newaxis,:] * sleep_h_a[:,:,np.newaxis]).sum(0)
-            d_w_b -= (sleep_v_b[:,np.newaxis,:] * sleep_h_b[:,:,np.newaxis]).sum(0)
+
+            d_w_a -= np.dot(expit(sleep_phi_a).T, sleep_h_a).T
+            d_w_b -= np.dot(expit(sleep_phi_b).T, sleep_h_b).T
+
+            # d_w_a -= (sleep_v_a[:,np.newaxis,:] * sleep_h_a[:,:,np.newaxis]).sum(0)
+            # d_w_b -= (sleep_v_b[:,np.newaxis,:] * sleep_h_b[:,:,np.newaxis]).sum(0)
 
             self.rbm_a.weights += learning_rate * d_w_a
             self.rbm_b.weights += learning_rate * d_w_b
