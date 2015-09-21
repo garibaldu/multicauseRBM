@@ -3,6 +3,7 @@ import numpy as np
 from numpy import newaxis
 from rbmpy.performance import plot_correction_decorator
 import logging
+from rbmpy.progress import Progress
 from collections import Counter
 
 class VanillaSampler(object):
@@ -89,7 +90,8 @@ class ContinuousSampler(VanillaSampler):
     A continous flavour of the vanilla sampler, allows non-binary visible representation. Hiddens are still binary.
     """
 
-    def hidden_to_visible(self, hidden):
+    def hidden_to_visible(self, hidden, return_sigmoid = True):
+        """I match the interface of VanillaSampler here, return_sigmoid has no effect,  as it will always return the sigmoid in the contrinous case."""
         return expit(np.dot(hidden, self.rbm.weights) + self.rbm.visible_bias)
 
 class PartitionedSampler(VanillaSampler):
@@ -216,21 +218,27 @@ class ApproximatedSampler(object):
         # print("phi_a {}\tphi_b {}\t\tdream_h_a {}\tdream_h_b {}\tSig_ab {}".format(phi_a, phi_b, a_dream_h, b_dream_h, sig_ab))
         return self.__bernoulli_trial__(sig_ab)
 
-    def v_to_v(self, h_a, h_b, v , num_gibbs = 100):
-        generated_h_a, generated_h_b = self.v_to_h(h_a,h_b, v,num_gibbs = num_gibbs)
+    def v_to_v(self, h_a, h_b, v , num_gibbs = 100, logging_freq = None):
+        generated_h_a, generated_h_b = self.v_to_h(h_a,h_b, v,num_gibbs = num_gibbs, logging_freq = logging_freq)
         v_a, v_b = self.h_to_v(generated_h_a, generated_h_b)
         return v_a, v_b
 
-    def v_to_h(self, h_a, h_b, v , num_gibbs = 100):
+    def v_to_h(self, h_a, h_b, v , num_gibbs = 100, logging_freq = 10):
         """return the hidden representations for the supplied visible pattern"""
         hid_a = h_a
         hid_b = h_b
+
+        if logging_freq:
+            progess_logger = Progress(self.__class__.__name__, num_gibbs)
+            progess_logger.set_percentage_update_frequency(logging_freq)
 
         for epoch in range(num_gibbs):
             # get the bentness of the coin used for the bernoulli trial
             psi_a, psi_b = self.p_hid(hid_a, hid_b, self.w_a, self.w_b, v)
             hid_a = self.__bernoulli_trial__(psi_a)
             hid_b = self.__bernoulli_trial__(psi_b)
+            if logging_freq:
+                progess_logger.set_completed_units(epoch)
         return hid_a, hid_b
 
     def h_to_v(self, h_a, h_b):
@@ -335,7 +343,10 @@ class ContinuousApproxSampler(ApproximatedSampler):
     """
 
     def h_to_v(self, h_a, h_b):
-        return self.p_vis(h_a, h_b, self.w_a, self.w_b)
+        return super().p_vis(h_a, h_b, self.w_a, self.w_b)
+
+
+
 
 # what a name! :(
 class ApproximatedMulDimSampler(ApproximatedSampler):
@@ -357,7 +368,6 @@ class ApproximatedMulDimSampler(ApproximatedSampler):
         return np.dot((v * c.sum(1)), w.T) + h_bias
 
     def correction(self,h_a, h_b, w_a, w_b,v):
-
         phi_a = self.phi_i(h_a ,w_a)
         phi_b = self.phi_i(h_b ,w_b)
         sig_A = phi_a + w_a/2
@@ -393,6 +403,9 @@ class DirtyCorrectionMulDimSampler(ApproximatedMulDimSampler):
         c_a = expit(sig_A) - expit(sig_AB)
         c_b = expit(sig_B) - expit(sig_BA)
         return c_a, c_b
+
+class ContinuousApproxMulDimSampler(ContinuousApproxSampler, ApproximatedMulDimSampler ):
+    pass
 
 class FullCorrectionMulDimSampler(ApproximatedMulDimSampler):
 

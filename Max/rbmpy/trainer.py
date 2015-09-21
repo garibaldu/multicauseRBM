@@ -1,9 +1,10 @@
 import numpy as np
 import rbmpy.rbm as rbm
-import logging
+import logging, math
 from rbmpy.sampler import VanillaSampler
 from rbmpy.progress import Progress
 from scipy.special import expit
+
 
 
 class VanillaTrainier(object):
@@ -23,6 +24,17 @@ class VanillaTrainier(object):
         self.rbm = rbm
         self.sampler = sampler
         self.progess_logger = None
+
+    def batch_train(self, epochs_per_batch, training, batches, learning_rate):
+        logger = Progress("Batch Logger", batches)
+        logger.set_percentage_update_frequency(10)
+        batch_size = math.floor(training.shape[0] / batches)
+
+        for batch in range(batches):
+            self.train(epochs_per_batch, training[(batch * batch_size):((batch + 1) * batch_size),:], learning_rate)
+            logger.set_completed_units(batch)
+
+        self.rbm.visible = training
 
     def train(self, epochs, training ,learning_rate = 0.002, logging_freq = None):
         """
@@ -48,7 +60,7 @@ class VanillaTrainier(object):
         for epoch in range(0, epochs):
 
             wake_hid = self.sampler.visible_to_hidden(wake_vis)
-            sleep_vis = self.sampler.hidden_to_visible(sleep_hid, return_sigmoid = True) # reconstruction based on training item
+            sleep_vis = self.sampler.hidden_to_visible(sleep_hid) # reconstruction based on training item
             sleep_hid = self.sampler.visible_to_hidden(sleep_vis) # hidden based on reconstruction
 
 
