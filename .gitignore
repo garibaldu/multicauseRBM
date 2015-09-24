@@ -73,3 +73,28 @@ Max/MNIST_Digits/6s-img-dataset.npy
 Max/MNIST_Digits/7s-img-dataset.npy
 Max/MNIST_Digits/8s-img-dataset.npy
 Max/MNIST_Digits/9s-img-dataset.npy
+
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+
+## Bibliography auxiliary files (bibtex/biblatex/biber):
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.brf
+*.run.xml
+
+## Build tool auxiliary files:
+*.fdb_latexmk
+*.synctex
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
