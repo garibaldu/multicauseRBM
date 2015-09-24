@@ -49,6 +49,7 @@ def create_from_sklearn_rbm(sklearnRBM, num_vis, num_items):
     rbm.weights = np.array(sklearnRBM.components_)
     rbm.visible_bias = sklearnRBM.intercept_visible_
     rbm.hidden_bias = sklearnRBM.intercept_hidden_
+    return rbm
 
 def random_visibles_for_rbm(rbm):
     return np.random.randint(0,2,(rbm.num_items, rbm.num_vis()))
