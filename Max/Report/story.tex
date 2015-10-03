@@ -1,0 +1,33 @@
+% Deep beleif networks are the shit
+  % Proven good for images and speech, text analysis (sentimenet analysis)
+Deep Belief networks are powerful models that have proven to achieve state of the art performance in many domains. For instance, image classification, dimensionality reduction, natural language recognition, Document classification, Semantic Analysis.
+
+% Captures deep interactions between complex features. In image domain this is the relationships between pixels.
+  % e.g. in an image at best low level layers learn images filters
+DBNs capture non-linear interactions between low level features, in the context of image classification the lower layers should capture image filters.
+
+% Deep belief networks have no way to separate the sources.
+Despite a DBNs expressiveness, their is no way to extract these interactions. If an input has multiple sources then the complex combination is instead learnt, the network has no mechanism for extracting multiple causes.
+% This is the motivation for this project, we want a way to separate, and model the sources of input data, where said data is a complex combindation of two sources acting independantly.
+This is the motivation for this project, to be able to separate the sources of data in a new model.
+
+% Deep Belief Networks are constructed by stacking Restricted Boltzmann Machines (RBMs). This proved a natural starting point for representing two sources. We worked in a shallow environment before attempting to stack RBMs.
+Restricted Boltzmann Machines are two layer, fully connected, unsupervised nueral networks. DBNs are constructed by stacking RBMs. Being the building block of the powerful DBN, RBMs are a natural starting point for representing mutliple sources.
+% RBMs make a strong assumption that all features are dependant in the prior, inheriently modelling a single source.
+RBMs make the assumption that the features of the input data are dependant in the prior, as they are independant in the posterior. The latter makes them tractable to use in practice, but also means they model/encode a single representation.
+  % In the image domain, this equates to all pixels being assumed relevant to what we are trying to model. With enough examples RBMs can generalise, but there is no mechanism for modelling independant subjects.
+  Again using the example of images, an input image will map to a single representation, again there is a lack of mechanism for modelling sources that are acting independantly.
+
+% There is another structure, Belief/Bayesian Networks, and the parameterised version, the Sigmoid Belief Network, which makes the polar assumption where each feature is modelled by an independant cause. These are intractable to train in practice.
+The Sigmoid Belief Network, the parameterized version of a Bayesain/Belief network appears as a natural choice for modelling inpendant sources in that it makes a polar assumption to the RBM; -- Warning Semicolon Use -- Every feature has an independant cause. The sigmoid belief networks assumption could capture data that has multiple source, but this is intractable in practice.
+
+% Frean, Marsland propose a generative model that aims for a middle ground between these two existing models.
+
+% \begin{tikzpicture}
+%   \tikzstyle{every node}=[draw,shape=rectangle];
+%   % \draw (0,0) rectangle (2,1);
+%   \node (a) at (0,3) {RBM A};
+%   \node (b) at (3,3) {RBM B};
+%   \node (s) at (1.5,0) {Sigmoid BN};
+%   % \path[draw] (0, 0) node {Source A} -- (1,0) -- (1,1) node {Source B};
+% \end{tikzpicture}
