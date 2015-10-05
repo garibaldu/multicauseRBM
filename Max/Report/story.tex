@@ -8,11 +8,11 @@ Deep Belief networks are powerful models that have proven to achieve state of th
 
 % Captures deep interactions between complex features. In image domain this is the relationships between pixels.
   % e.g. in an image at best low level layers learn images filters
-DBNs capture non-linear interactions between low level features, in the context of image classification the lower layers should capture image filters.
+DBNs capture non-linear interactions between low level features, in the context of image classification the lower layers can capture image filters.
 
 \subsection{DBNs have no mechanism for separating sources}
 % Deep belief networks have no way to separate the sources.
-Despite a DBNs expressiveness, their is no way to extract these interactions. If an input has multiple sources then the complex combination is instead learnt, the network has no mechanism for extracting multiple causes.
+Despite a DBNs expressiveness, there is no way to extract these interactions. If an input has multiple sources then the complex combination is instead learnt, the network has no mechanism for extracting multiple causes.
 % This is the motivation for this project, we want a way to separate, and model the sources of input data, where said data is a complex combindation of two sources acting independantly.
 This is the motivation for this project, to be able to separate the sources of data in a new model.
 
@@ -41,7 +41,7 @@ The new generative model, referred to onwards as an ORBM, uses an RBM to model e
 \begin{figure}[h]
 \begin{center}
   \includegraphics[width = 0.5\textwidth]{Assets/ORBM_fig_1}
-\caption{The proposed generative model for capturing two causes, the ORBM.}
+\caption{A graphical representation showing the proposed generative model for capturing two causes, the ORBM.}
 
 \label{F:ORBM-fig-1}
 \end{center}

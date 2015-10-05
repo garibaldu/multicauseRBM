@@ -4,7 +4,7 @@
 % Modifed by Ewan Tempero for the new TR cover. October 1993.
 %
 % Now allows \supervisors as well as \supervisor. NL Dec 2002
-% 
+%
 % Sets up cover page and page size for VUW CS reports
 %
 %% Now in the ECS CVS as of 2010-04-23, following some reworking
@@ -22,7 +22,7 @@
 %
 % use \title{} to specify title, \author{} to specify author,
 %       \supervisor(s){} to specify supervisor(s), \date{} to specify date,
-%       and ``abstract'' environment for abstract. 
+%       and ``abstract'' environment for abstract.
 %
 % Current options are:
 % [ecs|msor]              Which school you are in.
@@ -31,7 +31,7 @@
 %                          You can also specify any other degree by name
 %                          (see below)
 % [font|image]            Use a font or an image for the VUW logo
-%                          The font option will only work on ECS systems
+%                          The font option will  work on ECS systems
 %
 % If you don't use the package options, bschonscomp or mcompsci,
 %  to specify the degree you can use
@@ -57,21 +57,22 @@
 \newif\ifEcs@image
 
 \ProcessOptions
-
+\usepackage{xcolor}
 \usepackage{mathpazo} % sets palatino as the default font
 
 \newcommand{\makeblankpage}{\newpage
                             \thispagestyle{empty}
                             \addtocounter{page}{-1}}
-                            
+
 \newcommand{\frontmatter}{\pagenumbering{roman}}
 
 \newcommand{\mainmatter}{\cleardoublepage \pagenumbering{arabic}}
 
 \newcommand{\backmatter}{\appendix \cleardoublepage}
 
+\newcommand{\todo}{\par \textcolor{red}{TODO Draft Points Still to write TODO} \par}
 \ifEcs@image
-\usepackage{graphicx}  % for including images 
+\usepackage{graphicx}  % for including images
 \else
 \font\vuwf  = vuw20 scaled\magstep4
 \fi
@@ -121,13 +122,13 @@
 
 \begin{center}
 {\pal V\t@s I\t@s C\t@s T\t@s O\t@s R\t@s I\t@s A\  \t@s
-U\t@s N\t@s I\t@s V\t@s E\t@s R\t@s S\t@s I\t@s T\t@s Y\ \t@s O\t@s F\ \t@s 
+U\t@s N\t@s I\t@s V\t@s E\t@s R\t@s S\t@s I\t@s T\t@s Y\ \t@s O\t@s F\ \t@s
 W\t@s E\t@s L\t@s L\t@s I\t@s N\t@s G\t@s T\t@s O\t@s N}\\*[3pt]
 {\pali T\t@t e\  W\t@t h\t@t a\t@t r\t@t e\  W\t@t
-\=a\t@t n\t@t a\t@t n\t@t g\t@t a\  o\  t\t@t e\  \=U\t@t p\t@t o\t@t 
+\=a\t@t n\t@t a\t@t n\t@t g\t@t a\  o\  t\t@t e\  \=U\t@t p\t@t o\t@t
 k\t@t o\  o\  t\t@t e\  I\t@t k\t@t a\  a\  M\t@t \=a\t@t
 u\t@t i}\\*[8pt]
-% 
+%
 \ifEcs@image
   \includegraphics[width=0.36\textwidth]{VUWlogo}\\*[8pt]
 \else
@@ -157,7 +158,7 @@ Internet: office@\Ecs@schoolacronymlower.vuw.ac.nz}
   \vskip 1em
   \parbox{100mm}{\center\large\@author}\par
   \vskip 1em
-   \parbox{100mm}{\center\large \@supervisor}\par 
+   \parbox{100mm}{\center\large \@supervisor}\par
   \vskip 1em
   {\large \@date \par}
   \vskip 1em

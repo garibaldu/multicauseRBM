@@ -49,15 +49,16 @@ class VanillaSampler(object):
 
     # now I should look at the dreams and see if they are kosher
     def dream(self, model, num_gibbs = 1000, return_sigmoid = False):
-        current_v = np.random.randint(2, size= model.visible.shape[1])
-        dream_hid = np.random.randint(2, size= model.visible.shape[1])
+        if return_sigmoid:
+            current_v = np.random.randn(model.visible.shape[1])
+            dream_hid = np.random.rand(model.hidden.shape[1])
+        else:
+            current_v = np.random.randint(2, size= model.visible.shape[1])
+            dream_hid = np.random.randint(2, size= model.hidden.shape[1])
 
         for i in range(num_gibbs):
             dream_hid = self.visible_to_hidden(current_v)
-            current_v = self.hidden_to_visible(dream_hid)
-
-        if return_sigmoid:
-            current_v = expit(np.dot(dream_hid, self.rbm.weights) + self.rbm.visible_bias)
+            current_v = self.hidden_to_visible(dream_hid, return_sigmoid = return_sigmoid)
 
         return current_v
 

@@ -6,7 +6,6 @@ from rbmpy.progress import Progress
 from scipy.special import expit
 
 
-
 class VanillaTrainier(object):
     """Trainer that can knows how to update an RBM weights and hidden/visible states, requires a `Sampler`.
 
@@ -25,18 +24,18 @@ class VanillaTrainier(object):
         self.sampler = sampler
         self.progess_logger = None
 
-    def batch_train(self, epochs_per_batch, training, batches, learning_rate):
+    def batch_train(self, epochs_per_batch, training, batches, learning_rate, use_visible_bias):
         logger = Progress("Batch Logger", batches)
         logger.set_percentage_update_frequency(10)
         batch_size = math.floor(training.shape[0] / batches)
 
         for batch in range(batches):
-            self.train(epochs_per_batch, training[(batch * batch_size):((batch + 1) * batch_size),:], learning_rate)
+            self.train(epochs_per_batch, training[(batch * batch_size):((batch + 1) * batch_size),:], learning_rate, use_visible_bias = use_visible_bias)
             logger.set_completed_units(batch)
 
         self.rbm.visible = training
 
-    def train(self, epochs, training ,learning_rate = 0.002, logging_freq = None):
+    def train(self, epochs, training ,learning_rate = 0.002, logging_freq = None, use_visible_bias = True):
         """
         Train the rbm provided in the init to fit the given data.
 
@@ -46,6 +45,8 @@ class VanillaTrainier(object):
             learning_rate (Optional(float)): RBM's learning_rate, used in hebbian learning.
 
         """
+        if not use_visible_bias:
+            self.rbm.visible_bias = np.zeros(self.rbm.visible_bias.shape)
         if logging_freq:
             self.progess_logger = Progress(self.__class__.__name__, epochs)
             self.progess_logger.set_percentage_update_frequency(logging_freq)
@@ -60,7 +61,7 @@ class VanillaTrainier(object):
         for epoch in range(0, epochs):
 
             wake_hid = self.sampler.visible_to_hidden(wake_vis)
-            sleep_vis = self.sampler.hidden_to_visible(sleep_hid) # reconstruction based on training item
+            sleep_vis = self.sampler.hidden_to_visible(sleep_hid, return_sigmoid = True) # reconstruction based on training item
             sleep_hid = self.sampler.visible_to_hidden(sleep_vis) # hidden based on reconstruction
 
 
@@ -72,11 +73,12 @@ class VanillaTrainier(object):
             self.rbm.weights += learning_rate * (hebbian_pos - hebbian_neg).sum(0).transpose()
 
             # bias updates
-            self.rbm.visible_bias = self.rbm.visible_bias + learning_rate * (wake_vis - sleep_vis).sum(0)
-            self.rbm.visible_bias = np.mean(self.rbm.visible_bias) * np.ones(self.rbm.visible_bias.shape)
+            if use_visible_bias:
+                self.rbm.visible_bias = self.rbm.visible_bias + learning_rate * (wake_vis - sleep_vis).sum(0)
+                self.rbm.visible_bias = np.mean(self.rbm.visible_bias) * np.ones(self.rbm.visible_bias.shape)
 
-            self.rbm.hidden_bias =  self.rbm.hidden_bias + learning_rate * (wake_hid - sleep_hid).sum(0)
-            self.rbm.hidden_bias = np.mean(self.rbm.hidden_bias) * np.ones(self.rbm.hidden_bias.shape)
+            self.rbm.hidden_bias += learning_rate * (wake_hid - sleep_hid).sum(0)
+            # self.rbm.hidden_bias = np.mean(self.rbm.hidden_bias) * np.ones(self.rbm.hidden_bias.shape)
 
             if self.progess_logger:
                 self.progess_logger.set_completed_units(epoch)

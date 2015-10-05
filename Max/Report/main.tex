@@ -3,18 +3,10 @@
 %% $Date: 2010/04/23 02:40:16 $
 %% $Author: kevin $
 
-\documentclass[11pt
-              , a4paper
-              , twoside
-              , openright
+\documentclass[11pt, a4paper, twoside, openright
               ]{report}
 
 \usepackage{float} % lets you have non-floating floats
-\usepackage{wrapfig}
-
-\usepackage{amsmath}
-\usepackage{epigraph}
-\usepackage{tikz}
 
 \usepackage{url} % for typesetting urls
 
@@ -26,13 +18,13 @@
 
 %% These are standard LaTeX definitions for the document
 %%
-\title{Richer, Restricted Boltzmann Machines}
+\title{Richer Restricted Boltzmann Machines}
 \author{Max Godfrey}
 
 %% This file can be used for creating a wide range of reports
-%%  across various Schools
+%%  across  Schools
 %%
-%% Set up some things, mostly for the front page, for your specific document
+%% Set up some things, for the front page, for your specific document
 %
 % Current options are:
 % [ecs|msor]              Which school you are in.
@@ -41,7 +33,7 @@
 %                          You can also specify any other degree by name
 %                          (see below)
 % [font|image]            Use a font or an image for the VUW logo
-%                          The font option will only work on ECS systems
+%                          The font option will  work on ECS systems
 %
 \usepackage[image,ecs]{vuwproject}
 \otherdegree{Bachelor of Engineering with Honours}
@@ -49,7 +41,8 @@
 % You should specifiy your supervisor here with
 %     \supervisor{Firstname Lastname}
 % use \supervisors if there is more than one supervisor
-\supervisor{Marcus Frean}
+
+\supervisors{Marcus Frean}
 
 % Unless you've used the bschonscomp or mcompsci
 %  options above use
@@ -61,8 +54,7 @@
 
 \begin{document}
 
-
-% Make the page numbering roman, until after the contents, etc/Users/Max/Downloads/honoursreport 2/content.tex.
+% Make the page numbering roman, until after the contents, etc.
 \frontmatter
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -71,44 +63,39 @@
 
 \begin{abstract}
 
-In machine learning encoding prior knowlegde about a task can be essential to the technqiues ability to perform well on said task.(Big mental leap here....) This report explores and evaluates a novel approach to modelling data that is caused by two, independant sources. The theory has been proposed by Frean, Marcus and Marsland, Stephen, leveraging the popular Restricted Boltzmann Machine as a model for a source and a Sigmoid Belief Network as the way for these complex causes to combine. A new algorithm is presented under the dynamics of this model that allow indepedant representations of multi-cause data to be represented given a multi-cause input.
+TODO \- WRITE THE ABSTRACT
 
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \maketitle
 
-%\include{acknowledge}
-
+\include{acknowledge}
 
 \tableofcontents
 
 % we want a list of the figures we defined
-%\listof{fig}{Figures}
+\listof{fig}{Figures}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\mainmatter
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\mainmatter%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % individual chapters included here
-
-
-
 \include{story}
+\include{background}
 
-% \include{context}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% \include{introduction}
-%
-% \include{background}
-%
-% \include{workdone}
-%
-% \include{futurework}
+\backmatter%
 
-\backmatter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \bibliographystyle{acm}
-\bibliography{sample}
+\bibliography{bibliography}
+
 
 \end{document}
