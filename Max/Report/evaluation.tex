@@ -1,0 +1,103 @@
+\chapter{Evaluation}
+
+\section{Evaluation Design}
+
+
+\subsection{Mixing Time Evaluation}
+  \begin{itemize}
+    \item List the types Traceplot, Densityplots, Gelbin and Rubin multiple sequence diagnostics
+    \item Performed Geweke Diagnostic
+  \end{itemize}
+\subsection{Reconstructions As a measure of Performance}
+
+ \begin{itemize}
+   \item Cite literature where reconstructions are used, starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.
+ \end{itemize}
+
+\subsection{Evaluation Methods}
+This is the way I will gain the reconstructions.
+\begin{itemize}
+  \item Non-trivial to evaluate
+  \item 2 Bit XOR - Minimal Case
+  \begin{itemize}
+    \item Method
+    \item Can check the inference algorithm by using RBMs with hand trained weights
+    \item Using a single RBM, copied.
+    \item Diagram with small explaination why RBMs with these weights will work.
+    \begin{itemize}
+      \item 2 Hidden Units, 2 Visible Units. Weights Matrix of [-1,1],[1,-1]
+      \item This ensures that if one visible unit is 1, the other will get set to off.
+    \end{itemize}
+    \item Look at the reconstructions of these RBMs, should match XOR patterns.
+    \begin{itemize}
+      \item 100000 free phase samples from RBMs resulted in [1,0] and [0,1] most of the time. (TODO-SHOW-GRAPHs). 100000 free phase samples is quite quick to calculate for only 4 weights.
+      \item 2 sets of 100000 reconstructions given the patterns [1,0] and [0,1] resulted in all reconstructions for each set producing [1,0] and [0,1].
+    \end{itemize}
+    \item Hypothesis
+    \item Clamp the visible to patterns of interest. Can see the dynamics of the system.
+    \begin{itemize}
+      \item 1,1 This should result in reconstructions matching XOR - [1,0] and [0,1]
+      \item 1,0 This should result in reconstructions of just - [1,0]
+      \item 0,1 Should behave symmertrically to [1,0].
+      \item 0,0 Under the dynamics of the generative model should fall into [0,0].
+    \end{itemize}
+  \end{itemize}
+
+  \item Y Bit pattern, X bits On
+  \begin{itemize}
+    \item Have to train an RBM to recognise X neighbouring bits on at a time in a Y bit pattern. e.g. X = 2, Y = 5, [0,0,1,1,0]
+    \item num Y hiddens, or more.
+    \item While Y less than 10 it is easy to visualise if separation is occurring.
+  \end{itemize}
+
+  \item 2D Pattern, Square Separation, Single Model
+  \begin{itemize}
+    \item Dataset:
+    \begin{itemize}
+      \item 2x2 square in a 5x5 image. Dataset of every possible configuration of said square.
+    \end{itemize}
+    \item Method:
+    \begin{itemize}
+      \item train a single RBM to represent 2x2 squares in 5x5 space. Nice and small, can still inspect reconstructions, and dreams.
+      \item Compose two square images with each other, can the ORBM architecture separate the images.
+    \end{itemize}
+  \end{itemize}
+
+  \item 2D Pattern, Different Rectangle Separation
+  \begin{itemize}
+    \item Dataset
+    \begin{itemize}
+      \item n by m rectangles in 5x5 Images (TODO-IMAGE-IN-HERE) where n and m are not always equal.
+    \end{itemize}
+    \item Method
+    \begin{itemize}
+      \item Superimpose two images as the same way as before. How well can they separate.
+    \end{itemize}
+  \end{itemize}
+  \item MNIST Digits
+  \begin{itemize}
+    \item Dataset
+    \begin{itemize}
+      \item 500, 28 by 28 pixel, 0-1 valued, handwritten digit images form the training set.
+    \end{itemize}
+    \item Method
+    \begin{itemize}
+      \item Train an single RBM per digit (0-9) in the dataset. Each RBM having 100 hidden units, (TODO-CITE-COOKBOOK) for reasoning.
+      \item For all 500 training digit images, compose it with every other digit, and itself. This way the ground truth, the sources are known, therefore making evaluation possible.
+      \item For all of these compositions us the RBMs trained of the corresponding sources to:
+      \begin{itemize}
+        \item Compute the RBM reconstructions for the two sources given their composite input. (TODO-SHOW-DIAGRAM)
+        \item Compute the ORBM reconstructions, the ORBM using the same RBMs as in the RBM evaluation.
+        \item Because 28 by 28 pixels equates to 784 features, emperically examining all reconstructions is non-trivial. Hence some scoring functions are required.
+        \item Scoring
+        \item Cross Entropy - Approximate the Log likelihood of the underlying dataset.
+        \item Pixel Difference Score - Absolute difference in pixels of the image
+        \item Cosine Angle - between reconstruction and target vectors. This has the benefit of also being somewhat magnitude agnostic. (TODO-CITE-AS-MEASURE-WITH-JUSTIFICATION).
+        \item Repeat this process 30x to give confidence in findings. Scores calculated can then be meaned over the 30 runs.
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\subsection{Classifciation Accuracy on Hidden Representation}
+  Not sure about this one.
