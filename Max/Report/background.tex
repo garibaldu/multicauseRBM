@@ -71,7 +71,7 @@ MCMC methods require a `mixing` phase to ensure convergence, that is that the sa
 
   Generative Models can create an internal representation given an input. They can also generate a faux input given an internal representation. Performing one Gibbs iteration, that is sampling from the hidden units given an input $ P(\tilde{h}|\tilde{v}) $ and then taking the generated hidden state and generating a faux input. The model tries to reconstruct the input.
 
-  \subsubsection{Fanstasies of the model}
+  \subsubsection{Ancestral Sampling or fanstasies of the model}
   \todo%
   In the same way that a generative model uses reconstructions to try and recreate the  supplied input based purely on how it's represented that input, performing many, many (greater than 100) Gibbs iterations with no input pattern clamped allows the reconstructions to explore the probability mass that the model has built up during training. Sampling from these wanderings creates what are refferred to as `fantasies` or `dreams`. These give a sense of what the model has learnt, and can act a smoke test for if the model has actually capture anything.
   (TODO-CITE-PAPER-WITH-MNIST-DREAM-EVALUATION, they were crappy).
@@ -131,12 +131,14 @@ MCMC methods require a `mixing` phase to ensure convergence, that is that the sa
 
   While Boltzmann Machines are impractical to train and sample from as networks grow in size \todocite{Need to cite this\ldots} their architecture can be altered to alieviate these shortcomings. The restriction, proposed by \todocite{Hinton, a proper cite} requires the network to be bipartite, where connections are forbidden between the layer of hidden units and the layer of visible units repectively.
 
-  An example Restricted Boltzmann Machine architecture is shown in figure \ref{F:Restricted-Boltzmann-Machine}. The affect of the restriction is that inference can be tractably computed, as the latent variables no longer become dependant given the observed variables. For example in figure \ref{F:Restricted-Boltzmann-Machine} the hidden unit $h_1$ is not dependant on $h_2$ wether or not we know anything about the visible units. This is the opposite of a Sigmoid Belief Network where knowledge of the visible units makes the hidden units dependant. The RBMs nature removes the recurence present in Boltzmann Machines. This reduces the expresiveness of the network but makes the RBM useable in practice. \todocite{The paper about Boltzmann Machines being really good when actually left to find solution.}
+  An example Restricted Boltzmann Machine architecture is shown in figure \ref{F:Restricted-Boltzmann-Machine}. The affect of the restriction is that inference can be tractably computed, as the latent variables no longer become dependant given the observed variables.
+
+  For example in figure \ref{F:Restricted-Boltzmann-Machine} the hidden unit $h_1$ is not dependant on $h_2$ wether or not we know anything about the visible units. This is the opposite of a Sigmoid Belief Network where knowledge of the visible units makes the hidden units dependant. The RBMs nature removes the recurence present in Boltzmann Machines. This reduces the expresiveness of the network but makes the RBM useable in practice. \todocite{The paper about Boltzmann Machines being really good when actually left to find solution.}
 
   \begin{figure}[h]
   \begin{center}
     \includegraphics[width = 0.6\textwidth]{Assets/RBM_Example.png}
-  \caption{A Boltzmann Machine, the blue shaded nodes representing the observed variables, and the non-shaded nodes the latent variables.}
+  \caption{An example Restricted Boltzmann Machine with four hidden units, and five visible units. Note that the edges between units are not directed - representing a dependency not a cause. }
   \label{F:Restricted-Boltzmann-Machine}
   \end{center}
   \end{figure}
@@ -178,19 +180,19 @@ MCMC methods require a `mixing` phase to ensure convergence, that is that the sa
     \begin{itemize}
       \item Being unsupervised makes it difficult to evaluate RBMs. Often used as part of a deeper network, feature extractor, autoencoder
       \item Hinton Diagrams allow visualisation of hidden unit utlisation (TODO-SOME-SORT-OF-CITE). The weights out of a given hidden unit can be visualised in visible data space. The weights should exhibit some structure if they are being utlisied. This is a good smoke tests for non-tulised hidden units will look very similar to units with random initial weights.
-      \begin{itemize}
+
         \item Small Cases
-        \begin{itemize}
+
           \item In trivial cases an RBM can inspected analytically. Reconstructions of the dataset should match the dataset with approximately the correct proportion. For instance training RBMs on 2 bit XOR should result in mostly [1,0] and [0,1] but not [1,1] and [0,0].
           \item Hand craft weights can be used to perform inference in a 'perfect model'. For instance an RBM that can capture two bit, logical XOR can be represented as :TODO-INSERT-PIC
-        \end{itemize}
+
         \item Large Cases
-        \begin{itemize}
+
           \item In non-trivial cases, with larger datasets, reconstructions can be compared to the dataset but given the unsupervised nature of RBMs emperically detecting if a model is trained is difficult.
           \item The log liklihood of the RBMs generative model exbiting the dataset is a good measure that can be approximated (because we have to sample).
           \item We can train a classifier on the RBMs hidden representation. This can be compared for a ORBM and RBM.
-        \end{itemize}
-      \end{itemize}
+
+
     \end{itemize}
 
     \begin{figure}[]
@@ -209,43 +211,4 @@ MCMC methods require a `mixing` phase to ensure convergence, that is that the sa
     \end{figure}
 
 
-    \section{A New Approach - The ORBM}
-
-    \begin{itemize}
-      \item Frean and Maslands new approach combines the Restricted Boltzmann Machine and the Sigmoid Belief Network, the RBMs allowing the rich complex causes to be encoded independantly, and the Sigmoid Belief Network modelling the combination of the causes to form the observable data.'
-      \item By building on these existing methods can leverage exisitng algorithms
-      \item Can verify the inference algorithm with pre trained RBMs for each cause.
-      \item Like the RBM leveraged in the ORBM, it is difficult to evaluate, But similar techniques can be leveraged
-
-    \end{itemsize}
-
-    \subsection{Architecture}
-
-    \begin{itemize}
-        \item Two RBMs, on for each cause, then they combine via a Sigmoid Beleif Layer. Weights between the RBM and Sigmoid Layers are shared. (TODO-A-DIAGRAM)
-        \item Diagram of the ORBM Architecture Including U Layer. Make sure I'm explaining the U layer.
-        \item In fact Ua, Ub are like mirrors of the visible.
-    \end{itemize}
-
-    \subsection{Inference In the ORBM}
-
-    The difference in architecture from an RBM means that a slightly different inference algorithm is required, as the representations are represented separately for a composite input.
-
-    \begin{itemize}
-      \item Inference in this generative model is P(ha, hb given v) , we want to represent the causes separately.
-
-      \item Unfornately, ha and hb are dependant given the visible v. meaning to perform inference, obtaining a hidden representation requires a Gibbs chain
-      \item Diagram showing the inference gibbs chain.
-
-    \end{itemize}
-
-
-    \subsubsection{Calculating the Posterior}
-
-    To find the $ P(h_a, h_b | v_{comp}) $, where $h_a$ and $h_b$ are the separate representations of the data caused $a$ and $b$, and $v_{comp}$ is the composed/composite input. We must sample from a Gibbs Chain,  as $h_a$ and $h_b$ are dependant given $v_{comp}$. This ends up being almost identical to the RBM except we add a 'Correction', when computing the update for $h_a$ and $h_b$ respectively.
-
-    TODO-SHOW-THE-FULL-CORRECTION
-
-    \subsection{Source Separation - Reconstructions in the ORBM}
-
-    To actually perform source separation, one needs to simply take the internal representation generated by the inference step, and generate a visible pattern in the same way you would with a standalone RBM.
+  
