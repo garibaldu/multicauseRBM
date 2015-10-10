@@ -2,15 +2,8 @@
 
  As the ORBM builds on the previous work of Restricted Boltzmann Machines and Sigmoid Belief networks, the concepts and previous work in source separation, generative models as well as background on RBMs and Sigmoid Belief Networks need to be introduced.
 
-\section{Source Separation, nature can do it}
 
-\subsection{An example, the cocktail party problem}
-A famous example that illustrates the idea of source separation is the cocktail party problem. At a cocktail party many conversations are taking part at the same time, creating noise, a composition of all the conversations. Despite this, a partygoer is able to separate their conversation from cacophany, separating the sources.
-
-The applications of source separation are far wider than talkative partygoers. In the field of signal processing
-\todo%
-\todowording{Talk about how this is a harder problem but is out of scope. And elude to using two of the same model and two separate.}
-\section{Generative Models}
+\section{Generative Models and Source Separation}
 
 Generative models are a powerful way to model data.
 \todowording{
@@ -107,7 +100,7 @@ MCMC methods require a `mixing` phase to ensure convergence, that is that the sa
 
   \subsection{Boltzmann Machines}
 
-  A Boltzmann machine \todocite{Cite the Harmonium, markov field}  has qualities in common with Belief Networks. Both are generative models with their nodes having probabilities of being active based on neighboring nodes. Connections between nodes have associated weights as shown in figure \ref{F:Boltzmann-Machine}. These weights are symmetric.
+A Boltzmann machine \todocite{Cite the Harmonium, markov field and Hopfield for deterministic example...}  has qualities in common with Belief Networks. Both are generative models with their nodes having probabilities of being active based on neighboring nodes. Connections between nodes have associated weights as shown in figure \ref{F:Boltzmann-Machine}. These weights are symmetric.
 \todowording{Unlike a Belief Network, a Boltzmann Machine is a undirected network that allows cycles and thus more complex data can be captured.}
 
   \todowording{Connections between nodes no longer encode causal information, instead a depedancy, the difference being that a connection encodes a relationship as they are not directed.}

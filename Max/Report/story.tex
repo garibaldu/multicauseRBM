@@ -1,40 +1,44 @@
 \chapter{Introduction}
 
-\section{Problem}
+\section{A Problem}
 \subsection{Deep Belief Networks can achieve state of the art performance}
 % Deep beleif networks are the shit
   % Proven good for images and speech, text analysis (sentimenet analysis)
-Deep Belief networks are powerful models that have proven to achieve state of the art performance in many domains. For instance a non-exhaustive list is image classification, dimensionality reduction, natural language recognition, Document classification, Semantic Analysis and .
+Deep Belief networks (DBNs) are powerful models that have proven to achieve state of the art performance in tasks such as image classification, dimensionality reduction, natural language recognition, Document classification, Semantic Analysis.
 
-% Captures deep interactions between complex features. In image domain this is the relationships between pixels.
-  % e.g. in an image at best low level layers learn images filters
-DBNs capture non-linear interactions between low level features, in the context of image classification the lower layers can capture image filters.
+The shared views of four research groups, including the prolific Geoffrey Hinton, is that DBNs are favoured for use in speech recognition tasks over other deep learning approaches~\cite{Hinton:38131ww}. For instance \texttt{Stacked Denoising Autoencoders} and \texttt{Deep Convolutional Networks}.
 
-\subsection{DBNs have no mechanism for separating sources}
-% Deep belief networks have no way to separate the sources.
-Despite a DBNs expressiveness, there is no way to extract these interactions. If an input has multiple sources then the complex combination is instead learnt, the network has no mechanism for extracting multiple causes.
-% This is the motivation for this project, we want a way to separate, and model the sources of input data, where said data is a complex combindation of two sources acting independantly.
-This is the motivation for this project, to be able to separate the sources of data in a new model.
 
- \cite{2015HistSciPy}
+\subsection{Aspirational Examples as a motivation of the project}
+
+Now some thought experiments to highlight a fundamental weakness in DBNs.
+
+DBNs can capture rich non-linearity, making them ideal for tasks such as facial recognition, where pixels in the images change drastically depending on pose and illumination. These variations impede the use of classical feature based on geometry, such as Eigenfaces or Fischer-face~\cite{Lin:6100469ww}. There are at least two systems at play in an image of a face, the face itself that has a shape and colour, and the illumination which can vary greatly, casting shadows and highlighting parts of the face. Despite this, a DBN can achieve excellent classification performance on the UMIST dataset of 576 multi-viewed faced images of 20 individuals~\cite{Lin:6100469ww}.
+
+Consider another famous example that illustrates the idea of multiple sources acting independently to form some data, referred to as the \texttt{Cocktail Party Problem}. At a cocktail party many conversations are taking part at the same time, yet despite the cacophony, a partygoer is able to take part in their conversation, separating the sources.
+
+Both these examples exhibit independent sources arising and interacting in a non-linear way to generate a visible artifact, be it an image of a face or a audio recording. This project does not address these aspirational examples, they set the scene for it's motivation. Despite a DBN's expressiveness, there is no way to extract these sources, the model instead learning the how to represent the combination. The DBN might fully well learn features that correspond to each source during it's training process, however the architecture or training algorithm make no attempt to enforce this.
 
 % Deep Belief Networks are constructed by stacking Restricted Boltzmann Machines (RBMs). This proved a natural starting point for representing two sources. We worked in a shallow environment before attempting to stack RBMs.
 \subsection{Restricted Boltzmann Machines cannot separate sources either}
-Restricted Boltzmann Machines are two layer, fully connected, unsupervised nueral networks. DBNs are constructed by stacking RBMs. Being the building block of the powerful DBN, RBMs are a natural starting point for representing mutliple sources.
+
+DBNs are composed of a models with a shallow architecture, Restricted Boltzmann Machines (RBMs). RBMs provide a natural starting point for representing data causes by the combination of two sources.
+
+RBMs are two layer, fully connected, unsupervised neural networks. RBMs do not model causation, instead they model dependancies.
 % RBMs make a strong assumption that all features are dependant in the prior, inheriently modelling a single source.
-RBMs make the assumption that the features of the input data are dependant in the prior, as they are independant in the posterior. The latter makes them tractable to use in practice, but also means they model/encode a single representation.
+
   % In the image domain, this equates to all pixels being assumed relevant to what we are trying to model. With enough examples RBMs can generalise, but there is no mechanism for modelling independant subjects.
-  Again using the example of images, an input image will map to a single representation, again there is a lack of mechanism for modelling sources that are acting independantly.
+  Again using the example of images, an input image will map to a single representation. There lacks a mechanism for modeling  sources that are acting independantly, instead modeling inputs as a single source.
 
 % There is another structure, Belief/Bayesian Networks, and the parameterised version, the Sigmoid Belief Network, which makes the polar assumption where each feature is modelled by an independant cause. These are intractable to train in practice.
 \subsection{Sigmoid Belief Networks; Intractably rich in practice}
-The Sigmoid Belief Network, the parameterized version of a Bayesain/Belief network appears as a natural choice for modelling inpendant sources in that it makes a polar assumption to the RBM; -- Warning Semicolon Use -- Every feature has an independant cause. The sigmoid belief networks assumption could capture data that has multiple sources, but this is intractable in practice.
+The Sigmoid Belief Network, the parameterized version of a Bayesain/Belief network appears as a natural choice for modelling independent sources in that it makes a polar assumption to the RBM; -- Warning Semicolon Use -- Every feature has an independant cause. The sigmoid belief networks assumption could capture data that has multiple sources, but this is intractable in practice.
 
 % Frean, Marsland propose a generative model that aims for a middle ground between these two existing models.
-\section{Solution}
+\section{A proposed solution}
 \subsection{Trading tractibility for Source Separation}
-Frean and Marsland propose a generative model that aims to trade a small amount of the RBMs performance for richness, finding a middle ground between the sigmoid beleif network and the restricted boltzmann machine.
-Frean and Marsland also propose an algorithm to invert this model, seperating the sources of an input.
+Frean and Marsland propose a generative model that aims to trade a small amount of the RBMs performance for richness, finding a middle ground between the Sigmoid Belief network and the Restricted Boltzmann Machine.
+Frean and Marsland also propose an algorithm to invert this proposed generative model, seperating the sources of an input.
 
 The new generative model, referred to onwards as an ORBM, uses an RBM to model each source and a sigmoid belief network to capture their combination to from data. This project explores the ORBM use for separating two causes.
 
@@ -49,12 +53,12 @@ The new generative model, referred to onwards as an ORBM, uses an RBM to model e
 
 Given the proposed model and algorithm, this project answers the following questions:
 \begin{itemize}
-  \item Can this model encode data comprised of more than one cause as it's constituted causes? That is, can the model and new algorithm for inverting it, perform source separation.
+  \item \todowording{Can this model encode data comprised of more than one cause as it's constituted causes? That is, can the model and new algorithm for inverting it, perform source separation.}
   \item Is the ORBMs two cause structure to rich to be tractible in practice?
 \end{itemize}
 
-\section{Results}
-\todo{}
-Spoil the results here.
-Good on smaller cases, less good on larger case
-\todowording{elude to the story here, 2 bit, x bit, rectangles, MNIST}
+\section{Results and Contribution}
+
+This project provides a suite of evalautions, in the form of tests in increasing complexity to answer the above questions. The aim being to incrementally verify the new generative model and inference algorithm.
+
+The tests give reasons for optimism, especially in the smaller cases. Challenges have been exposed in the evaluation that will need to be addressed going forward, to make the algorithm and model scalable.

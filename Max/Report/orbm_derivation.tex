@@ -1,9 +1,9 @@
 \section{A New Approach - The ORBM}
 
 \begin{itemize}
-  \item Frean and Maslands new approach combines the Restricted Boltzmann Machine and the Sigmoid Belief Network, the RBMs allowing the rich complex causes to be encoded independantly, and the Sigmoid Belief Network modelling the combination of the causes to form the observable data.'
+  \item Frean and Maslands new approach combines the Restricted Boltzmann Machine and the Sigmoid Belief Network, the RBMs allowing the rich complex causes to be encoded independantly, and the Sigmoid Belief Network modelling the combination of the causes to form the observable data.
   \item By building on these existing methods can leverage exisitng algorithms
-  \item Can verify the inference algorithm with pre trained RBMs for each cause.
+  \item Can verify the inference algorithm with pre trained RBMs for each cause. \todowording{Introduce the idea of plug and play here}
   \item Like the RBM leveraged in the ORBM, it is difficult to evaluate, But similar techniques can be leveraged
 \end{itemize}
 
@@ -44,7 +44,7 @@ Where $\psi_j$ is the weighted sum into the $jth$ hidden unit and $\sigma()$ is 
 \begin{figure}[h]
 \begin{center}
   \includegraphics[width = 0.8\textwidth]{Assets/PSI_and_PHI.png}
-\caption{A diagram showing $\psi_j$, the weighted sum into the $jth$ hidden unit.}
+\caption{A diagram showing $\psi_j$, the weighted sum into the $jth$ hidden unit. Note that $W_{oj}$ is the hidden bias, represented as a unit that is always on with a weight into each hidden unit.}
 \label{F:PSI}
 \end{center}
 \end{figure}
@@ -68,8 +68,7 @@ $$ \phi = \sum(W_{ji}h_{j}) + W_{0i} $$
 
 Before the ORBMs architecture can be introduced, Gibbs sampling in an RBM must be presented in a different way. \todocite{Hintons paper on unrolling the Gibbs chain. He showed that RBM is infinitely deep belief network with tied weights}. This unrolling a single Gibbs iteration is illustrated in figure \ref{F:3-Layer-RBM}, the $U$ layer corresponding to the $V$ layer after one Gibbs iteration. To clarify, the $U$ layer corresponds to $v_1$ in figure \ref{F:Gibbs_Chain}.
 
-Note the weights between the $H$ and $U$ layer are the transpose of the weights between the $V$ and $H$ layer.
-
+Note the weights between the $H$ and $U$ layer are shared between the $V$ and $H$ layers.
 
 
 We can show that Gibbs sampling in this RBM unrolled with a Sigmoid belief network is equivalent to Gibbs Sampling in a standard RBM.
