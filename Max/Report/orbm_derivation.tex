@@ -20,41 +20,6 @@
 
 \subsection{The Gibbs Chain}
 
-\todowording{To describe the ORBM and how to perform inference, traditional RBMs need to be thought of in a different yet equivalent way}.\todocite{This is similar to Hinton infinitely deep sigmoid belief networks.}
-
-\begin{wrapfigure}{r}{0.6\textwidth}
-  \begin{center}
-    \includegraphics[width=0.48\textwidth]{Assets/Gibbs_Chain.png}
-  \end{center}
-  \caption{A figure illustrating a Gibbs chain where left to right indicates a Gibbs iteration. Note this is not a PGM.}
-  \label{F:Gibbs_Chain}
-\end{wrapfigure}
-
-For the following discussion, the hidden units are indexed by $j$ and the visible units are indexed by $i$.
-
-To perform Gibbs sampling in an RBM one must sample from $P(\tilde{h}|\tilde{v})$ giving a hidden state $\tilde{h}$. Using this hidden state a visible state is then generated, $\tilde{v'}$, by sampling from $P(\tilde{v'}|\tilde{h})$ and so on. This forms the Gibbs Chain \todocite{Feel like I could  cite this again in like a CD paper or something.} This process is visualised in figure \ref{F:Gibbs_Chain}
-
-In a standard RBM, updating a hidden unit $h_j$ when performing Gibbs sampling is calculated by finding $ P(h_j = 1 | \tilde{v}) $ where $\tilde{v}$ is an input pattern. In the context of an image, $ \tilde{v} $ would be the pixel values where each pixel corresponds to a visible unit, $v_i$.
-The probability of a given hidden unit activating in standard Gibbs sampling is: \todocite{Gibbs sampling would be good here}.
-$$
-P(h_j = 1 | \tilde{v}) = \sigma(\psi_j)
-$$
-Where $\psi_j$ is the weighted sum into the $jth$ hidden unit and $\sigma()$ is the Sigmoid function, or it also known as the Logistic function $\sigma(x)=1/(1+e^{-x})$. Figure \ref{F:PSI} \todowording{shows} psi for an example RBM.
-
-\begin{figure}[h]
-\begin{center}
-  \includegraphics[width = 0.8\textwidth]{Assets/PSI_and_PHI.png}
-\caption{A diagram showing $\psi_j$, the weighted sum into the $jth$ hidden unit. Note that $W_{oj}$ is the hidden bias, represented as a unit that is always on with a weight into each hidden unit.}
-\label{F:PSI}
-\end{center}
-\end{figure}
-
-As the weights are symmetric, sampling from the visible layer, given a hidden state is similar. That is $P(v_i = 1 | \tilde{h})$, where $\tilde{h}$ is the entire hidden vector is given by:
-$$ P(v_i = 1 | \tilde{h}) = \sigma(\phi_{i}) $$
-Where $\phi_i$ is the weighted sum into the $ith$ visible unit.
-
-$$ \phi = \sum(W_{ji}h_{j}) + W_{0i} $$
-
 
 \subsection{Unrolling a Gibbs Chain, a different perspective on RBM inference}
 
