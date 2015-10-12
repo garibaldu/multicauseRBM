@@ -19,6 +19,18 @@
 
 \subsection{Implementation Design}
 
+The program was implemented with unit testing and composability in mind. It was important that the design supportted comparing the Full and Approximated correction . Also by using Python, multiple inherientance could be leveraged for instance for adding continous pixel value support to the \texttt{Full Correction Sampler}, the class \texttt{Continuous Full Correction Sampler} needed to inherit from \texttt{Continuous Approximate Correction Sampler} and  the \texttt{Full Correction Sampler}, with no code actually in the class.
+
+\subsubsection{Program Architecture}
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width = 0.8\textwidth]{Assets/ENGR489-Architecture.png}
+\caption{A figure showing the architecture for the implemented test suite in UML notation.}
+\label{F:Correction-Plot}
+\end{center}
+\end{figure}
+
+
 \begin{itemize}
   \item Sampler, Trainer, RBM concepts for plug and play.
   \item Library choice meant efficiency with benefits of python for quick dev

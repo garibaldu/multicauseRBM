@@ -48,8 +48,7 @@ To be able to use this reconstruction based evaluation, knowledge of the ground 
 
 \subsubsection{Description}
 
-The starting point for the evalatuion was examining the ORBM reconstructions in a two bit pattern, where two of the same model were combining to form the data. This model made one bit on in a two bit pattern at a time. That is it could either make $[1 , 0]$ or $[0 , 1]$. The training set is the two bit XOR truth table.
-
+The starting point for the evalatuion was examining the ORBM reconstructions in a two bit pattern, where two of the same model were combining to form the data. This model made one bit on in a two bit pattern at a time. That is it could either make $[1 , 0]$ or $[0 , 1]$. The training set is the two bit XOR truth table. Two bit case also provides the minimal case to compare the full correction calculation, versus that of the proposed approximation (see equation \ref{eq:Full-Corretion}).
 
 
 \begin{figure}{h}
@@ -80,9 +79,7 @@ This RBM was checked to ensure that it behaved in practice by ensuring it's reco
 
 In a similar way to the reconstructions, ancestral samples can be taken from the model and evaluated. \todowording{In larger dimensions Hinton has shown RBMs to be poor generative models without the extra layers above...} however in the small dimensions of this task the dreams should match the training set:
 
-A histogram of frequencies of reconstructions given the RBM is in the free phase, is shown in figure \ref{F:Two-Bit-RBM-Dreams}. Again the model behaves as expected, generating dream patterns that match the training dataset the majority of the time. There is a lack of parity in that the RBM produces the visible pattern $[1,0]$ almost double the time of the visible $[0,1]$, however this is resolved when the generative model is run for longer, and more samples are taken.
-
-
+A histogram of frequencies of reconstructions given the RBM is in the free phase, is shown in figure \ref{F:Two-Bit-RBM-Dreams}. Again the model behaves as expected, generating dream patterns that match the training dataset the majority of the time.
 \begin{wrapfigure}{r}{0.4\textwidth}
   \begin{center}
     \includegraphics[width=0.35\textwidth]{Assets/XOR-RBM-Dreams.png}
@@ -90,8 +87,6 @@ A histogram of frequencies of reconstructions given the RBM is in the free phase
   \caption{Dreams in the XOR RBM, note how only the training data is present.}
   \label{F:Two-Bit-RBM-Dreams}
 \end{wrapfigure}
-
-
 Given this good model, the XOR RBM was duplicated and plugged into the ORBM structure as picture in figure \ref{F:XOR-ORBM}.
 
 
@@ -103,7 +98,16 @@ Given this good model, the XOR RBM was duplicated and plugged into the ORBM stru
   \label{F:XOR-ORBM}
 \end{wrapfigure}
 
-The inference algorithm was run in the ORBM architecture for various visible inputs, giving two hidden vectors for the two representations $h^A$ and $h^B$. For each pair of hidden vectors, a reconstruction was created, the process illustrated in figure \ref{F:Two-Bit-ORBM-Inference-REsults-1}. This process was repeated in a similar way to how the reconstructions were evaluated in the lone RBM, counting the frequency each reconstruction occurred over $1500$ runs.
+The inference algorithm was run in the ORBM architecture for various visible inputs, giving two hidden vectors for the two representations $h^A$ and $h^B$. For each pair of hidden vectors, a reconstruction was created, the process illustrated in figure
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{Assets/XOR-2-Bit-Process-Diagram.png}
+  \end{center}
+  \caption{The process of generating reconstruction is shown in this diagram.}
+
+  \label{F:Two-Bit-ORBM-Process-Diagram}
+\end{figure}
+ \ref{F:Two-Bit-ORBM-Process-Diagram}. This process was repeated in a similar way to how the reconstructions were evaluated in the lone RBM, counting the frequency each reconstruction occurred over $1500$ runs.
 
 \begin{table}[]
 \centering
@@ -120,15 +124,23 @@ $[0, 1]$      & $[0,1]$               & $[0,1]$               \\ \hline
 
 \subsubsection{XOR ORBM Analysis}
 
-The results of this process are shown in figure \ref{F:Two-Bit-ORBM-Inference-Results-1}. Where the x-axis shows the reconstructions of the form v\_a$[x,y]$ v\_b$[n,m]$ where $[x,y]$ is the reconstruction (v) created model A and $[n,m]$ is the reconstruction created by model B. The ORBM is able to separate the causes, as the model is being duplicated, it produces $[1,0]$ and $[0,1]$ approximately half the time and symetrically $[0,1]\text{ }[1,0]$ the other half of the time.
+The results of this process are shown in figure \ref{F:Two-Bit-ORBM-Inference-Results-1}. Where the x-axis shows the reconstructions of the form A reconstruction, B reconstruction. The results show how applying the full correction compares to the approximated correction.
+
+The ORBM is able to separate the causes with both types of correction, as the model is being duplicated, it produces $[1,0]$ and $[0,1]$ approximately half the time and symetrically $[0,1]\text{ }[1,0]$ the other half of the time.
 
 \begin{figure}[h]
   \begin{center}
-    \includegraphics[width=6.5in]{Assets/XOR-2-bit-inference-results.png}
+    \includegraphics[width=0.8\textwidth]{Assets/Two-Bit-XOR-Results-Approx-Full.png}
   \end{center}
-  \caption{A figure with the results of running ORBM inference 1000 times, showing the frequency for which a given reconstruction occurred. The process is shown in the diagram on the right hand side. }
-
+  \caption{A figure with the results of running ORBM inference 1000 times, with the two different approaches to calculating the correction. The frequency for which a given reconstruction occurred is shown. }
   \label{F:Two-Bit-ORBM-Inference-Results-1}
+\end{figure}
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{Assets/Two-Bit-XOR-Results-Approx-Full-2.png}
+  \end{center}
+  \caption{A figure showing the result of generating 1000 reconstructions with the ORBM with $[1,0]$ as input, again comparing the Approximated correction and Full correction.}
+  \label{F:Two-Bit-RBM-Inference-Results-2}
 \end{figure}
 
 These reconstructions were compared to one of the RBMs trained to recognised a single pattern being on in two bits. As expected a machine that has been trained to recognise one bit, has no concept of two bits being on and hence the reconstructions show no mechanism for seperating the sources. This is illustrated in figure \ref{F:Two-Bit-RBM-Inference-Results-1}.
@@ -136,7 +148,7 @@ These reconstructions were compared to one of the RBMs trained to recognised a s
 
 \begin{figure}[h]
   \begin{center}
-    \includegraphics[width=0.8\textwidth]{Assets/RBM-two-bit-XOR-Inference.png}
+    \includegraphics[width=0.5\textwidth]{Assets/RBM-two-bit-XOR-Inference.png}
   \end{center}
   \caption{A figure showing the result of generating 1000 reconstructions with an RBM. It is clear the RBM has no mechanism to separate the sources. Hence showing it [1,1] when it has only been trained on XOR results in no separation, i.e. reconstructions including $[1,1]$.}
 
@@ -148,16 +160,9 @@ figure \ref{F:Two-Bit-RBM-Inference-Results-2}.\todowording{Do the markers care 
 
 \subsubsection{Two bit XOR Conclusion}
 
-The ORBM was able to extract the target patterns $[1,0]$ and $[0,1]$ given the input $[1,1]$. Being the minimal case for source separation, bits in a two bit string, this was important to establish as it meant the approximated correction could be tested and compared. \todowording{Fuck I need to get those pictures in here!}
+The ORBM was able to extract the target patterns $[1,0]$ and $[0,1]$ given the input $[1,1]$. This was the case for both the Approximated and Full corrections, which gave confidence that the more computationally efficient Approximated correction could be relied on going forward --- as for larger datasets is was a lot faster in practice. The generative model also copes with the subject overlapping, which in the two bit case arised when $[1,0]$ is composed with $[1,0]$. In both the Approximated and Full corrections the highest occuring reconstruction is the target $[1,0]$, however there appears to be a lot less confidence.
 
-\begin{figure}[h]
-  \begin{center}
-    \includegraphics[width=0.8\textwidth]{Assets/ORBM-Reconstructions-[1,1].png}
-  \end{center}
-  \caption{A figure showing the result of generating 1000 reconstructions with the ORBM with $[1,0]$ as input.}
 
-  \label{F:Two-Bit-RBM-Inference-Results-2}
-\end{figure}
 
 \section{$Y$ bit pattern, $X$ neighbouring bits on}
 
@@ -170,12 +175,14 @@ $$ dataset =
   0 & 0 & 1 & 1
 \end{bmatrix}
 $$
+This allows for some interesting cases, for instance using the same example as above of $Y = 4 $ and $ X = 2 $, we can see how the ORBM is able to separate interesting patterns such as $[1,1,1,0]$, which is a composition of $[1,1,0,0]$ and $[0,1,1,0]$.
+
 
 \subsubsection{Architecture and Parameters}
 \begin{itemize}
   \item $|Y|$ Hidden units per RBM, any less and we were unable to train the RBM to make the target reconstructions or dreams.
-  \item Random normally distributed, mean and standard deviation of one starting weights. The RBM was trained with $1000$ epochs and a learning rate of $0.002$.
-  \item A sample of 10,000 dreams were sampled from the RBMs, and then plotted on a histogram in a similar fashion to figure \ref{efnsefskj}. The frequency of these dreams should be roughly equal and the dreams should directly match the training set. This is feasible as the ground truth patterns are known.
+  \item Random normally distributed, mean and standard deviation of one, starting weights. The RBM was trained with $1000$ epochs and a learning rate of $0.002$.
+  \item A sample of 10,000 dreams were sampled from the RBMs, and then plotted on a histogram in a similar fashion to figure \ref{efnsefskj}. The frequency of produced dreams was ensured to be approximately equal and that the dreams should directly match the training set. This is feasible as the ground truth patterns are known.
 \end{itemize}
 
 
@@ -183,12 +190,15 @@ $$
 
 For values of $Y$ where $y \epsilon Y \big| 2 < y < 7$ and all values of $X$ where $x \epsilon X \big| 2 < x < y < 7 $ The process below is repeated.
 
-The inference algorithm was run for 1000 reconstructions in the ORBM architecture for all unique compositions of the training set. The result was 1000 reconstructions per composition of the dataset above. \todowording{Need a way to describe the dataset a bit better}.
+The inference algorithm was run for 1000 reconstructions in the ORBM architecture for all unique compositions of the training set. The result was 1000 reconstructions for both the Full Correction and Approximate Correction, for some interesting compositions of the dataset.
 
 \todocite{Need to grab the images out of the ipython notebook.}
 
 
 \section{2D Patterns in a small dimensional space}
+
+
+
 \begin{itemize}
     \item Dataset:
     \begin{itemize}
