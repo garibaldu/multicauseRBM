@@ -1,25 +1,5 @@
-\section{A New Approach - The ORBM}
 
-\begin{itemize}
-  \item Frean and Maslands new approach combines the Restricted Boltzmann Machine and the Sigmoid Belief Network, the RBMs allowing the rich complex causes to be encoded independantly, and the Sigmoid Belief Network modelling the combination of the causes to form the observable data.
-  \item By building on these existing methods can leverage exisitng algorithms
-  \item Can verify the inference algorithm with pre trained RBMs for each cause. \todowording{Introduce the idea of plug and play here}
-  \item Like the RBM leveraged in the ORBM, it is difficult to evaluate, But similar techniques can be leveraged
-\end{itemize}
-
-\subsection{Architecture}
-
-\begin{itemize}
-    \item Two RBMs, on for each cause, then they combine via a Sigmoid Beleif Layer. Weights between the RBM and Sigmoid Layers are shared. (TODO-A-DIAGRAM)
-    \item Diagram of the ORBM Architecture Including U Layer. Make sure I'm explaining the U layer.
-    \item In fact Ua, Ub are like mirrors of the visible.
-\end{itemize}
-
-
-\section{Inference In the ORBM }
-
-\subsection{The Gibbs Chain}
-
+\section{A network equivalent to an RBM}
 
 \subsection{Unrolling a Gibbs Chain, a different perspective on RBM inference}
 
@@ -27,22 +7,18 @@
   \begin{center}
     \includegraphics[width=0.5\textwidth]{Assets/3_Layer_RBM.png}
   \end{center}
-  \caption{A diagram illustrating `unrolling` an RBM by one Gibbs iteration.}
+  \caption{A diagram illustrating `unrolling` an RBM by one Gibbs iteration. Note the connections between $H$ and $V$ layers are now directed.}
   \label{F:3-Layer-RBM}
 \end{wrapfigure}
 
-Before the ORBMs architecture can be introduced, Gibbs sampling in an RBM must be presented in a different way. \todocite{Hintons paper on unrolling the Gibbs chain. He showed that RBM is infinitely deep belief network with tied weights}. This unrolling a single Gibbs iteration is illustrated in figure \ref{F:3-Layer-RBM}, the $U$ layer corresponding to the $V$ layer after one Gibbs iteration. To clarify, the $U$ layer corresponds to $v_1$ in figure \ref{F:Gibbs_Chain}.
+Before the ORBMs architecture and inference algorithm can be introduced, Gibbs sampling in an RBM must be presented in a different, yet equivalent way.
+Hinton, when introducing the idea of training a Deep Belief Network showed that a Gibbs chain in an RBM is equivalent to a infinitely deep belief network, with an RBM on the top with tied weights. \todocite{Hintons paper on unrolling the Gibbs chain}. An unrolling of a single Gibbs iteration is illustrated in figure \ref{F:3-Layer-RBM}, the $U$ layer corresponding to the $V$ layer after one Gibbs iteration. The top two layers ($U$ and $H$) form a standard RBM, but the bottom connections ($V$ and $H$) form a Sigmoid Belief Network. To further clarify, the $U$ layer corresponds to $V_1$ in figure \ref{F:Gibbs_Chain}. Note in figure \ref{F:3-Layer-RBM} the weights  between the $H$ and $U$ layer are shared between the $V$ and $H$ layers.
 
-Note the weights between the $H$ and $U$ layer are shared between the $V$ and $H$ layers.
-
-
-We can show that Gibbs sampling in this RBM unrolled with a Sigmoid belief network is equivalent to Gibbs Sampling in a standard RBM.
-
-
+We can now show that Gibbs sampling in this RBM unrolled with a Sigmoid belief network is equivalent to Gibbs Sampling in a standard RBM.\@
 
 \subsubsection{Ancestral Sampling in this equivalent network}
 
-Ancestral sampling in an RBM \todocite{as described in the section where I talk about dreams...}. This network behaves a similar way, where a Gibbs chain is run between the top two layers, the $U$ and $H$ layer, until the last iteration. At the last iteration a hidden pattern is sampled and then is pushed through the Sigmoid belief network between $H$ and $V$. This is illustrated in figure \ref{F:3-Layer-RBM-Gibbs}.
+Ancestral sampling in an RBM \todocite{as described in the section where I talk about dreams...}. This network behaves a similar way, where a Gibbs chain is run between the top two layers, $U$ and $H$, until the last iteration. At the last iteration a hidden pattern is sampled and then is pushed through the Sigmoid belief network between $H$ and $V$. This is illustrated in figure \ref{F:3-Layer-RBM-Gibbs}.
 
 \begin{figure}[h]
 \begin{center}
@@ -52,13 +28,20 @@ Ancestral sampling in an RBM \todocite{as described in the section where I talk 
 \end{center}
 \end{figure}
 
-\todowording{We know (from above) how to generate the $h$ sample: Gibbs sampling from the RBM will do it. Then, the conditional probability of $v$ under a sigmoid belief net is (by definition) $p(v_i=1|h) = \sigma_i(h)$.
-Thus Gibbs sampling from a simple RBM ending in a sample for $v$ is the same as sampling $h$ from the same RBM and then using a sigmoid belief net for the last step.}
+To generate a sample from $h$ is equivalent we can use equation \ref{eq:Hid-Gibbs-Update}, by running the Gibbs chain between $h$ and $U$. To sample from $v$ in the SBN is by definition:
+$$
+P(v_i = 1|h) = \sigma_i{h}
+$$
+Thus Gibbs sampling from a simple RBM ending in a sample for $v$ is the same as sampling $h$ from the same RBM and using a SBN for the last step.
 
-\todowording{However, there's another way to draw such samples. Write (product rule) $\log P^\star(h,v) = \log P^\star(h) + \log P(v|h)$. We have the second term already:
-$$ \log P(v|h) = \sum_i v_i \log \sigma_i(h) + (1-v_i) \log (1 - \sigma_i(h))$$}
+There is however another useful way to draw samples in such a network that we will leverage in the ORBM. The log likelihood of the joint can be written as:
+\begin{equation}\label{eq:Product-Joint}
+\log P^\star(h,v) = \log P^\star(h) + \log P(v|h)
+\end{equation}
+We have the second term already:
+$$ \log P(v|h) = \sum_i v_i \log \sigma_i(h) + (1-v_i) \log (1 - \sigma_i(h))$$
 
-To find $P^\star(h)$ we need to marginalise that joint over all $\mathbf{v}$ configurations:
+To find the remaining term, $P^\star(h)$ we need to marginalise the  joint (eq~\ref{eq:Product-Joint}) over all $\mathbf{v}$ configurations:
 
 $$
  \begin{aligned}
@@ -81,8 +64,28 @@ Therefore another way to write $\log P^\star(h,v)$ is
 $$
 \log P^\star(h,v) = \underbrace{\sum_j h_j  W_{j0} \;\; + \; \sum_i \phi_i(h) \;  - \; \sum_i \log \sigma_i(h)}_{\log P^\star(h)} \;\;+\;\; \underbrace{\sum_i v_i \log \sigma_i(h) + (1-v_i) \log (1 - \sigma_i(h))}_{\log P(v \mid h)}
 $$
-By collecting terms and simplifying one can readily those that this matches the earlier form \todocite{The earlier equation}.
+By collecting terms and simplifying one can readily those that this matches the earlier form in equation~\ref{eq:LogPJoint}.
 
+
+\section{A New Approach, The ORBM}
+
+\begin{itemize}
+  \item Frean and Marsland's new approach combines the Restricted Boltzmann Machine and the Sigmoid Belief Network, the RBMs allowing the rich complex causes to give rise to data independantly, and the Sigmoid Belief Network modeling the combination of the causes to form the observable data.
+  \item By building on these existing methods can leverage exisitng algorithms
+  \item Can verify the inference algorithm with pre trained RBMs for each cause. \todowording{Introduce the idea of plug and play here}
+  \item Like the RBM leveraged in the ORBM, it is difficult to evaluate, But similar techniques can be leveraged
+\end{itemize}
+
+\subsection{Architecture}
+
+\begin{itemize}
+    \item Two RBMs, on for each cause, then they combine via a Sigmoid Beleif Layer. Weights between the RBM and Sigmoid Layers are shared. (TODO-A-DIAGRAM)
+    \item Diagram of the ORBM Architecture Including U Layer. Make sure I'm explaining the U layer.
+    \item In fact Ua, Ub are like mirrors of the visible.
+\end{itemize}
+
+
+\section{Inference In the ORBM}
 
 \subsection{The ORBM architecture is derived from the equivalent RBM architecture}
 This equivalent network can be extended to form the ORBMs architecture.

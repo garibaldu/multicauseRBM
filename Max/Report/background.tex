@@ -140,44 +140,44 @@ A Boltzmann machine \todocite{Cite the Harmonium, markov field and Hopfield for 
   The probability of the RBM being in a given configuration is the joint probability of $\tilde{h}$ and $\tilde{v}$.
 
 
-  $$ P(\tilde{h},\tilde{v}) = 1 / Z \prod_{j,i} e^{h_jW_{ji}v_i} $$
+  $$ P(\tilde{h},\tilde{v}) = \frac{1}{Z} \prod_{j,i} e^{h_jW_{ji}v_i} $$
   If we move to log space that becomes
   $$ \log P(\tilde{h},\tilde{v}) = \frac{1}{Z} \log \sum_{j,i} h_j W_{ji} v_i $$
-  $\frac{1}{Z} $ is the partition function, which normalises the probability of the joint. Calculating this would require summing over all possible configurations of $h$ and $v$, which is intractable for practical numbers of units. For instance a 28 by 28 image corresponds to 784 visible units.
+  $\frac{1}{Z} $ is the partition function, which normalises the probability of the joint. Calculating this would require summing over all possible configurations of $h$ and $v$, which is intractable for practical numbers of units. For instance a 28 by 28 image corresponds to 784 visible units, and for say 10 hidden units this would amount to $2^{784} * 2^{10} $ possible configurations. We opt to work in terms of $P^\star$ which is the non-normalised probability of the joint over $h \text{ and } v$.
   So we arrive at
-  $$ P^\star(\tilde{h},\tilde{v}) = \log \sum_{j,i} h_j W_{ji} v_i $$
-
-
-  This can be illustrated by re-examining how we represent the joint distribution in this restricted architecture, in log space
-  $$ \log P^\star(h, v) = \sum_i \sum_j e^{h_j v_i W_{ji}} $$
-
-
-
+  \begin{equation}\label{eq:LogPJoint}
+     \log P^\star(h, v) = \sum_i \sum_j e^{h_j v_i W_{ji}}
+  \end{equation}
 
   \subsection{Gibbs Sampling in RBMs}
 
     \todowording{To describe the ORBM and how to perform inference, traditional RBMs need to be thought of in a different yet equivalent way}.\todocite{This is similar to Hinton infinitely deep sigmoid belief networks.}
 
+  For the following discussion, the hidden units are indexed by $j$ and the visible units are indexed by $i$.
+  To perform inference, create reconstructions, and train RBMs, Gibbs sampling is used to draw samples from $P(h|v)$ (referred to as sampling from the posterior) and $P(v|h)$ respectively. It is introduced here to be reference later in Gibbs in an ORBM. In an RBM the process of Gibbs sampling is as follows:
+  \begin{itemize}
+    \item One must sample from $P(\tilde{h}|\tilde{v})$ giving a hidden state $\tilde{h'}$
+    \item Using this hidden state, a visible state is then generated, $\tilde{v'}$, by sampling from $P(\tilde{v'}|\tilde{h'})$. This process of generating a hidden pattern, and subsequent visible pattern is referred to as a Gibbs step.
+    \item This chain of Gibbs steps between sampling from $P(h|v)$ and $P(v|h)$ can then be repeated as desired, the longer the chain the closer the samples will be to the true joint distribution that the model has learnt. For training an RBM Hinton showed that 1 step is often enough in practice, as one step is enough to infer a direction to adjust the weights in.
+  \end{itemize}
+   This process can be calculated in one step for all units in the target layer as they are independant of one another. The process of updating the hidden, then visible layers forms what is referred to as the \texttt{Gibbs Chain}. \todocite{Feel like I could  cite this again in like a CD paper or something.} This process is visualised at a layer level in figure \ref{F:Gibbs_Chain}
 
-    To perform inference, create reconstructions, and train RBMs, Gibbs sampling is used to draw samples from $P(h|v)$ (referred to as sampling from the posterior) and $P(v|h)$ respectively. It is introduced here to be reference later in Gibbs in an ORBM.
-
-
-  For the following discussion, the hidden units are indexed by $j$ and the visible units are indexed by $i$. To perform Gibbs sampling in an RBM one must sample from $P(\tilde{h}|\tilde{v})$ giving a hidden state $\tilde{h}$. Using this hidden state a visible state is then generated, $\tilde{v'}$, by sampling from $P(\tilde{v'}|\tilde{h})$ and so on. This process can be calculated in one step for all units in the target layer as they are independant on one another. The process of updating the hidden, then visible layers forms what is referred to as the \texttt{Gibbs Chain}. \todocite{Feel like I could  cite this again in like a CD paper or something.} This process is visualised at a layer level in figure \ref{F:Gibbs_Chain}
-
-  \begin{wrapfigure}{r}{0.7\textwidth}
+  \begin{figure}[h]
     \begin{center}
-      \includegraphics[width=0.6\textwidth]{Assets/RBM-Gibbs-Chain.png}
+      \includegraphics[width=0.8\textwidth]{Assets/RBM-Gibbs-Chain.png}
     \end{center}
-    \caption{A figure illustrating a Gibbs chain where left to right indicates a Gibbs iteration. Note this is not a PGM.}
+    \caption{A figure illustrating a Gibbs chain where left to right indicates a Gibbs iteration. Note this is \emph{not} a PGM.}
     \label{F:Gibbs_Chain}
-  \end{wrapfigure}
+  \end{figure}
+
+  \subsubsection{The Gibbs update}\label{S:Gibbs-Update}
 
   In a standard RBM, updating a hidden unit $h_j$ when performing Gibbs sampling is calculated by finding $ P(h_j = 1 | \tilde{v}) $ where $\tilde{v}$ is an input pattern. In the context of an image, $ \tilde{v} $ would be the pixel values where each pixel corresponds to a visible unit, $v_i$.
   The probability of a given hidden unit activating is: \todocite{Gibbs sampling would be good here}.
-  $$
+  \begin{equation}\label{eq:Hid-Gibbs-Update}
   P(h_j = 1 | \tilde{v}) = \sigma(\psi_j)
-  $$
-  Where $\psi_j$ is the weighted sum into the $jth$ hidden unit and $\sigma()$ is the Sigmoid function, or it also known as the Logistic function $\sigma(x)=1/(1+e^{-x})$. Figure \ref{F:PSI} illustrates psi for an example RBM.
+  \end{equation}
+  Where $\psi_j$ is the weighted sum into the $jth$ hidden unit and $\sigma()$ is the Sigmoid function, or it also known as the Logistic function $\sigma(x)=1/(1+e^{-x})$. Figure \ref{F:PSI} illustrates $psi_j$ for an example RBM.
 
   \begin{figure}[h]
   \begin{center}
@@ -188,68 +188,60 @@ A Boltzmann machine \todocite{Cite the Harmonium, markov field and Hopfield for 
   \end{figure}
 
   As the weights are symmetric, sampling from the visible layer, given a hidden state is similar. That is $P(v_i = 1 | \tilde{h})$, where $\tilde{h}$ is the entire hidden vector is given by:
-  $$ P(v_i = 1 | \tilde{h}) = \sigma(\phi_{i}) $$
-  Where $\phi_i$ is the weighted sum into the $ith$ visible unit, which is
+  \begin{equation}\label{eq:Vis-Gibbs-Update}
+   P(v_i = 1 | \tilde{h}) = \sigma(\phi_{i})
+  \end{equation}
+  Where $\phi_i$ is the weighted sum into the $ith$ visible unit, which is:
 
   $$ \phi_i = \sum(W_{ji}h_{j}) + W_{0i} $$
 
 
 
 
-    \subsubsection{Tractable Training - Contrastive Divergence}
-    Hinton TODO-CITE-CLASSIC-PAPER proposed Contrastive Divergence as a method for training RBMs efficiently. The algorithm leverages the now tractable wake phase because $P(h|v)$ is efficeint to compute. However the free or sleep phase required another restriction where the network is only left to its own dynamics can be limited to only one iteration and still perform well. TODO-CITE-CD-PAPER
+    % \subsubsection{Tractable Training - Contrastive Divergence}
+    % Hinton TODO-CITE-CLASSIC-PAPER proposed Contrastive Divergence as a method for training RBMs efficiently. The algorithm leverages the now tractable wake phase because $P(h|v)$ is efficeint to compute. However the free or sleep phase required another restriction where the network is only left to its own dynamics can be limited to only one iteration and still perform well. TODO-CITE-CD-PAPER
 
-the Restricted Boltzmann machine transforms some visible unit into a hidden representation. These two layers of units can be thought of as vectors of binary values, referred to as $ v $ and $ h $ for visible and hidden layers respectively.
-
-  This restriction allows an efficient calculation of the Wake Phase of generative model learning, as the $ P(h|v) $ can be calculated as a simple weighted sum passed through a sigmoid followed by a bernouli trial where the probability of being $1$ is equal to the result of sigmoid.
+    % This restriction allows an efficient calculation of the Wake Phase of generative model learning, as the $ P(h|v) $ can be calculated as a simple weighted sum passed through a sigmoid followed by a bernouli trial where the probability of being $1$ is equal to the result of sigmoid.
 
 
 
-  \subsection{Deep Learning}
-
-    \begin{itemize}
-      \item Discuss deep learning as there are clear parallels to Deep Belief Networks and the new approach
-      \item in paritcular how the deep networks have this process of freezing the weights and creating a sigmoid belief layer instead. There seem to be clear parallels between a deep network with one RBM to the ORBM.
-    \end{itemize}
-
-  \begin{itemize}
-    \item Unrolling the gibbs chain and we are in effect training an infinite depth sigmoid beleif net (TODO-REFERENCE-HINTONS-PAPER-HERE)
-  \end{itemize}
-
-    \subsection{Inference}
-    One of the reasons the Restricted Boltzmann Machine is effective in practice is inference can be performed efficiently. Inference being computing the posterior.
+  % \subsection{Deep Learning}
+  %
+  %   \begin{itemize}
+  %     \item Discuss deep learning as there are clear parallels to Deep Belief Networks and the new approach
+  %     \item in paritcular how the deep networks have this process of freezing the weights and creating a sigmoid belief layer instead. There seem to be clear parallels between a deep network with one RBM to the ORBM.
+  %   \end{itemize}
+  %
+  % \begin{itemize}
+  %   \item Unrolling the gibbs chain and we are in effect training an infinite depth sigmoid beleif net (TODO-REFERENCE-HINTONS-PAPER-HERE)
+  % \end{itemize}
 
     \subsection{Evaluating Restricted Boltzmann Machines}
+    A challenge faced by this project and work with RBMs is that they are non-trivial to evaluate \todocite{Something please}. Being unsupervised black box, one cannot inspect the hidden units for an input and be sure that a good model has been learnt.
 
-    \begin{itemize}
-      \item Being unsupervised makes it difficult to evaluate RBMs. Often used as part of a deeper network, feature extractor, autoencoder
-      \item Hinton Diagrams allow visualisation of hidden unit utlisation (TODO-SOME-SORT-OF-CITE). The weights out of a given hidden unit can be visualised in visible data space. The weights should exhibit some structure if they are being utlisied. This is a good smoke tests for non-tulised hidden units will look very similar to units with random initial weights.
+    We can examine the weights into a given hidden unit in the shape of the visible vector. For instance in the context of images, \texttt{Hinton Diagrams} allow visualisation of what a given hidden unit is `doing` by visualising the matrix. This was first used by Hinton in the context of Boltzmann Machines in \cite{Hinton:1986:LRB:104279.104291}. They also give insight into hidden unit utilisation.  Weights are often initialised to small random values, the Hinton diagram will have no visual structure to it. This is illustrated in figures \ref{F:Hinton-Good} and \ref{F:Hinton-Bad}. The former showing a hidden units weights where some structure has been learnt, and the latter showing the opposite.
 
-        \item Small Cases
-
-          \item In trivial cases an RBM can inspected analytically. Reconstructions of the dataset should match the dataset with approximately the correct proportion. For instance training RBMs on 2 bit XOR should result in mostly [1,0] and [0,1] but not [1,1] and [0,0].
-          \item Hand craft weights can be used to perform inference in a 'perfect model'. For instance an RBM that can capture two bit, logical XOR can be represented as :TODO-INSERT-PIC
-
-        \item Large Cases
-
-          \item In non-trivial cases, with larger datasets, reconstructions can be compared to the dataset but given the unsupervised nature of RBMs emperically detecting if a model is trained is difficult.
-          \item The log liklihood of the RBMs generative model exbiting the dataset is a good measure that can be approximated (because we have to sample).
-          \item We can train a classifier on the RBMs hidden representation. This can be compared for a ORBM and RBM.
-
-
-    \end{itemize}
-
-    \begin{figure}[]
+    \begin{wrapfigure}{L}{0.45\textwidth}
     \begin{center}
-    	\includegraphics[]{Assets/HINTON1}
-    \caption{ Good Hinton Diagram}
-    \label{F:TEMP}
+      \includegraphics[width = 0.2\textwidth]{Assets/HINTON1.png}
+    \caption{.}
+    \label{F:Hinton-Good}
     \end{center}
-    \end{figure}
-    \begin{figure}[]
+    \end{wrapfigure}
+    \begin{wrapfigure}{R}{0.45\textwidth}
     \begin{center}
-      \includegraphics[]{Assets/HINTON2}
-    \caption{Bad Hinton Diagram}
-    \label{F:TEMP}
+      \includegraphics[width = 0.2\textwidth]{Assets/HINTON2.png}
+    \caption{.}
+    \label{F:Hinton-Bad}
     \end{center}
-    \end{figure}
+    \end{wrapfigure}
+
+    Evaluating RBMs is also problem dependant, if split by dimenionality of the task we have some different approaches:
+    \begin{description}
+    \item[Small Cases] In trivial cases an RBM can inspected analytically. Reconstructions of the dataset should match the dataset with approximately the correct proportion. For instance training RBMs on two bit XOR should result in mostly [1,0] and [0,1] but not [1,1] and [0,0].
+    If the task has a small enough dimentionality, like two bit XOR, then a learned RBM can be compared to one constructed by hand. This approach is used later when the ORBM tackles two bit XOR.
+
+    \item[Large Cases] In non-trivial cases, with larger datasets, reconstructions can be compared to the training dataset,  but empirically detecting if a model is trained is difficult given the unsupervised, black box nature of RBMs.
+    We can train a classifier on the RBMs hidden representation, with the idea being that better hidden features should result in a better way of distinguishing classes, and therefore a better classification accuracy.
+
+  \end{description}
