@@ -80,7 +80,7 @@ Generative Models can create an internal representation given an input. They can
 
     This intractability arises from the Sigmoid Nets richness and the `explaining away effect`. Inference is required for training generative models making Sigmoid Belief Networks impractical to train. \todocite{It has been done, link to paper where they do it.}
 
-    \subsection{Explaining Away creates a trade off between richness and tractability}
+    \subsection{Explaining Away creates a trade off between richness and tractability}\label{SS:Explaining-Away}
     \todo%
     The power of the Belief Network is also it's weakness, a rich structure that models a system of interest inherently has dependancies. In its minimal case explaining away can be seen in a 3 node network popularised by \todocite{AI-A-MODERN-APPROACH-TODO. TODO-GRAPHIC} as shown in figure \ref{F:Explaining-Away}. Each of the nodes represents a binary state. For instance $Burglar = 1$ means that the person owning the \texttt{Alarm} has been burgled. Also note how the connections between the units have arrows, this is causal.
 
@@ -177,7 +177,7 @@ A Boltzmann machine \todocite{Cite the Harmonium, markov field and Hopfield for 
   \begin{equation}\label{eq:Hid-Gibbs-Update}
   P(h_j = 1 | \tilde{v}) = \sigma(\psi_j)
   \end{equation}
-  Where $\psi_j$ is the weighted sum into the $jth$ hidden unit and $\sigma()$ is the Sigmoid function, or it also known as the Logistic function $\sigma(x)=1/(1+e^{-x})$. Figure \ref{F:PSI} illustrates $psi_j$ for an example RBM.
+  Where $\psi_j$ is the weighted sum into the $jth$ hidden unit and $\sigma()$ is the Sigmoid function, or it also known as the Logistic function $\sigma(x)=1/(1+e^{-x})$. Figure \ref{F:PSI} illustrates $\psi_j$ for an example RBM.
 
   \begin{figure}[h]
   \begin{center}
@@ -191,9 +191,13 @@ A Boltzmann machine \todocite{Cite the Harmonium, markov field and Hopfield for 
   \begin{equation}\label{eq:Vis-Gibbs-Update}
    P(v_i = 1 | \tilde{h}) = \sigma(\phi_{i})
   \end{equation}
-  Where $\phi_i$ is the weighted sum into the $ith$ visible unit, which is:
-
-  $$ \phi_i = \sum(W_{ji}h_{j}) + W_{0i} $$
+  Where $\phi_i$ is the weighted sum into the $ith$ visible unit, which is: $ \phi_i = \sum(W_{ji}h_{j}) + W_{0i} $. Both $\phi_j$ and $\psi_i$ can be expressed in alternative, but useful way:
+  \begin{equation}
+  \phi_j = \log P^\star(v,h | v_i = 1) - \log P^\star(v,h | v_i = 0)
+  \end{equation}
+  \begin{equation}\label{psi-gibbs-update-rbm}
+  \psi_i = \log P^\star(h,v | h_j = 1) - \log P^\star(h,v | h_j = 0)
+  \end{equation}
 
 
 

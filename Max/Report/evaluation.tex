@@ -14,9 +14,17 @@
    \item Cite literature where reconstructions are used, starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.
  \end{itemize}
 
+ \subsection{Growing Complexity of tasks}
+
+ \begin{itemize}
+   \item Same models
+   \item Growing dimensionality, bit strings to 2d to MNIST
+   \item Allows comparison of Approx corrections in smaller scale - fail there don't continue using them...
+ \end{itemize}
+
 \section{Evaluation Methods}
 
-My \todowording{x experiements} all followed the roughly the same process, ultimately working from trivial cases to more challenging tasks. The reasoning behind this was that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.
+My \todowording{x experiements} all followed the same high level process, working from trivial cases to more challenging tasks. The reasoning being that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.
 
 The following evaluations aimed to evaluate the ORBM and it's inference algorithm by examining reconstructions given a multi-cause input. An example of a muli-cause input with two quadrilaterals is shown in figure \ref{F:Composite-Example}. The optimal reconstructions are equivalent to the two images that combined form the input.
 
@@ -62,7 +70,7 @@ The starting point for the evalatuion was examining the ORBM reconstructions in 
   \label{F:Two-Bit-RBM-Recons}
 \end{wrapfigure}
 
-Being a trivial dimensionality, the RBMs weights were constructed by hand, meaning that only the ORBMs inference algorithm was being evaluated. This network is picture in figure \ref{F:Two-Bit-RBM}, \todowording{with weights greater than 5} the networks stable state results in either $[1 , 0]$ or $[0 , 1]$. The RBMs had 2 hidden units and 2 visible units.
+Being a trivial dimensionality, the RBMs weights were constructed by hand, meaning that only the ORBMs inference algorithm was being evaluated and not the training of the RBMs plugged into it. This network is picture in figure \ref{F:Two-Bit-RBM}, \todowording{with weights greater than 5} the networks stable state results in either $[1 , 0]$ or $[0 , 1]$. The RBMs had 2 hidden units and 2 visible units.
 
 \subsubsection{Method}
 
@@ -72,7 +80,7 @@ This RBM was checked to ensure that it behaved in practice by ensuring it's reco
 
 In a similar way to the reconstructions, ancestral samples can be taken from the model and evaluated. \todowording{In larger dimensions Hinton has shown RBMs to be poor generative models without the extra layers above...} however in the small dimensions of this task the dreams should match the training set:
 
-A histogram of frequencies of reconstructions given the RBM is in the free phase, is shown in figure \ref{F:Two-Bit-RBM-Dreams}. Again the model behaves as expected, generating dream patterns that match the training dataset the majority of the time.
+A histogram of frequencies of reconstructions given the RBM is in the free phase, is shown in figure \ref{F:Two-Bit-RBM-Dreams}. Again the model behaves as expected, generating dream patterns that match the training dataset the majority of the time. There is a lack of parity in that the RBM produces the visible pattern $[1,0]$ almost double the time of the visible $[0,1]$, however this is resolved when the generative model is run for longer, and more samples are taken.
 
 
 \begin{wrapfigure}{r}{0.4\textwidth}
@@ -84,7 +92,7 @@ A histogram of frequencies of reconstructions given the RBM is in the free phase
 \end{wrapfigure}
 
 
-Given a good model, the XOR RBM was duplicated and plugged into the ORBM structure as picture in figure \ref{F:XOR-ORBM}.
+Given this good model, the XOR RBM was duplicated and plugged into the ORBM structure as picture in figure \ref{F:XOR-ORBM}.
 
 
 \begin{wrapfigure}{l}{0.55\textwidth}
@@ -95,7 +103,7 @@ Given a good model, the XOR RBM was duplicated and plugged into the ORBM structu
   \label{F:XOR-ORBM}
 \end{wrapfigure}
 
-The inference algorithm was run in the ORBM architecture for various visible inputs, giving two hidden vectors for the two representations $h^A$ and $h^B$. For each pair of hidden vectors, a reconstruction was created. This process was repeated in a similar way to how the reconstructions were evaluated in the lone RBM, counting the frequency each reconstruction occurs over \todowording{a number here} many runs,
+The inference algorithm was run in the ORBM architecture for various visible inputs, giving two hidden vectors for the two representations $h^A$ and $h^B$. For each pair of hidden vectors, a reconstruction was created, the process illustrated in figure \ref{F:Two-Bit-ORBM-Inference-REsults-1}. This process was repeated in a similar way to how the reconstructions were evaluated in the lone RBM, counting the frequency each reconstruction occurred over $1500$ runs.
 
 \begin{table}[]
 \centering
@@ -112,7 +120,7 @@ $[0, 1]$      & $[0,1]$               & $[0,1]$               \\ \hline
 
 \subsubsection{XOR ORBM Analysis}
 
-The results of this process are shown in figure \ref{F:Two-Bit-ORBM-Inference-Results-1}. The ORBM is able to separate the causes, as the model is being duplicated, it produces $[1,0]$ and $[0,1]$ roughly half the time. The reconstructions are of the form v\_a$[x,y]$ v\_b$[n,m]$ where $[x,y]$ is the reconstruction created model A and $[n,m]$ is the reconstruction created by model B.
+The results of this process are shown in figure \ref{F:Two-Bit-ORBM-Inference-Results-1}. Where the x-axis shows the reconstructions of the form v\_a$[x,y]$ v\_b$[n,m]$ where $[x,y]$ is the reconstruction (v) created model A and $[n,m]$ is the reconstruction created by model B. The ORBM is able to separate the causes, as the model is being duplicated, it produces $[1,0]$ and $[0,1]$ approximately half the time and symetrically $[0,1]\text{ }[1,0]$ the other half of the time.
 
 \begin{figure}[h]
   \begin{center}
@@ -123,7 +131,7 @@ The results of this process are shown in figure \ref{F:Two-Bit-ORBM-Inference-Re
   \label{F:Two-Bit-ORBM-Inference-Results-1}
 \end{figure}
 
-These reconstructions were compared to one of the RBMs trained to recognised a single pattern being on in two bits. As expected a machine that has been trained to recognise one bit, has no concept of two bits being on and hence the reconstructions show no mechanism for seperating the sources. This is illustrated in figure \ref{F:Two-Bit-RBM-Inference-Results-2}.
+These reconstructions were compared to one of the RBMs trained to recognised a single pattern being on in two bits. As expected a machine that has been trained to recognise one bit, has no concept of two bits being on and hence the reconstructions show no mechanism for seperating the sources. This is illustrated in figure \ref{F:Two-Bit-RBM-Inference-Results-1}.
 
 
 \begin{figure}[h]
@@ -135,12 +143,12 @@ These reconstructions were compared to one of the RBMs trained to recognised a s
   \label{F:Two-Bit-RBM-Inference-Results-1}
 \end{figure}
 
-The results of repeating this process with the input $[1,0]$ yielded successful results. We would hope that ORBM architecture could also handle inferenece with just a single subject. The results of this are shown in
+The results of repeating this process with the input $[1,0]$ yielded successful results. We would hope that ORBM architecture could also handle inference with just a single subject. The results of this are shown in
 figure \ref{F:Two-Bit-RBM-Inference-Results-2}.\todowording{Do the markers care that it works in this case... it's so trivial does it even mean anything for larger images.}.
 
 \subsubsection{Two bit XOR Conclusion}
 
-The ORBM was able to extract the target patterns $[1,0]$ and $[0,1]$ given the input $[1,1]$.
+The ORBM was able to extract the target patterns $[1,0]$ and $[0,1]$ given the input $[1,1]$. Being the minimal case for source separation, bits in a two bit string, this was important to establish as it meant the approximated correction could be tested and compared. \todowording{Fuck I need to get those pictures in here!}
 
 \begin{figure}[h]
   \begin{center}
@@ -165,9 +173,9 @@ $$
 
 \subsubsection{Architecture and Parameters}
 \begin{itemize}
-  \item $|Y|$ Hidden units per RBM
-  \item Random starting weights. RBM trained with $1000$ epochs and a learning rate of $0.002$.
-  \item A sample of 10,000 dreams were sampled from the RBMs, and then plotted on a histogram in a similar fashion to figure \ref{efnsefskj}. The frequency of these dreams should be roughly equal and the dreams should directly match the training set. This is feasible as allow possible data items are known.
+  \item $|Y|$ Hidden units per RBM, any less and we were unable to train the RBM to make the target reconstructions or dreams.
+  \item Random normally distributed, mean and standard deviation of one starting weights. The RBM was trained with $1000$ epochs and a learning rate of $0.002$.
+  \item A sample of 10,000 dreams were sampled from the RBMs, and then plotted on a histogram in a similar fashion to figure \ref{efnsefskj}. The frequency of these dreams should be roughly equal and the dreams should directly match the training set. This is feasible as the ground truth patterns are known.
 \end{itemize}
 
 
