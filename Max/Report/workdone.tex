@@ -1,12 +1,12 @@
-\chapter{Work Done}\label{C:work}
+\chapter{Design and Implementation}\label{C:work}
+
+A large portion of the project was gaining enough understanding of the existing work on RBMs to be able to implement the ORBMs algorithm and architecture. This was crucial as bugs in the implementation are a threat to validity.
 
 \todowording{Make sure you talk about why the sigmoid is the most appropriate atrication function! Maybe this should go in background..}
 
 %A large amount of the accomplishments in the project so far have been in gaining the understanding needed to really explore and verify this new technique - given it is built upon the existing work of Restricted Boltzmann Machines. This understanding means that robust correctness tests can be written. This in turn ensures that results produced have more credibility, so the implementation is known to be sound. %
 
-\section{Design}\label{S:design}
-
-\subsection{Dataset Choice}
+\section{Evaluation Dataset Choice}
 
 \begin{itemize}
   \item 2 Bit XOR - It's the minimal case. Can examine reconstructions and dreams/fantansy emperically. Also can check that code performs as expect by manually calcating expected values for the algorithm.
@@ -17,27 +17,33 @@
   \item MNIST Handwritten Digit Dataset - Pixel values from 0 to 1, 28 by 28 pixel image (784 pixel features.) Used extensiviely in previous studies. Gives me confidence that RBMs can learn these representations. Also allows metaparameters don't have to be tweaked as much as studies already have found reasonable values. Non-trivial to evaluate, but more of a real world case.
 \end{itemize}
 
-\subsection{Implementation Design}
+\section{Implementation Design}
 
-The program was implemented with unit testing and composability in mind. It was important that the design supportted comparing the Full and Approximated correction . Also by using Python, multiple inherientance could be leveraged for instance for adding continous pixel value support to the \texttt{Full Correction Sampler}, the class \texttt{Continuous Full Correction Sampler} needed to inherit from \texttt{Continuous Approximate Correction Sampler} and  the \texttt{Full Correction Sampler}, with no code actually in the class.
-
-\subsubsection{Program Architecture}
-\begin{figure}[h]
-\begin{center}
-  \includegraphics[width = 0.8\textwidth]{Assets/ENGR489-Architecture.png}
-\caption{A figure showing the architecture for the implemented test suite in UML notation.}
-\label{F:Correction-Plot}
-\end{center}
-\end{figure}
-
-
+\subsection{Language Choice}
 \begin{itemize}
-  \item Sampler, Trainer, RBM concepts for plug and play.
   \item Library choice meant efficiency with benefits of python for quick dev
   \item Easy to deploy to grid (versus java higher risk, lack of expeirence)
   \item Ordering of evaluation tasks made unit testing, with hand made test cases possible. Also less risk, remove the uncertainty around the RBM.
   \item testing approach
 \end{itemize}
+
+
+\subsection{Program Architecture}
+
+The program was implemented with unit testing and composability in mind. It was important that the design supported comparing the Full and Approximated correction. By using Python, multiple inheritance could be leveraged. For instance  adding continuous pixel value support to the \texttt{Full Correction Sampler}, one simply needed to extend \texttt{Continuous Approximate Correction Sampler} and the  \texttt{Full Correction Sampler}, with no code actually in the new class. The architecture is pictured in the class diagram \ref{F:Prog-Arch}. There were three main roles these classes filled:
+\begin{enumerate}
+  \item The \texttt{Trainer} was used to train the weights of a supplied \texttt{RBM}. It would do so using a supplied \texttt{sampler}, decoupling how samples were generated from the training process.
+  \item The \texttt{RBM} was the model of an RBM, storing the weight matrix, as well as parameter information. Also this supported conversion of the SciPy Sklearn libraries' RBM implementation into the implementation used in this project. Decoupling the concept of an \texttt{RBM} from the \texttt{Sampler} and the \texttt{Trainer} meant that RBMs could be `plugged` into the ORBM architecture with ease.
+  \item The \texttt{Sampler} defined how to perform Gibbs sampling, the subclasses defining whether it is standard RBM sampling or ORBM sampling. This made is trivial to compose samplers, which was required for the ORBM samplers.
+\end{enumerate}
+
+\begin{figure}[h]
+\begin{center}
+  \includegraphics[width = 0.8\textwidth]{Assets/ENGR489-Architecture.png}
+\caption{A figure showing the architecture for the implemented test suite in UML notation.}
+\label{F:Prog-Arch}
+\end{center}
+\end{figure}
 
 % \subsection{Language Choice}\label{SS:language}
 %

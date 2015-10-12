@@ -31,7 +31,7 @@ RBMs are two layer, fully connected, unsupervised neural networks. RBMs do not m
   Again using the example of images, an input image will map to a single representation. There lacks a mechanism for modeling  sources that are acting independantly, instead modeling inputs as a single source.
 
 % There is another structure, Belief/Bayesian Networks, and the parameterised version, the Sigmoid Belief Network, which makes the polar assumption where each feature is modelled by an independant cause. These are intractable to train in practice.
-\subsection{Sigmoid Belief Networks; Intractably rich in practice}
+\subsection{Sigmoid Belief Networks --- Intractably causal in practice}
 The Sigmoid Belief Network, the parameterized version of a Bayesain/Belief network appears as a natural choice for modelling independent sources in that it makes a polar assumption to the RBM; -- Warning Semicolon Use -- Every feature has an independant cause. The sigmoid belief networks assumption could capture data that has multiple sources, but this is intractable in practice.
 
 % Frean, Marsland propose a generative model that aims for a middle ground between these two existing models.

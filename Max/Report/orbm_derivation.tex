@@ -30,7 +30,7 @@ Ancestral sampling in an RBM \todocite{as described in the section where I talk 
 
 To generate a sample from $h$ is equivalent we can use equation \ref{eq:Hid-Gibbs-Update}, by running the Gibbs chain between $h$ and $U$. To sample from $v$ in the SBN is by definition:
 $$
-P(v_i = 1|h) = \sigma_i{h}
+P(v_i = 1|h) = \sigma_i(h)
 $$
 Thus Gibbs sampling from a simple RBM ending in a sample for $v$ is the same as sampling $h$ from the same RBM and using a SBN for the last step.
 
@@ -79,9 +79,9 @@ The ORBM, like the RBM is difficult to evaluate empirically, but the same techni
 
 \begin{figure}[h]
 \begin{center}
-  \includegraphics[width = 7in]{Assets/ORBM-Full-Architecture.png}
+  \includegraphics[width = 1.2\textwidth]{Assets/ORBM-Full-Architecture.png}
 \caption{The full ORBM architecture, where $A$ and $B$ are the two causes that combine to form the data.}
-\label{F:ORBM-Architecture}
+\label{ORBM-Architecture}
 \end{center}
 \end{figure}
 
@@ -152,7 +152,7 @@ The proposed approximation uses a Sigmoid to approximate
 
 \subsubsection{What happened to the biases?}
 
-The ORBM utilises the hidden biases present on the RBMs when calculating the hidden states $h^A$ and $h^B$. However, the visible biases are not used in sampling from the visible.
+The ORBM utilises the hidden biases present on the RBMs when calculating the hidden states $h^A$ and $h^B$. However, the visible biases are not used in sampling from the visible. The reasoning behind this being that the RBMs visible bias acts like the `background rate`, i.e. what visible reconstruction would we see from an all zero hidden activation. As visible bias are not captured in the ORBM, it is important that RBMs plugged into it's structure do not use a visible bias.
 
 % \todowording{We're interested in how this will affect the Gibbs updates to the hidden units $h$ in the first RBM.}
 
