@@ -223,29 +223,116 @@ The inference algorithm was run for 1000 reconstructions in the ORBM architectur
       \end{itemize}
     \end{itemize}
 
-    \section{MNIST Digits}
+    \section{MNIST Digits Reconstructions}
+
+    \subsubsection{Description}
+
+    MNIST is a widely used dataset of handwritten digits (0 -- 9). This task explored the non-trivial task of given two handwritten digits composited to form one image, how effectively can the ORBM separate the sources compared to the naive RBM? An example input is illustrated in figure \ref{TODO}.
+
+    \subsubsection{Architecture and Parameters}
+
     \begin{itemize}
-      \item Dataset
-      \begin{itemize}
-        \item 500, 28 by 28 pixel, 0-1 valued, handwritten digit images form the training set.
-      \end{itemize}
-      \item Method
-      \begin{itemize}
-        \item Train an single RBM per digit (0-9) in the dataset. Each RBM having 100 hidden units, (TODO-CITE-COOKBOOK) for reasoning.
-        \item For all 500 training digit images, compose it with every other digit, and itself. This way the ground truth, the sources are known, therefore making evaluation possible.
-        \item For all of these compositions us the RBMs trained of the corresponding sources to:
-        \begin{itemize}
-          \item Compute the RBM reconstructions for the two sources given their composite input. (TODO-SHOW-DIAGRAM)
-          \item Compute the ORBM reconstructions, the ORBM using the same RBMs as in the RBM evaluation.
-          \item Because 28 by 28 pixels equates to 784 features, emperically examining all reconstructions is non-trivial. Hence some scoring functions are required.
-          \item Scoring
-          \item Cross Entropy - Approximate the Log likelihood of the underlying dataset.
-          \item Pixel Difference Score - Absolute difference in pixels of the image
-          \item Cosine Angle - between reconstruction and target vectors. This has the benefit of also being somewhat magnitude agnostic. (TODO-CITE-AS-MEASURE-WITH-JUSTIFICATION).
-          \item Repeat this process 30x to give confidence in findings. Scores calculated can then be meaned over the 30 runs.
-        \end{itemize}
-      \end{itemize}
+      \item MNIST Digit images are 28 by 28 pixel images, with pixel values between 0 -- 1.
+      \item 10, 100 Hidden unit RBMs trained on 500 examples of each digit respectively.
+      \item Reconstructions and dreams of these RBMs were inspected by hand to ensure that they resembled the dataset.
     \end{itemize}
+
+    \subsubsection{Method}
+
+    For every digit dataset (of size 500), each digit in each dataset was composed with every other digit in every other dataset. Given this set of composite datasets, the corresponding RBMs were plugged in the ORBM architecture and used to create reconstructions. 100 Gibbs iterations were used when calculating the correction (generating the hidden states ($h^A$ and $h^B$) for a given input). These RBMs were also used to create standard RBM reconstructions.
+    Given the ORBMs reconstructions (two per image) and the RBM reconstructions (also two per image) two scores were applied to compare these reconstructions to the ground truth:
+    \begin{description}
+      \item[Cross Entropy] The cross entropy was calculated between the reconstruction and the ground truth.
+      \item[Cosine Angle] The angle between the flattened reconstruction vectors was computed, then negated to give a `score`. The higher the score the smaller the angle between the reconstruction vector and the ground truth.
+    \end{description}
+    These scores can then be summed over each digit and over the entire dataset to find a single score for each digit composed with every other digit forming a 9 by 9 matrix. A cell of this matrix (say $j,i$) corresponds to the difference between the ORBM score and RBM scores for digits $j$ and $i$ composited together. This entire process was repeated 10 times gain certainty in the results --- given the stochasticity of the RBM and ORBM. This process is shown in Algorithm \ref{alg:scores}.
+
+    \begin{algorithm}[!ht]
+     \KwData{MNIST Digit datasets, each with 500 examples, 10 RBMs trained on MNIST data 0--9 respectively}
+     \KwResult{Composite Datasets for every digit}
+
+     \For {10 repetitions to gain confidence in results} {
+       \For{All MNIST digits datasets}{
+        \For{Every digit example in the MNIST digit}{
+          composite the current digit dataset with every other dataset\;
+          Generate reconstructions on that dataset using the ORBM, RBM\;
+          Calculate the Cosine Angle score and Cross Entropy for both the RBM's and ORBM's reconstructions versus the ground truth\;
+        }
+        Sum the scores over every digit example\;
+       }
+       Tabulate the summed scores in a several matrices indexed by the digits being composited\;
+     }
+    \caption{Algorithm explaining how the Scores matrices were constructed.}\label{alg:scores}
+    \end{algorithm}
+
+    By finding the difference between the ORBMs reconstructions and the RBMs reconstruction we can create another matrix, in which a positive value represents a `win` for the ORBMs reconstructions and a negative value represents a `loss` (where the RBM outperformed the ORBM).
+
+    \subsubsection{Results}
+
+    These score difference matrices are seen in for the Cross Entropy and Cosine Angle scores in \ref{F:Cross-Entropy-MNIST} and \ref{F:Cosine-MNIST} respectively, where the colour encodes the score. For the Cosine score,  using the approximate correction, zero composed with every other digit yielded the best results for ORBM relative to the RBM, and nine the converse yielding particularly bad results (worse by a factor of 10 compared to zero). Given this, I plotted the RBMs Score versus the ORBM Score as a scatter plot, where each point corresponds to a score. This allows us to examine if the ORBM is performing worse as a whole, or if in some cases it is performing better than the RBM. These plots for zero and nine are shown in \ref{fig:mnist-worse-best-results}.
+    \begin{figure}[h]
+    \centering
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{Assets/Cross-Entropy-Score.png}
+        \caption{The cross entropy score summed over every item in the composite dataset.}
+        \label{F:Cross-Entropy-MNIST}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[t]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{Assets/Cosine-Score.png}
+        \caption{The cosine score summed over every item in the composite dataset.}
+        \label{F:Cosine-MNIST}
+    \end{subfigure}
+    \caption{Dataset-wide MNIST Score Results }\label{fig:mnist-dataset-wide-results}
+\end{figure}
+
+    \begin{figure}[h]
+    \centering
+    \begin{subfigure}[t]{1.1\textwidth}
+        \includegraphics[width=\textwidth]{Assets/(0,X)-ReconstructionScores.png}
+        \caption{(0,x)}
+        \label{F:Cosine-0-x-scores}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[t]{1.1\textwidth}
+        \includegraphics[width=\textwidth]{Assets/(9,X)-ReconstructionScores.png}
+        \caption{(9,x)}
+        \label{F:Cosine-9-x-scores}
+    \end{subfigure}
+    \caption{Cosine Score breakdown for the highest and lowest performing datasets, 0 and 9.}\label{fig:mnist-worse-best-results}
+\end{figure}
+
+
+\subsection{MNIST Analysis}
+
+It is clear that RBM has better scores than the ORBM when summed over the dataset, and surprising the Approximated correction results in better scores than the Full Correction calculation. For the dataset wide scores \ref{fig:mnist-dataset-wide-results} I would expect to see symmetry in that, for example four composited with five, will be an equivalent dataset to five composited with four. There is a symmetry present in the Full Correction, but this is not the case for the Approximate Correction.
+
+
+
+    % \begin{itemize}
+    %   \item Dataset
+    %   \begin{itemize}
+    %     \item 500, 28 by 28 pixel, 0-1 valued, handwritten digit images form the training set.
+    %   \end{itemize}
+    %   \item Method
+    %   \begin{itemize}
+    %     \item Train an single RBM per digit (0-9) in the dataset. Each RBM having 100 hidden units, (TODO-CITE-COOKBOOK) for reasoning.
+    %     \item For all 500 training digit images, compose it with every other digit, and itself. This way the ground truth, the sources are known, therefore making evaluation possible.
+    %     \item For all of these compositions us the RBMs trained of the corresponding sources to:
+    %     \begin{itemize}
+    %       \item Compute the RBM reconstructions for the two sources given their composite input. (TODO-SHOW-DIAGRAM)
+    %       \item Compute the ORBM reconstructions, the ORBM using the same RBMs as in the RBM evaluation.
+    %       \item Because 28 by 28 pixels equates to 784 features, emperically examining all reconstructions is non-trivial. Hence some scoring functions are required.
+    %       \item Scoring
+    %       \item Cross Entropy - Approximate the Log likelihood of the underlying dataset.
+    %       \item Pixel Difference Score - Absolute difference in pixels of the image
+    %       \item Cosine Angle - between reconstruction and target vectors. This has the benefit of also being somewhat magnitude agnostic. (TODO-CITE-AS-MEASURE-WITH-JUSTIFICATION).
+    %       \item Repeat this process 30x to give confidence in findings. Scores calculated can then be meaned over the 30 runs.
+    %     \end{itemize}
+    %   \end{itemize}
+    % \end{itemize}
 
 
 

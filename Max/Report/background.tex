@@ -44,7 +44,7 @@ Gibbs sampling explores the desired probability distribution, taking samples of 
 
 Gibbs sampling is used for performing inference in RBMs and as result also in the ORBM. The \texttt{mixing time}, that is how many Gibbs iterations are needed to reach a satisfactory sample is an important part issue in the ORBM, in that more than one may be required.
 
-\subsubsection{Mixing Time}
+\subsection{Mixing Time}
 
 MCMC methods aim to approximate a distribution, by exploring likely states. As we often start this process from a random state, it's important that enough Gibbs steps are taken before a sample is drawn. This is because the random state may not be close any part of the true distribution we want to sample from, so by running the chain for many iterations we increase the likihood of samples being from the desired distribution.
 
@@ -55,7 +55,7 @@ This process of waiting for enough steps to before drawing samples is referred t
 
 Generative Models can create an internal representation given an input. They can also generate a faux input given an internal representation. Performing one Gibbs iteration, that is sampling from the hidden units given an input $ P(\tilde{h}|\tilde{v}) $ and then taking the generated hidden state and generating a faux input. The model tries to reconstruct the input.
 
-  \subsubsection{Ancestral Sampling or fanstasies of the model}
+  \subsection{Ancestral Sampling or fanstasies of the model}
 
   In the same way that a generative model uses reconstructions to try and recreate the  supplied input based purely on how it's represented that input, performing many, many (greater than 100) Gibbs iterations with no input pattern clamped allows the reconstructions to explore the probability mass that the model has built up during training. Sampling from these wanderings creates what are refferred to as `fantasies` or `dreams`. These give a sense of what the model has learnt, and can act a smoke test for if the model has actually capture anything.
   \todocite{(TODO-CITE-PAPER-WITH-MNIST-DREAM-EVALUATION, they were crappy)}.
@@ -172,6 +172,8 @@ Unlike a Belief Network, a Boltzmann Machine is a undirected network that allows
   \end{center}
   \end{figure}
 
+
+
   As the weights are symmetric, sampling from the visible layer, given a hidden state is similar. That is $P(v_i = 1 | \tilde{h})$, where $\tilde{h}$ is the entire hidden vector is given by:
   \begin{equation}\label{eq:Vis-Gibbs-Update}
    P(v_i = 1 | \tilde{h}) = \sigma(\phi_{i})
@@ -210,20 +212,22 @@ Unlike a Belief Network, a Boltzmann Machine is a undirected network that allows
 
     We can examine the weights into a given hidden unit in the shape of the visible vector. For instance in the context of images, \texttt{Hinton Diagrams} allow visualisation of what a given hidden unit is `doing` by visualising the matrix. This was first used by Hinton in the context of Boltzmann Machines in \cite{Hinton:1986:LRB:104279.104291}. They also give insight into hidden unit utilisation.  Weights are often initialised to small random values, the Hinton diagram will have no visual structure to it. This is illustrated in figures \ref{F:Hinton-Good} and \ref{F:Hinton-Bad}. The former showing a hidden units weights where some structure has been learnt, and the latter showing the opposite.
 
-    \begin{wrapfigure}{L}{0.45\textwidth}
-    \begin{center}
-      \includegraphics[width = 0.2\textwidth]{Assets/HINTON1.png}
-    \caption{.}
-    \label{F:Hinton-Good}
-    \end{center}
-    \end{wrapfigure}
-    \begin{wrapfigure}{R}{0.45\textwidth}
-    \begin{center}
-      \includegraphics[width = 0.2\textwidth]{Assets/HINTON2.png}
-    \caption{.}
-    \label{F:Hinton-Bad}
-    \end{center}
-    \end{wrapfigure}
+    \begin{figure}[h]
+    \centering
+    \begin{subfigure}[t]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{Assets/HINTON1.png}
+        \caption{Utilised hidden unit Hinton Diagram}
+        \label{F:Hinton-Good}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[t]{0.3\textwidth}
+        \includegraphics[width=\textwidth]{Assets/HINTON2.png}
+        \caption{Unutilised hidden unit Hinton Diagram}
+        \label{F:Hinton-Bad}
+    \end{subfigure}
+    \caption{Hinton Diagrams illustrating a trained hidden unit, versus that of an untrained/unutilised hidden unit. This is with no measures to enforce sparsity.}\label{fig:mnist-worse-best-results}
+\end{figure}
 
     Evaluating RBMs is also problem dependant, if split by dimenionality of the task we have some different approaches:
     \begin{description}
