@@ -1,48 +1,5 @@
 \chapter{Evaluation}
 
-\section{Evaluation Design}
-
-
-\subsection{Mixing Time Evaluation}
-  \begin{itemize}
-    \item List the types Traceplot, Densityplots, Gelbin and Rubin multiple sequence diagnostics
-    \item Performed Geweke Diagnostic
-  \end{itemize}
-\subsection{Reconstructions As a measure of Performance}
-
- \begin{itemize}
-   \item Cite literature where reconstructions are used, starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.
- \end{itemize}
-
- \subsection{Growing Complexity of tasks}
-
- \begin{itemize}
-   \item Same models
-   \item Growing dimensionality, bit strings to 2d to MNIST
-   \item Allows comparison of Approx corrections in smaller scale - fail there don't continue using them...
- \end{itemize}
-
-\section{Evaluation Methods}
-
-My \todowording{x experiements} all followed the same high level process, working from trivial cases to more challenging tasks. The reasoning being that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.
-
-The following evaluations aimed to evaluate the ORBM and it's inference algorithm by examining reconstructions given a multi-cause input. An example of a muli-cause input with two quadrilaterals is shown in figure \ref{F:Composite-Example}. The optimal reconstructions are equivalent to the two images that combined form the input.
-
-\begin{wrapfigure}{r}{0.6\textwidth}
-  \begin{center}
-    \includegraphics[width=0.48\textwidth]{Assets/Composite-Example.png}
-  \end{center}
-  \caption{A figure illustrating two five by five pixel images combining to form a composite/multicause input. The images are binary.}
-  \label{F:Composite-Example}
-\end{wrapfigure}
-
-In the smaller dimenisonal cases the reconstructions are inspected by hand, manually plotting the reconstructions and the frequency with which they occurred after a large amount of repetitions. In the larger dimensional tasks, two `scores` were used to evaluate reconstructions against the training set.
-
-To be able to use this reconstruction based evaluation, knowledge of the ground truth was required. This was so:
-\begin{itemize}
-  \item RBMs could be trained and then plugged into the ORBM network.
-  \item Reconstructions could be compared directly (by score) to the ground truth.
-\end{itemize}
 
 \section{Starting from the minimal case, two bit XOR }
 

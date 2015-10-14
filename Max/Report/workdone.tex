@@ -1,21 +1,11 @@
 \chapter{Design and Implementation}\label{C:work}
 
-A large portion of the project was gaining enough understanding of the existing work on RBMs to be able to implement the ORBMs algorithm and architecture. This was crucial as bugs in the implementation are a threat to validity.
+A significant hurdle for the project was gaining enough understanding of the existing work on RBMs to be able to implement the ORBMs algorithm and architecture. This was crucial as bugs in the implementation are a threat to validity.
 
 \todowording{Make sure you talk about why the sigmoid is the most appropriate atrication function! Maybe this should go in background..}
 
 %A large amount of the accomplishments in the project so far have been in gaining the understanding needed to really explore and verify this new technique - given it is built upon the existing work of Restricted Boltzmann Machines. This understanding means that robust correctness tests can be written. This in turn ensures that results produced have more credibility, so the implementation is known to be sound. %
 
-\section{Evaluation Dataset Choice}
-
-\begin{itemize}
-  \item 2 Bit XOR - It's the minimal case. Can examine reconstructions and dreams/fantansy emperically. Also can check that code performs as expect by manually calcating expected values for the algorithm.
-  \item X Neighbouring Bits On in Y Bit Pattern - A natural next step from 2 bit XOR. Still trivial to train an RBM to represent, quick feedback to ensure the algorithm works. Allows comparing the different approximations tractable as number of hidden units is small enough.
-  \item Square Patterns in a 5 by 5 Pixel Image - Another natural step from neighbouring bits, trival to construct a dataset. Very easy to compose. Can use the same model for both models in the ORBM Architecture.
-  \item Rectangles in a 5 by 5 Pixel Image - Next step, builds on the previous test but adds a different model for each source. Also different shapes of model can be used.
-  \item Continous Rectangles (Pixel values 0 to 1) in a 5 by 5 Image - Another variation working towards the MNIST dataset, same as the previous but has continous visible pixels. Allows to different intensitities, interesting cases where the images overlap and increase in intensity.
-  \item MNIST Handwritten Digit Dataset - Pixel values from 0 to 1, 28 by 28 pixel image (784 pixel features.) Used extensiviely in previous studies. Gives me confidence that RBMs can learn these representations. Also allows metaparameters don't have to be tweaked as much as studies already have found reasonable values. Non-trivial to evaluate, but more of a real world case.
-\end{itemize}
 
 \section{Implementation Design}
 
@@ -39,11 +29,71 @@ The program was implemented with unit testing and composability in mind. It was 
 
 \begin{figure}[h]
 \begin{center}
-  \includegraphics[width = 0.8\textwidth]{Assets/ENGR489-Architecture.png}
+  \includegraphics[width = 1\textwidth]{Assets/ENGR489-Architecture.png}
 \caption{A figure showing the architecture for the implemented test suite in UML notation.}
 \label{F:Prog-Arch}
 \end{center}
 \end{figure}
+
+
+\section{Evaluation Design}
+
+
+\subsection{Reconstructions As a measure of Performance}
+
+\begin{itemize}
+  \item Cite literature where reconstructions are used, starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.
+\end{itemize}
+
+
+\subsection{Evaluation Methods}
+
+My \todowording{x experiements} all followed the same high level process, working from trivial cases to more challenging tasks. The reasoning being that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.
+
+\subsubsection{Growing Complexity of tasks}
+
+\begin{itemize}
+  \item Same models
+  \item Growing dimensionality, bit strings to 2d to MNIST
+  \item Allows comparison of Approx corrections in smaller scale - fail there don't continue using them...
+\end{itemize}
+
+The following evaluations aimed to evaluate the ORBM and it's inference algorithm by examining reconstructions given a multi-cause input. An example of a muli-cause input with two quadrilaterals is shown in figure \ref{F:Composite-Example}. The optimal reconstructions are equivalent to the two images that combined form the input.
+
+\begin{wrapfigure}{r}{0.6\textwidth}
+  \begin{center}
+    \includegraphics[width=0.48\textwidth]{Assets/Composite-Example.png}
+  \end{center}
+  \caption{A figure illustrating two five by five pixel images combining to form a composite/multicause input. The images are binary.}
+  \label{F:Composite-Example}
+\end{wrapfigure}
+
+In the smaller dimenisonal cases the reconstructions are inspected by hand, manually plotting the reconstructions and the frequency with which they occurred after a large amount of repetitions. In the larger dimensional tasks, two `scores` were used to evaluate reconstructions against the training set.
+
+To be able to use this reconstruction based evaluation, knowledge of the ground truth was required. This was so:
+\begin{itemize}
+  \item RBMs could be trained and then plugged into the ORBM network.
+  \item Reconstructions could be compared directly (by score) to the ground truth.
+\end{itemize}
+
+
+\subsection{Dataset choice}
+\begin{itemize}
+  \item 2 Bit XOR - It's the minimal case. Can examine reconstructions and dreams/fantansy emperically. Also can check that code performs as expect by manually calcating expected values for the algorithm.
+  \item X Neighbouring Bits On in Y Bit Pattern - A natural next step from 2 bit XOR. Still trivial to train an RBM to represent, quick feedback to ensure the algorithm works. Allows comparing the different approximations tractable as number of hidden units is small enough.
+  \item Square Patterns in a 5 by 5 Pixel Image - Another natural step from neighbouring bits, trival to construct a dataset. Very easy to compose. Can use the same model for both models in the ORBM Architecture.
+  \item Rectangles in a 5 by 5 Pixel Image - Next step, builds on the previous test but adds a different model for each source. Also different shapes of model can be used.
+  \item Continous Rectangles (Pixel values 0 to 1) in a 5 by 5 Image - Another variation working towards the MNIST dataset, same as the previous but has continous visible pixels. Allows to different intensitities, interesting cases where the images overlap and increase in intensity.
+  \item MNIST Handwritten Digit Dataset - Pixel values from 0 to 1, 28 by 28 pixel image (784 pixel features.) Used extensiviely in previous studies. Gives me confidence that RBMs can learn these representations. Also allows metaparameters don't have to be tweaked as much as studies already have found reasonable values. Non-trivial to evaluate, but more of a real world case.
+\end{itemize}
+
+
+\subsection{Mixing Time Evaluation}
+  \begin{itemize}
+    \item List the types Traceplot, Densityplots, Gelbin and Rubin multiple sequence diagnostics
+    \item Examine hidden state, reconstructions as gibbs iterations occur.
+  \end{itemize}
+
 
 % \subsection{Language Choice}\label{SS:language}
 %

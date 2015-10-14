@@ -140,10 +140,12 @@ There are two plots for the two cases $h^A_j=0,1$ These are plotted in figure \r
 The proposed approximation uses a Sigmoid to approximate
 \todowording{Marcus help! I don't understand where the approximation comes from. Do you have to jusitfy it or can I just drop it in and be like, proposed approximation will also be tested?}
 
+The correction essentially applies a plus or minus a weight, or nothing depending on the state of the two RBMs. This allows one RBM to in effect change what the other RBM `sees` by either adding weight to a given visible or removing weight. This is almost equivalent to appling a correction to the visible vector that each RBM `sees`.
+
 \begin{figure}[h]
 \begin{center}
   \includegraphics[width = 0.8\textwidth]{Assets/correction.png}
-\caption{A diagram that shows the structure of the correction over the weighted sums into the hiddens of one of the RBMS versus both.}
+\caption{A diagram that shows the structure of the correction over the weighted sums into the hiddens of one of the RBMS versus both. Note the platuaes that are $+- weight$ in maganitude}
 \label{F:Correction-Plot}
 \end{center}
 \end{figure}
