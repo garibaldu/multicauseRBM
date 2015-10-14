@@ -146,7 +146,12 @@ The dependance in belief networks means that sampling from the network requires 
 $$
 P(h_1 = 1|v = 1) = \bigg[1 + \frac{(1 - f(b_1))f(w_2)}{f(b_1)f(w_1 + w_2)} \bigg]^{-1}
 $$
-In a network with many connected nodes the dependence introduced makes sampling take longer. In the context of images, where there may be upwards of 1000 observable values, all with different dependancies this becomes intractable. Neal showed this by comparing the number of gibbs iterations required for small enough error rates in~\cite{neal1992:connectionist}.
+In a network with many connected nodes the dependence introduced makes sampling take longer. In the context of images, where there may be upwards of 1000 observable values, all with different dependancies sampling from $P(h|v)$ becomes intractable. Neal showed this by comparing the number of gibbs iterations required for small enough error rates in~\cite{neal1992:connectionist}.
+
+Conversely, sampling from the visible given we know the state of the hidden cause is extremely efficient in a SBN. It can be expressed as
+\begin{equation}\label{eq:SBN-v-given-h}
+P(v|h) = \sum_i v_i \log \sigma_i(h) + (1-v_i)log(1-\sigma_i(h))
+\end{equation}
 
 \subsection{Gibbs Sampling in a Boltzmann Machine}
 
@@ -191,15 +196,12 @@ In order to describe Gibbs sampling in the new architecture proposed, it must fi
     &= \frac{p_1}{1 - p_1} \\
     % \text{Rearranging to give p_1 leads to} \\
     p_1 &= \frac{1}{1 + \frac{P^\star(h,v \text{ where } h_j = 0)}{P^\star(h,v \text{ where } h_j = 1)} }
-    &= \frac{1}{1 + e^{\psi_j}}
+    &= \frac{1}{1 + e^{-\psi_j}}
   \end{aligned}
     $$
-
-
-
-
-    In a standard RBM, updating a hidden unit $h_j$ when performing Gibbs sampling is calculated by finding $ P(h_j = 1 | v) $ where $v$ is an input pattern. In the context of an image, $ v $ would be the pixel values where each pixel corresponds to a visible unit, $v_i$.
-    The probability of a given hidden unit activating is: \todocite{Gibbs sampling would be good here}.
+  To update a hidden unit $h_j$
+  we find $ P(h_j = 1 | v) $ where $v$ is an input pattern. In the context of an image, $ v $ would be the pixel values where each pixel corresponds to a visible unit, $v_i$.
+  The probability of a given hidden unit activating is: \todocite{Gibbs sampling would be good here}.
     \begin{equation}\label{eq:Hid-Gibbs-Update}
     P(h_j = 1 | v) = \sigma(\psi_j)
     \end{equation}

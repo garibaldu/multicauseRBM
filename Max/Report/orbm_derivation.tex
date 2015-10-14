@@ -18,13 +18,13 @@ Hinton, when introducing the idea of training a Deep Belief Network showed that 
 
 We can now show that Gibbs sampling in this RBM unrolled with a Sigmoid belief network is equivalent to Gibbs Sampling in a standard RBM.\@
 
-\subsubsection{Ancestral Sampling in this equivalent network}
+\subsubsection{Sampling in this equivalent network}
 
-Ancestral sampling in an RBM \todocite{as described in the section where I talk about dreams...}. This network behaves a similar way, where a Gibbs chain is run between the top two layers, $U$ and $H$, until the last iteration. At the last iteration a hidden pattern is sampled and then is pushed through the Sigmoid belief network between $H$ and $V$. This is illustrated in figure \ref{F:3-Layer-RBM-Gibbs}.
+sampling in the ORBM \todocite{as described in the section where I talk about dreams...} network behaves a similar way to RBM sampling, where a Gibbs chain is run between the top two layers, $U$ and $H$, until the last iteration. At the last iteration a hidden pattern is sampled and then is pushed through the Sigmoid belief network between $H$ and $V$. This is illustrated in figure \ref{F:3-Layer-RBM-Gibbs}.
 
 \begin{figure}[h]
 \begin{center}
-  \includegraphics[width = 0.65\textwidth]{Assets/ORBM-Gibbs-Chain.png}
+  \includegraphics[width = 0.8\textwidth]{Assets/ORBM-Gibbs-Chain.png}
 \caption{A diagram showing Ancestral sampling in the equivalent network, where normal sampling in the top 2 layers is performed until Gibbs iteration $t$ the hidden state is pushed through the bottom layers Sigmoid Network.}
 \label{F:3-Layer-RBM-Gibbs}
 \end{center}
@@ -40,20 +40,16 @@ There is however another useful way to draw samples in such a network that we wi
 \begin{equation}\label{eq:Product-Joint}
 \log P^\star(h,v) = \log P^\star(h) + \log P(v|h)
 \end{equation}
-We have the second term already:
-$$ \log P(v|h) = \sum_i v_i \log \sigma_i(h) + (1-v_i) \log (1 - \sigma_i(h))$$
-
-To find the remaining term, $P^\star(h)$ we need to marginalise the  joint (eq~\ref{eq:Product-Joint}) over all $\mathbf{v}$ configurations:
+The second term is defined in equation \ref{eq:SBN-v-given-h}. To find the first term, $P^\star(h)$, we need to marginalise the joint (eq~\ref{eq:Product-Joint}) over all $\mathbf{U}$ layer configurations:
 
 $$
  \begin{aligned}
 P^\star(h) &= \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \exp \bigg[  \log P^{\star}(h,v) \bigg] \\
 &= \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \exp \bigg[  \sum_i  \sum_j h_j W_{ji} v_i \;\; + \;\; \sum_i W_{0i} v_i \;\; + \;\; \sum_j W_{j0} h_j \bigg] \\
 &= \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \exp \bigg[  \sum_i v_i \phi_i(h)  \;\; + \;\; \sum_j W_{j0} h_j \bigg] \\
-\text{where } \phi_i(h) &= \sum_j W_{ji} h_j + W_{0i} \\
 &= \exp\left[ \sum_j h_j  W_{j0} \right] \;\; \times \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \prod_i \exp\bigg[ v_i \phi_i(h) \bigg] \\
 &= \exp\left[\sum_j h_j  W_{j0}\right] \;\; \times \prod_i \bigg( 1 + e^{\phi_i(h) } \bigg) \\
-\text{and so}
+\text{and taking logs,}
 \log P^\star(h) &= \sum_j h_j  W_{j0} \;\; +  \sum_i \log \bigg( 1 + e^{\phi_i(h) } \bigg)
 \\
 &= \sum_j h_j  W_{j0} \;\; + \; \sum_i \phi_i(h) \;  - \; \sum_i \log \sigma_i(h)
@@ -63,10 +59,10 @@ $$
 So far we've figured out $\log P^\star(h)$ for the RBM that is the `top layer`.
 
 Therefore another way to write $\log P^\star(h,v)$ is
-$$
+\begin{equation}\label{eq:equivalent-rbm-log-joint}
 \log P^\star(h,v) = \underbrace{\sum_j h_j  W_{j0} \;\; + \; \sum_i \phi_i(h) \;  - \; \sum_i \log \sigma_i(h)}_{\log P^\star(h)} \;\;+\;\; \underbrace{\sum_i v_i \log \sigma_i(h) + (1-v_i) \log (1 - \sigma_i(h))}_{\log P(v \mid h)}
-$$
-By collecting terms and simplifying one can readily those that this matches the earlier form in equation~\ref{eq:LogPJoint}.
+\end{equation}
+By collecting terms and simplifying this matches the earlier form in equation~\ref{eq:LogPJoint}.
 
 
 \section{A New Approach, The ORBM}
