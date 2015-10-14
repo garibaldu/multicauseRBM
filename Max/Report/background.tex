@@ -179,6 +179,25 @@ In order to describe Gibbs sampling in the new architecture proposed, it must fi
 
   \subsubsection{The Gibbs update}\label{S:Gibbs-Update}
 
+    Denote the Gibbs sampler's probability of setting a variable, $x_j$ to 1 as:
+    \begin{equation}\label{eq-p1-gibbs-full}
+    P_{Gibbs}(h_j = 1 | v, h_{k != j})
+    \end{equation}
+    We can refer to the proability in equation \ref{eq-p1-gibbs-full} as $p_1$ and the converse $P_{Gibbs}(h_j = 0 | v, h_{k != j})$ can be referred to as $p_0$.
+    Then, by the product rule of probabilities:
+    $$
+    \begin{aligned}
+    \frac{p_1}{p_0} &= \frac{P^\star(h,v \text{ where } h_j = 1)}{P^\star(h,v \text{ where } h_j = 0)}\\
+    &= \frac{p_1}{1 - p_1} \\
+    % \text{Rearranging to give p_1 leads to} \\
+    p_1 &= \frac{1}{1 + \frac{P^\star(h,v \text{ where } h_j = 0)}{P^\star(h,v \text{ where } h_j = 1)} }
+    &= \frac{1}{1 + e^{\psi_j}}
+  \end{aligned}
+    $$
+
+
+
+
     In a standard RBM, updating a hidden unit $h_j$ when performing Gibbs sampling is calculated by finding $ P(h_j = 1 | v) $ where $v$ is an input pattern. In the context of an image, $ v $ would be the pixel values where each pixel corresponds to a visible unit, $v_i$.
     The probability of a given hidden unit activating is: \todocite{Gibbs sampling would be good here}.
     \begin{equation}\label{eq:Hid-Gibbs-Update}
