@@ -246,17 +246,15 @@ The inference algorithm was run for 1000 reconstructions in the ORBM architectur
 
     \begin{figure}[h]
     \centering
-    \begin{subfigure}[t]{1.1\textwidth}
-        \includegraphics[width=\textwidth]{Assets/(0,X)-ReconstructionScores.png}
-        \caption{(0,x)}
-        \label{F:Cosine-0-x-scores}
+    \begin{subfigure}[t]{1\textwidth}
+        \includegraphics[width=\textwidth]{Assets/b.png}
+        \caption{ $(0,x)$ }
+      \label{F:Cosine-0-x-scores}
     \end{subfigure}
-    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
-      %(or a blank line to force the subfigure onto a new line)
-    \begin{subfigure}[t]{1.1\textwidth}
+    \begin{subfigure}[t]{1\textwidth}
         \includegraphics[width=\textwidth]{Assets/(9,X)-ReconstructionScores.png}
-        \caption{(9,x)}
-        \label{F:Cosine-9-x-scores}
+        \caption{ $(9,x)$ }
+      \label{F:Cosine-9-x-scores}
     \end{subfigure}
     \caption{Cosine Score breakdown for the highest and lowest performing datasets, 0 and 9.}\label{fig:mnist-worse-best-results}
 \end{figure}
@@ -264,7 +262,7 @@ The inference algorithm was run for 1000 reconstructions in the ORBM architectur
 
 \subsection{MNIST Analysis}
 
-It is clear that RBM has better scores than the ORBM when summed over the dataset, and surprising the Approximated correction results in better scores than the Full Correction calculation. For the dataset wide scores \ref{fig:mnist-dataset-wide-results} I would expect to see symmetry in that, for example four composited with five, will be an equivalent dataset to five composited with four. There is a symmetry present in the Full Correction, but this is not the case for the Approximate Correction.
+% It is clear that RBM has better scores than the ORBM when summed over the dataset, and surprising the Approximated correction results in better scores than the Full Correction calculation. For the dataset wide scores \ref{fig:mnist-dataset-wide-results} I would expect to see symmetry in that, for example four composited with five, will be an equivalent dataset to five composited with four. There is a symmetry present in the Full Correction, but this is not the case for the Approximate Correction.
 
 
 
@@ -374,5 +372,5 @@ It is clear that RBM has better scores than the ORBM when summed over the datase
 %   \end{itemize}
 %
 %
-% \subsection{Classifciation Accuracy on Hidden Representation}
-%   Not sure about this one.
+% % \subsection{Classifciation Accuracy on Hidden Representation}
+% %   Not sure about this one.

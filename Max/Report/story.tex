@@ -2,16 +2,17 @@
 
 
 \section{A Problem}
-Consider an image of a face. At least two systems are at play in the image of a face, the face itself and the illumination. Both face and illumination are complex and can vary greatly, but they are fundamentally acting independently of each other up until they compose to form the image.
-A form of Deep Nueral Networks, Deep Belief Networks, have achieved state of the art performance in facial recognition, but this is only possible with a large amount of training data. This suggests that these networks are missing a way to represent these \emph{sources} independently. This project takes steps toward representing complex causes separately with the primary task of decomposing joint images (data).
+Consider an image of a face. At least two \emph{systems} are at play in the image of a face, the face itself and the illumination. Both face and illumination are complex and can vary greatly, but they are fundamentally acting independently of each other up until they compose to form the image.
+
+A form of Deep Neural Networks, Deep Belief Networks, have achieved state of the art performance in facial recognition, but this is only possible with a large amount of training data. This suggests that there is a disparity between the task and these networks, as the networks do no explicitly attempt to represent these \emph{systems} indedependently. This project takes steps toward representing complex causes separately with the primary task of decomposing joint images (more generally, vector based data).
 
 Separating faces and illumination is too challenging for this project, there is no way to verify/evaluate that the new approach is working as the concept of a face without illumination cannot be visualised. Instead I will start with the modest task of working with images where the source images being combined are known.
 
 \section{Deep Belief Networks can achieve state of the art performance}
 Deep Belief networks (DBNs) are powerful models that have proven to achieve state of the art performance in tasks such as image classification, dimensionality reduction, natural language recognition, Document classification, Semantic Analysis.\todocite{}
-Despite a DBN's expressiveness, there is no way to extract independant sources, the model instead learns how to represent the complex combination. The complex combination of sources is inheriently richer than the individual sources acting alone. The DBN may learn features that correspond to each source during it's training process, however the architecture or training algorithm make no attempt to enforce this.
+Despite a DBN's expressiveness, there is no way to extract independant sources, the model instead learns how to represent the complex combination. The complex combination of sources is inheriently richer than the individual sources acting alone. The DBN may learn features that correspond to each source during it's training process, however the architecture or training algorithm make no attempt to enforce this. Consider face and illumination example, with 1000 possible faces and 1000 possible illuminations. If we only observe a combination of faces and illuminations there is 1000000 possible combinations we need to represent. It is more succint to treat faces and illuimination as independent \emph{system}, resulting in 2000 combinations.
 
-DBNs are built of shallow networks called Restricted Boltzmann Machines.
+DBNs are built of shallow networks called Restricted Boltzmann Machines (RBMs). Despite being building blocks for the DBN RBMs can be used as models for practical tasks for instance representing handrwritten digits \cite{fischer2014training}.
 
 \section{A Proposed Solution and Contributions}
 
@@ -19,18 +20,16 @@ Frean and Marsland propose an alternative architecture to that of an RBM, that a
 
 This project contributes:
 \begin{itemize}
-  \item The first articulation of the architecture, presenting the context needed to understand the new architecture.
+  \item The first articulation of the proposed architecture, including the context needed to understand it.
+  \item A Python implementation of the new architecture.
   \item A suite of graded evaluations/tests that explore how the architecture and source separation algorithm work in practice.
 \end{itemize}
 The evaluations will not address separating faces and illumination, instead only performing tasks such as separating two handwritten digits composed on each other (see figure \ref{F:Composition-Example}).
 
-
-
-
 \begin{figure}[h]
 \begin{center}
-  \includegraphics[width = 0.4\textwidth]{Assets/composition-example.png}
-\caption{An example composition of a handwritten 4 and 3, illustrating a non-trival task where the ground truth is known.}
+  \includegraphics[width = 0.1\textwidth]{Assets/composition-example.png}
+\caption{An example composition of a handwritten four and three, illustrating a non-trival task where the ground truth is known.}
 \label{F:Composition-Example}
 \end{center}
 \end{figure}

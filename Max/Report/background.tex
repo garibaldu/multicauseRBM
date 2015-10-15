@@ -1,34 +1,37 @@
 \chapter{Backgroud}
-% #rewrite
-As the proposed architecture and algorithm extend existing work on RBMs, a substantial amount of background is required culminating with the new approach being derived. An robust understanding of these concepts is required for this project to implement and design appropriate evaluations for the proposed architecture new approach.
+
+As the proposed architecture and algorithm extend existing work on Probablistic Graphical Models, a substantial amount of background is required culminating with the new approach being derived. An robust understanding of these concepts is required for this project to implement and design appropriate evaluations for the proposed architecture new approach.
 
 \section{Generative Models}\label{S:Generative-Models}
 
 This project works with nueral network based generative models.
-Generative models are a powerful way to model data. The rational behind them being that we aim to learn a model that can both create the training data represent it, and reconstruct it using it's learned representation. Generative models can map input data from raw values to higher level features. Hinton gave a compelling argument why higher level features are desirable in the context of generative models~\cite{hinton:32723:vv}. \begin{quote} Consider, for example, a set of images of a dog. Latent variables such as the position, size, shape and color of the dog are a good way of explaining the complicated, higher-order correlations between the individual pixel intensities, and some of these latent variables are very good predictors of the class label.\end{quote}
+Generative models are a powerful way to model data. The rational behind them being that we aim to learn a model that can both create the training data represent it, and reconstruct it using it's learned representation. Generative models can map input data from raw values to higher level features. Hinton~\cite{hinton:32723:vv} gave a compelling argument for higher level features in the context of generative models. \begin{quote} Consider, for example, a set of images of a dog. Latent variables such as the position, size, shape and color of the dog are a good way of explaining the complicated, higher-order correlations between the individual pixel intensities, and some of these latent variables are very good predictors of the class label.\end{quote}
 
-Generative models model a distribution over a collection binary variables $X$, where $X$ is comprised of variables which can be observed or unobserved. The observed variables are referred to as \texttt{visible} variables or units ($v$). Conversely, unobserved variables correspond to the hidden units of the neural network ($h$). With these terms defined the joint distribution that generative models model can be expressed as $P(X)$ where $X$ is comprised of $h,v$. Collections of these units, are often referred to as `patterns` or `vectors` in that they are represented by a vector or pattern of bits. For instance in the context of an image, a visible pattern is the pixels of the image raveled into a one dimensional vector.
+Generative models model a distribution over a collection binary variables $X$, where $X$ is comprised of variables which can be observed or unobserved. The observed variables are referred to as \texttt{visible} variables or units ($v$). Conversely, unobserved variables correspond to the hidden units of the neural network ($h$). With these terms defined the joint distribution that generative models model can be expressed as $P(X)$ where $X$ is comprised of $h,v$. Collections of these units, are often referred to as `patterns` or `vectors` in that they are represented by a vector or pattern of bits. For instance in the context of an image, a visible pattern is the pixels of the image flattened into a one dimensional vector.
 
 \section{Directed PGMs}
 
-A Directed PGM, or in full, a Directed Probabilistic Graphical Model (DPGMs), is a language for reasoning about generative models where connections between units express causation~\cite{pearl2014probabilistic}. They provide an expressive way to represent a collection of related, stochastic variables. See figure \ref{F:PGM-example} for a simple, abstract example where variable $A$ is dependent on $B$. As a result this network often referred to as a Belief Network or Bayesian Network where it causal dependencies are expressed as a conditional probability table. For example in figure \ref{F:PGM-example} the probabilities of $A$ being in a given state are dependent on $B$, and as a result the joint distrubution over $A$ and $B$ is $P(A,B) = P(A|B)P(B)$.
+There are two classes of Probablisitic Graphical Models, Directed and Undirected. A Directed PGM, is a notation for factorising over a collection of stochastic variables.
+Given $X$, the variables in the generative model, and $parent_i$ the parent unit of $x_i$, the distribution over $X$ in a directed PGM is defined by the following factorisation:
+\begin{equation}\label{eq:sbn-factorisation}
+P(X) = \prod_i P(x_i | parent_i)
+\end{equation}
+Connections between units in the Directed PGM express causation~\cite{pearl2014probabilistic}. They provide an expressive way to represent a collection of related, stochastic variables. See figure \ref{F:PGM-example} for the minimal example, where variable $A$ is dependent on $B$. As a result this network often referred to as a Belief Network or Bayesian Network where it's causal dependencies are expressed as a conditional probability table or `factor`. For example in figure \ref{F:PGM-example} the probabilities of $A$ being in a given state are dependent on $B$. The joint distrubution over $A$ and $B$, as in equation \ref{eq:sbn-factorisation}, can be expressed as:
+$$P(A,B) = P(A|B)P(B)$$
 \begin{wrapfigure}{r}{0.2\textwidth}
 \begin{center}
-  \includegraphics[width = 0.2\textwidth]{Assets/PGM_Example_1.png}
-\caption{An example PGM, showing an observed variable `A` and it's hidden cause `B`.}
+  \includegraphics[width = 0.1\textwidth]{Assets/PGM_Example_1.png}
+\caption{Minimal Directed PGM, showing an observed variable `A` and it's hidden cause `B`.}
 \label{F:PGM-example}
 \end{center}
 \end{wrapfigure}
 
-Given $X$, the variables in the generative model, and $parent_i$ the parent unit of $x_i$, the distribution over $X$ in a directed PGM is defined by the following factorisation:
-$$
-P(X) = \prod_i P(x_i | parent_i)
-$$
-Note that a normalisation is not needed in DPGMs as the conditional probabilities enforce a value between 0 and 1.
+\todowording{consider removing ---
+Note that a normalisation is not needed in DPGMs as the conditional probabilities enforce that the factors sum to 1.}
 
 \subsection{Explaining Away in DPGMs}
 
-A common task in generative models is given a known parent unit (a cause), is inferring the probability of children variable dependent on that parent being in a given state. In directed PGMs this proves trivial to calculate. The opposite task of inferring the state of causes, given the effect of that cause is also a desirable task\todocite{}. It becomes problematic in DPGMs as these causal relationships gives rise to the effect of `Explaining Away`. The canonical example \texttt{Burglar, Earthquake, Alarm Problem} is a exemplifies this effect effect\cite{Barber:2012:BRM:2207809} and is illustrated in figure \ref{F:Explaining-Away}.
+\todowording{A common task in generative models is given a known parent unit (a cause), is inferring the probability of children variable dependent on that parent being in a given state. In directed PGMs this proves trivial to calculate. The opposite task of inferring the state of causes, given the effect of that cause is also a desirable task\todocite{}. It becomes problematic in DPGMs as these causal relationships gives rise to the effect of `Explaining Away`. The canonical example \texttt{Burglar, Earthquake, Alarm Problem} is a exemplifies this effect effect\cite{Barber:2012:BRM:2207809} and is illustrated in figure \ref{F:Explaining-Away}.}
 \begin{figure}[h]
 \begin{center}
   \includegraphics[width = 0.4\textwidth]{Assets/Explaining_Away.png}
@@ -36,37 +39,37 @@ A common task in generative models is given a known parent unit (a cause), is in
 \label{F:Explaining-Away}
 \end{center}
 \end{figure}
-Knowledge of the state of the \texttt{alarm} makes \texttt{burglar} and \texttt{earthquake} dependent. The \texttt{alarm} is the observable variable here ($v$) and the \texttt{burglar} and \texttt{earthquake} are the hidden `causes` ($h$). For example if the \texttt{alarm} is true, and we see news of earthquake in the area, our belief that we have been burgled decreases. Expressed in probabilities where $A$, $B$ and $E$ are the states of \texttt{alarm},\texttt{burglar} and \texttt{earthquake} respectively:
+Knowledge of the state of the \texttt{alarm} makes \texttt{burglar} and \texttt{earthquake} dependent. The \texttt{alarm} is the observable variable here ($v$) and the \texttt{burglar} and \texttt{earthquake} are the hidden `causes` ($h$). For example if the \texttt{alarm} is true, and we see news of earthquake in the area, our belief that we have been burgled decreases. Expressed (again exemplify equation \ref{eq:sbn-factorisation}) in probabilities where $A$, $B$ and $E$ are the states of \texttt{alarm},\texttt{burglar} and \texttt{earthquake} respectively:
 $$
 P(A,B,E) = P(A|B,E)P(B)P(E)
 $$
 
 \subsection{DPGMs in Neural Networks: The Sigmoid Belief Network}
 
-A Belief network can be expressed as a neural network, where conditional probabilities are parameterised as weights. This network is called a Sigmoid Belief Network (SBN) as the probability of a variable $x_i$ that is dependent on a ancestor variable $parent_i$ the weighted sum into $x_i$, $\phi_i$ passed through the sigmoid function ($ \sigma(x)=1/(1+e^{-x})$). This is equivalent to a perceptron using a sigmoid activation function and ensures that the output is a valid probability (between 0 and 1).
-SBNs take a naive approach to causes, where each hidden unit represent a single, simple cause. Formally, $\phi_i$ is
+A Belief network can be expressed as a neural network, where conditional probabilities are parameterised as weights. \todowording{Simplify --- This network is called a Sigmoid Belief Network (SBN) as the probability of a variable $x_i$ being 1 that is dependent on a ancestor variable $parent_i$ the weighted sum into $x_i$, $\phi_i$ passed through the sigmoid function ($ \sigma(x)=1/(1+e^{-x})$)}. This is equivalent to a perceptron using a sigmoid activation function and ensures that the output is a valid probability (between 0 and 1).
+SBNs take a naive approach to causes, where each hidden unit represent a single, simple cause. Formally, $\phi_i$ is a weighted sum of the activations of parent nodes:
 $$ \phi_i = \sum_{j \in parent_i} W_{ij}x_j$$
-and the factorisation of a DPGM is defined as:
+and
 $$
-P(x_i | parent_i) = \sigma(\phi_i)
+P(x_i = 1 | parent_i) = \sigma(\phi_i)
 $$
 
 \section{Undirected PGMs:}
 
-Unlike DPGMs Undirected PGMs (UPGMs) do not represent causation, instead capturing a dependency between two units. These pairwise dependencies change the structure of the factorisation, requiring a normalisation constant $Z$, a factor $\Phi$ between two variables $x_i,x_j$, resulting in the factorisation:
+Undirected PGMs do not represent causation, instead merely capturing a dependency between two units. These pairwise dependencies change the structure of the factorisation a factor $\Phi$ between each pair of variables $x_i,x_j$ resulting in the factorisation:
 $$
 P(X) = \frac{1}{Z} \prod_i \Phi(x_i, x_j)
 $$
-The introduction of the normalisation $Z$ (often referred to as the partition function) adds nontrival complexity to the model as to compute $Z$, a sum over all configurations of $x_i$ and $x_j$ is required for all $i$ and $j$.
+The introduction of the normalisation $Z$ (often referred to as the partition function) adds nontrival complexity to performing inference in Undirected PGMs~\todocite{}, a sum over all $2^N$ configuratiions of $x$ is required.
 
-As UPGMs do not capture causal data, calculating the state of a variable given another is no longer hampered by the effect of explaining away, however their reccurent structure, while expressive introduces an intractability in practice.
+On the other hand, Undirected PGMs do not capture causal relationships. Calculating the state of a variable given another is no longer hampered by the effect of explaining away, however their reccurent structure, while expressive introduces an intractability in practice.
 
-\subsection{UPGMs in Neural Networks: The Boltzmann Machine}
+\subsection{Undirected PGMs in Neural Networks: The Boltzmann Machine}
 A UPGM expressed as nueral network is referred as Boltzmann Machine or Markov Field, where connections encode dependancies with an associated weight. We see this where $W_{ij}$ is the weight between variables $x_i$ and $x_j$ the factor $\Phi$ is expressed as:
 $$
-\Phi = e^{x_i,x_j,W_{ij}}
+\Phi(x_i, x_j) = e^{x_ix_jW_{ij}}
 $$
-The Boltzmann machine has proposed in various forms, from different domains throughout the years, for instance it was presented in a non-stochastic context of the Hopfield network in~\cite{Hopfield01041982}. Hinton and Sejnowski also proposed the Boltzmann machine in~\cite{geoffreye.hintonterrencej.sejnowski1983}. An example Boltzmann Machine is shown in figure \ref{F:Boltzmann-Machine}. As shown in this figure \ref{F:Boltzmann-Machine}, the Boltzmann Machine can be recurrent, expressing complex dependencies between variables. This recurrence makes inferring the state of a subset variables based on knowledge of another subset non-trivial as the size of the network grows to be practical \todocite{}.
+The Boltzmann machine has proposed in various forms, from different domains throughout the years, for instance it was presented in a non-stochastic context of the Hopfield network in~\cite{Hopfield01041982}. Hinton and Sejnowski also proposed the Boltzmann machine in~\cite{geoffreye.hintonterrencej.sejnowski1983}. An example Boltzmann Machine is shown in figure \ref{F:Boltzmann-Machine}. As shown in this figure \ref{F:Boltzmann-Machine}, the Boltzmann Machine can be recurrent, expressing complex dependencies between variables. This recurrence makes inferring the state of a subset variables based on knowledge of another subset non-trivial as the size of the network grows\todocite{}.
 \begin{figure}[h]
 \begin{center}
   \includegraphics[width = 0.4\textwidth]{Assets/Boltzmann_Machine.png}
@@ -78,7 +81,7 @@ The Boltzmann machine has proposed in various forms, from different domains thro
 \subsection{Restricted Boltzmann Machines}
 
 
-A Boltzmann Machine's architecture can be altered to alleviate inference shortcoming. The restriction, originally proposed by \cite{Smolensky:1986vy}, and then later revitalised with a training algorithm that operates on the deeper architecture of the DBN~\cite{geoffreye.hintonterrencej.sejnowski1983}. The restriction requires the network to be a two layer bipartite network, each layer corresponding to the observed (visible) and latent (hidden) units. Connections are forbidden between the layer of hidden units and the layer of visible units respectively. An example Restricted Boltzmann Machine architecture is shown in figure~\ref{F:Restricted-Boltzmann-Machine}. The collection of hidden units, forming a layer are referred to as the \texttt{hidden layer}. The collection of visible units are referred to as the \texttt{visible layer}.
+\todowording{A Boltzmann Machine's architecture can be altered to alleviate inference shortcoming. The restriction, originally proposed by \cite{Smolensky:1986vy}, and then later revitalised with a training algorithm that operates on the deeper architecture of the DBN~\cite{geoffreye.hintonterrencej.sejnowski1983}}. The restriction requires the network to be a two layer bipartite network, each layer corresponding to the observed (visible) and latent (hidden) units. Connections are forbidden between the layer of hidden units and the layer of visible units respectively. An example Restricted Boltzmann Machine architecture is shown in figure~\ref{F:Restricted-Boltzmann-Machine}. The collection of hidden units, forming a layer are referred to as the \texttt{hidden layer}. The collection of visible units are referred to as the \texttt{visible layer}.
 
 \begin{figure}[h]
 \begin{center}
@@ -88,29 +91,33 @@ A Boltzmann Machine's architecture can be altered to alleviate inference shortco
 \end{center}
 \end{figure}
 
-\subsection{Energy, and the log likelihood of the joint}
-
-An RBM models the joint distribution of hidden and visible states.
-The RBM assigns to every configuration of $h$ and $v$ an \texttt{Energy}, where the lower the energy, the more likely the RBMs configuration is to \textit{fall} into that state. Hopfield, in the context of what is now called the Boltzmann Machine~\cite{Hopfield01041982}, presented this energy as defined by the function as:
-$$ E(v,h) = -\sum_{i \in visible}{W_{0i}v_i}   -\sum_{j \in hidden}{W_{0j}h_j}  -\sum_{i,j}{v_ih_jW_{ji}}  $$
-The probability of the RBM being in a given configuration is the joint probability of $h$ and $v$.
-$$ P(h,v) = \frac{1}{Z} \prod_{j,i} e^{h_jW_{ji}v_i} $$
+% \subsection{Energy, and the log likelihood of the joint}
+%
+% An RBM models the joint distribution of hidden and visible states.
+% The RBM assigns to every configuration of $h$ and $v$ an \texttt{Energy}, where the lower the energy, the more likely the RBMs configuration is to \textit{fall} into that state. Hopfield, in the context of what is now called the Boltzmann Machine~\cite{Hopfield01041982}, presented this energy as defined by the function as:
+% $$ E(v,h) = -\sum_{i \in visible}{W_{0i}v_i}   -\sum_{j \in hidden}{W_{0j}h_j}  -\sum_{i,j}{v_ih_jW_{ji}}  $$
+The probability of the RBM being in a given configuration is the joint probability of $h$ and $v$:
+$$ P(h,v) = \frac{1}{Z} \prod_{j,i} e^{h_jv_iW_{ji}} $$
 Taking logs this becomes:
-$$ \log P(h,v) = \frac{1}{Z} \log \sum_{j,i} h_j W_{ji} v_i $$
-$\frac{1}{Z} $ is the partition function, which normalises the probability of the joint. Calculating this would require summing over all possible configurations of $h$ and $v$, which is intractable for practical numbers of units. For instance a 28 by 28 image corresponds to 784 visible units, and for, say 10 hidden units this would amount to $2^{784} * 2^{10} $ possible configurations. We opt to work in terms of $P^\star$ which is the non-normalised probability of the joint over $h \text{ and } v$.
-So we arrive at
+$$ \log P(h,v) = \log \sum_{j,i} h_jv_i  W_{ji}  - \log Z $$
+$ Z $ is the partition function, which normalises the probability of the joint. Calculating this would require summing over all $2^N$ configurations of $h$ and $v$, which is intractable for practical numbers of units. For instance a 28 by 28 image corresponds to 784 visible units, and for, say 10 hidden units this would amount to $ 2^{784} * 2^{10} $ possible configurations. We opt to work in terms of $P^\star$ which is the non-normalised probability of the joint over $h \text{ and } v$.
+% So we arrive at:
+
 \begin{equation}\label{eq:LogPJoint}
-   \log P^\star(h, v) = \sum_i \sum_j e^{h_j v_i W_{ji}}
+   \log P^\star(h, v) = \log \sum_{i,j} {h_j v_i W_{ji}}
 \end{equation}
 
 \section{Sampling in Generative Models}
 
 \subsection{Why sampling is important}
 
-Sampling is the process of drawing samples from a distribution. It is used when the distribution we want samples from is intractable to calculate analytically. As mentioned in \ref{S:Generative-Models}, the power of generative models is their ability to represent, reconstruct and be trained on data. These tasks all require sampling from configurations of the hidden and visible units, often conditioned one or the other --- for instance sampling from $P(h|v)$ allows a hidden representation to be created from a given input.
+Sampling is used when the distribution we want to work from is intractable to calculate analytically. As mentioned in \ref{S:Generative-Models}, the power of generative models is their ability to represent, reconstruct and be trained on data. These tasks all require sampling from configurations of the hidden and visible units, often conditioned one or the other --- for instance sampling from $P(h|v)$ allows a hidden representation to be created from a given input.
 
-This is required to train generative models, as often the gradient to be climbed/descended involves calculating a probability over all the units in the generative model. Training a nueral network based generative model involves calculating a weight update, which in turn requires inferring a hidden representation given a training item. The converse, sampling from a $P(v|h)$ is also required. \todocite{EM}
+\todowording{*}
 
+This is required to train generative models, as often the gradient to be climbed/descended involves calculating a probability over all the units in the generative model. Training a network based generative model involves calculating a weight update, which in turn requires inferring a hidden representation given a training item. The converse, sampling from a $P(v|h)$ is also required. \todocite{EM}
+
+\todowording{inference for our purpose is used for (somehting about not training)}
 
 \subsection{The sampling technique: Gibbs Sampling}
 
@@ -132,7 +139,7 @@ Gibbs sampling explores the desired probability distribution, taking samples of 
  \caption{The Gibbs Sampling Algorithm}\label{Alg:Gibbs-Sampling}
 \end{algorithm}
 
-\subsubsection{Mixing Time}
+\subsubsection{Mixing Time of the Gibbs Sampler}
 
 MCMC methods aim to approximate a distribution, by exploring likely states. As we often start this process from a random state, it's important that enough Gibbs steps are taken before a sample is drawn. This is because the random state may not be close any part of the true distribution we want to sample from, so by running the chain for many iterations we increase the likelihood of samples being from the desired distribution.
 
@@ -140,12 +147,11 @@ This process of waiting for enough steps to before drawing samples is referred t
 
 
 
-\subsection{Gibbs Sampling in a Sigmoid Belief Network}
+\subsection{Sampling in a Sigmoid Belief Network}
 
-The dependance in belief networks means that sampling from the network requires a longer Markov Chain to mix, as changing the value of \texttt{Earthquake}, effects the value of \texttt{Burglar}. Formally, Gibbs sampling in a SBN, where our visible node is observed is expressed by:
-$$
-P(h_1 = 1|v = 1) = \bigg[1 + \frac{(1 - f(b_1))f(w_2)}{f(b_1)f(w_1 + w_2)} \bigg]^{-1}
-$$
+The dependance in belief networks means that sampling from the network requires a longer Markov Chain to mix, as changing the value of \texttt{Earthquake}, effects the value of \texttt{Burglar}.
+
+
 In a network with many connected nodes the dependence introduced makes sampling take longer. In the context of images, where there may be upwards of 1000 observable values, all with different dependancies sampling from $P(h|v)$ becomes intractable. Neal showed this by comparing the number of gibbs iterations required for small enough error rates in~\cite{neal1992:connectionist}.
 
 Conversely, sampling from the visible given we know the state of the hidden cause is extremely efficient in a SBN. It can be expressed as
