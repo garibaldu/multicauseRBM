@@ -36,8 +36,39 @@ The program was implemented with unit testing and composability in mind. It was 
 \end{figure}
 
 
-\section{Evaluation Design}
+\section{Evaluation Design: Evaluating RBMs and ORBMs}
 
+
+  A challenge faced by this project and work with RBMs is that they are non-trivial to evaluate \todocite{Something please}. Being unsupervised black box, one cannot inspect the hidden units for an input and be sure that a good model has been learnt.
+
+  We can examine the weights into a given hidden unit in the shape of the visible vector. For instance in the context of images, \texttt{Hinton Diagrams} allow visualisation of what a given hidden unit is `doing` by visualising the matrix. This was first used by Hinton in the context of Boltzmann Machines in \cite{Hinton:1986:LRB:104279.104291}. They also give insight into hidden unit utilisation.  Weights are often initialised to small random values, the Hinton diagram will have no visual structure to it. This is illustrated in figures \ref{F:Hinton-Good} and \ref{F:Hinton-Bad}. The former showing a hidden units weights where some structure has been learnt, and the latter showing the opposite.
+
+  \begin{figure}[h]
+  \centering
+  \begin{subfigure}[t]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{Assets/HINTON1.png}
+      \caption{Utilised hidden unit Hinton Diagram}
+      \label{F:Hinton-Good}
+  \end{subfigure}
+  ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+    %(or a blank line to force the subfigure onto a new line)
+  \begin{subfigure}[t]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{Assets/HINTON2.png}
+      \caption{Unutilised hidden unit Hinton Diagram}
+      \label{F:Hinton-Bad}
+  \end{subfigure}
+  \caption{Hinton Diagrams illustrating a trained hidden unit, versus that of an untrained/unutilised hidden unit. This is with no measures to enforce sparsity.}\label{fig:mnist-worse-best-results}
+\end{figure}
+
+  Evaluating RBMs is also problem dependant, if split by dimenionality of the task we have some different approaches:
+  \begin{description}
+  \item[Small Cases] In trivial cases an RBM can inspected analytically. Reconstructions of the dataset should match the dataset with approximately the correct proportion. For instance training RBMs on two bit XOR should result in mostly [1,0] and [0,1] but not [1,1] and [0,0].
+  If the task has a small enough dimentionality, like two bit XOR, then a learned RBM can be compared to one constructed by hand. This approach is used later when the ORBM tackles two bit XOR.
+
+  \item[Large Cases] In non-trivial cases, with larger datasets, reconstructions can be compared to the training dataset,  but empirically detecting if a model is trained is difficult given the unsupervised, black box nature of RBMs.
+  We can train a classifier on the RBMs hidden representation, with the idea being that better hidden features should result in a better way of distinguishing classes, and therefore a better classification accuracy.
+
+\end{description}
 
 \subsection{Reconstructions As a measure of Performance}
 

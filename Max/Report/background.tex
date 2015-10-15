@@ -44,7 +44,7 @@ $$
 P(A,B,E) = P(A|B,E)P(B)P(E)
 $$
 
-\subsection{DPGMs in Neural Networks: The Sigmoid Belief Network}
+\subsection{Directed PGMs in Neural Networks: The Sigmoid Belief Network}
 
 A Belief network can be expressed as a neural network, where conditional probabilities are parameterised as weights. \todowording{Simplify --- This network is called a Sigmoid Belief Network (SBN) as the probability of a variable $x_i$ being 1 that is dependent on a ancestor variable $parent_i$ the weighted sum into $x_i$, $\phi_i$ passed through the sigmoid function ($ \sigma(x)=1/(1+e^{-x})$)}. This is equivalent to a perceptron using a sigmoid activation function and ensures that the output is a valid probability (between 0 and 1).
 SBNs take a naive approach to causes, where each hidden unit represent a single, simple cause. Formally, $\phi_i$ is a weighted sum of the activations of parent nodes:
@@ -111,11 +111,14 @@ $ Z $ is the partition function, which normalises the probability of the joint. 
 
 \subsection{Why sampling is important}
 
-Sampling is used when the distribution we want to work from is intractable to calculate analytically. As mentioned in \ref{S:Generative-Models}, the power of generative models is their ability to represent, reconstruct and be trained on data. These tasks all require sampling from configurations of the hidden and visible units, often conditioned one or the other --- for instance sampling from $P(h|v)$ allows a hidden representation to be created from a given input.
+Sampling is used when the distribution we want to work from is intractable to calculate analytically. As mentioned in \ref{S:Generative-Models}, the power of generative models is their ability to represent, reconstruct and be trained on data. These tasks all require sampling from configurations of the hidden and visible units, often conditioned one or the other. There are two cases:
+\begin{itemize}
+  \item Sampling from $P(v|h)$, which is known as running the generative model, where the model \emph{generates} data based on a hidden representation.
+  \item Sampling from $P(h|v)$, which is known as \emph{inverting} a generative model (This is also refferred to as \emph{inference}). The process is called `Inverting` because instead of the model generating the data (sampling from $P(v|h)$) we instead try to infer a representation given data $P(h|v)$. It is the process of reasoning about what we do not know, given that of which we do.
+\end{itemize}
 
-\todowording{*}
 
-This is required to train generative models, as often the gradient to be climbed/descended involves calculating a probability over all the units in the generative model. Training a network based generative model involves calculating a weight update, which in turn requires inferring a hidden representation given a training item. The converse, sampling from a $P(v|h)$ is also required. \todocite{EM}
+Sampling from $P(v|h)$ and $P(h|v)$ is required to train generative models, as often the gradient to be climbed/descended involves calculating a probability over all the units in the generative model. Training a network based generative model involves calculating a weight update, which in turn requires inferring a hidden representation given a training item. The converse, sampling from a $P(v|h)$ is also required. \todocite{EM}
 
 \todowording{inference for our purpose is used for (somehting about not training)}
 
@@ -149,15 +152,21 @@ This process of waiting for enough steps to before drawing samples is referred t
 
 \subsection{Sampling in a Sigmoid Belief Network}
 
-The dependance in belief networks means that sampling from the network requires a longer Markov Chain to mix, as changing the value of \texttt{Earthquake}, effects the value of \texttt{Burglar}.
 
-
-In a network with many connected nodes the dependence introduced makes sampling take longer. In the context of images, where there may be upwards of 1000 observable values, all with different dependancies sampling from $P(h|v)$ becomes intractable. Neal showed this by comparing the number of gibbs iterations required for small enough error rates in~\cite{neal1992:connectionist}.
-
-Conversely, sampling from the visible given we know the state of the hidden cause is extremely efficient in a SBN. It can be expressed as
+Sampling from $ P(v|h) $ (known as Ancestral Sampling) is extremely efficient in a SBN, it does not need Gibbs sampling. It can be expressed as
 \begin{equation}\label{eq:SBN-v-given-h}
 P(v|h) = \sum_i v_i \log \sigma_i(h) + (1-v_i)log(1-\sigma_i(h))
 \end{equation}
+As this process is calcuated by propagating probabilites from the root hidden causes, it is known in a SBN as Ancestral Sampling.
+
+Conversly, sampling from $P(h|v)$ in an SBN is intractable. Performing inference in a Sigmoid Belief network would allow source separation, as each hidden unit could represent a simple cause. The SBN would be shown an input, and could extract representations of the seperate causes that likely gave rise to the input. There exist algorithms for performing inference in Sigmoid Belief Networks. For instance, the Belief Propagation algorithm proposed by Judea Pearl~\cite{Pearl1982} operates on this encoding, calculating the probabilities of a given network state (i.e. the state of all the variables). As well as constraining the architecture to be Directed Acyclic Graph, Belief Propagation is intractable to use as the number of variables grow\todocite{}. As we want to work with cases with upwards of 100 visible and hidden nodes, these algorithms break down.
+
+Despite the Sigmoid Belief Network being expressive and providing a succinct encoding of conditional probabilities, Gibbs sampling is intractable for SBNs of practical size~\cite{Jensen95blockinggibbs}. The issue being that the Gibbs chain takes too long to mix~\cite{neal1992:connectionist}, which arises from the the `explaining away effect`~\cite{Hinton:2006:FLA:1161603.1161605}. Calling back to the example in section \ref{}, instead of a single \texttt{burglar} or \texttt{earthquake} becoming dependant given the \texttt{alarm}, there is more in the realm of hundreds of burlgars and earthquakes all suddenly depedendant.
+
+Being able to efficiently sample from $P(h|v)$ is also required for training generative models\todocite{em} making Sigmoid Belief Networks impractical for not only inference, but also training.
+
+
+
 
 \subsection{Gibbs Sampling in a Boltzmann Machine}
 
@@ -168,11 +177,12 @@ $$
 P(x_j = 1, x_{\smallsetminus}j) = \frac{1}{1 + e^{-\sum_i w_{ji}x_i}}
 $$
 That is, Gibbs sampling in a Boltzmann Machine amounts to use the Sigmoid function of the weighted inputs.
-
 \todocite{neal1992:connectionist}
 
 \subsection{Gibbs Sampling in RBMs}
-%
+
+A big payoff for the restriction in an RBM is inverting the model becomes tractable, as the latent variables no longer become dependant given the observed variables. This is illustrated in figure~\ref{F:Restricted-Boltzmann-Machine} the hidden unit $h_1$ is not dependent on $h_2$ wether or not we know anything about the visible units. Firstly, this is the opposite of a SBN, where knowledge of the visible units makes the hidden units dependant. Secondly, by removing the recurence present in Boltzmann Machines, it reduces the expresiveness of the RBM network while making the RBM useable in practice as the Gibbs sampling process can stop after one Gibbs step\todocite{}.
+
 In order to describe Gibbs sampling in the new architecture proposed, it must first be explained for a standard RBM --- The process of Gibbs sampling is as follows:
   \begin{itemize}
     \item One must sample from $P(h|v)$ giving a hidden state $\tilde{h'}$
@@ -233,26 +243,7 @@ In order to describe Gibbs sampling in the new architecture proposed, it must fi
 
 
 
-\section{The cost of sampling from $P(h|v)$}
-
-\subsection{Inverting the Generative Model}
-
-Inverting a generative model can be referred to as inference, the process of reasoning about what we do not know, given that of which we do know. In generative models this is the `posterior`, the probability distribution of the hidden (latent) variables, given we know the state of the observable (visible) units. The process is called `Inverting` because instead of the model generating the data (sampling from $P(v|h)$) we instead try to infer a representation given data $P(h|v)$.
-
-
-% The algorithm introduced and evaluated in this report aimed to invert the ORBM, generating two separate hidden representations given an input.
-
-\subsection{Inverting a Sigmoid Belief Network}
-
-Performing inference in a Sigmoid Belief network would allow source separation, as each hidden unit could represent a simple cause. The SBN would be shown an input, and could extract the seperate causes that likely gave rise to that input. Despite the Sigmoid Belief Network being expressive and providing a succinct encoding of inter-variable dependancies, performing inference is intractable for a network of practical size~\cite{Jensen95blockinggibbs}.
-
-There do exist algorithms for performing inference in Sigmoid Belief Networks. For instance, the Belief Propagation algorithm proposed by Judea Pearl~\cite{Pearl1982} operates on this encoding, calculating the probabilities of a given network state (i.e. the state of all the variables). As well as constraining the architecture to be Directed Acyclic Graph, Belief Propagation is intractable to use as the number of variables grow. This intractability arises from the SBNs dependencies and the `explaining away effect`~\cite{Hinton:2006:FLA:1161603.1161605}. Being able to efficiently sample from $P(h|v)$ is required for training generative models\todocite{em} making Sigmoid Belief Networks impractical to train.
-
-\subsection{Inverting a Restricted Boltzmann Machine}
-
-A big payoff for the restriction in an RBM is inverting the model becomes tractable, as the latent variables no longer become dependant given the observed variables. This is illustrated in figure~\ref{F:Restricted-Boltzmann-Machine} the hidden unit $h_1$ is not dependent on $h_2$ wether or not we know anything about the visible units. This is the opposite of a Sigmoid Belief Network where knowledge of the visible units makes the hidden units dependant. By removing the recurence present in Boltzmann Machines, it reduces the expresiveness of the RBM network while makingß the RBM useable in practice as the Gibbs sampling process can stop after one Gibbs step\todocite{}.
-
-\subsubsection{Reconstructions, visualising what the RBM has learnt}
+\subsubsection{Reconstructions: visualising what the RBM has learnt}
 
 RBMs create an internal representation given an input by sampling from $P(h|v)$. They can also generate a faux input given an internal representation. Performing one Gibbs iteration, that is, sampling from the hidden units given a `clamped` input $ P(h|v) $ and then taking the generated hidden state and generating a faux input (sampling from $P(v|h_{sampled})$) results in a \texttt{reconstruction}. Clamped input is where the visible units are set to be an input pattern. The model tries to reconstruct the input based on the internal representation it has learnt to model. This has applications in increasing the size of a dataset by introducing variation by generatin these faux inputs\todocite{}.
 
@@ -369,34 +360,3 @@ In the same way that a Generative model uses reconstructions to try and recreate
 %   %   \item Unrolling the gibbs chain and we are in effect training an infinite depth sigmoid beleif net (TODO-REFERENCE-HINTONS-PAPER-HERE)
 %   % \end{itemize}
 %
-%     \subsection{Evaluating Restricted Boltzmann Machines}
-%     A challenge faced by this project and work with RBMs is that they are non-trivial to evaluate \todocite{Something please}. Being unsupervised black box, one cannot inspect the hidden units for an input and be sure that a good model has been learnt.
-%
-%     We can examine the weights into a given hidden unit in the shape of the visible vector. For instance in the context of images, \texttt{Hinton Diagrams} allow visualisation of what a given hidden unit is `doing` by visualising the matrix. This was first used by Hinton in the context of Boltzmann Machines in \cite{Hinton:1986:LRB:104279.104291}. They also give insight into hidden unit utilisation.  Weights are often initialised to small random values, the Hinton diagram will have no visual structure to it. This is illustrated in figures \ref{F:Hinton-Good} and \ref{F:Hinton-Bad}. The former showing a hidden units weights where some structure has been learnt, and the latter showing the opposite.
-%
-%     \begin{figure}[h]
-%     \centering
-%     \begin{subfigure}[t]{0.3\textwidth}
-%         \includegraphics[width=\textwidth]{Assets/HINTON1.png}
-%         \caption{Utilised hidden unit Hinton Diagram}
-%         \label{F:Hinton-Good}
-%     \end{subfigure}
-%     ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
-%       %(or a blank line to force the subfigure onto a new line)
-%     \begin{subfigure}[t]{0.3\textwidth}
-%         \includegraphics[width=\textwidth]{Assets/HINTON2.png}
-%         \caption{Unutilised hidden unit Hinton Diagram}
-%         \label{F:Hinton-Bad}
-%     \end{subfigure}
-%     \caption{Hinton Diagrams illustrating a trained hidden unit, versus that of an untrained/unutilised hidden unit. This is with no measures to enforce sparsity.}\label{fig:mnist-worse-best-results}
-% \end{figure}
-%
-%     Evaluating RBMs is also problem dependant, if split by dimenionality of the task we have some different approaches:
-%     \begin{description}
-%     \item[Small Cases] In trivial cases an RBM can inspected analytically. Reconstructions of the dataset should match the dataset with approximately the correct proportion. For instance training RBMs on two bit XOR should result in mostly [1,0] and [0,1] but not [1,1] and [0,0].
-%     If the task has a small enough dimentionality, like two bit XOR, then a learned RBM can be compared to one constructed by hand. This approach is used later when the ORBM tackles two bit XOR.
-%
-%     \item[Large Cases] In non-trivial cases, with larger datasets, reconstructions can be compared to the training dataset,  but empirically detecting if a model is trained is difficult given the unsupervised, black box nature of RBMs.
-%     We can train a classifier on the RBMs hidden representation, with the idea being that better hidden features should result in a better way of distinguishing classes, and therefore a better classification accuracy.
-%
-%   \end{description}
