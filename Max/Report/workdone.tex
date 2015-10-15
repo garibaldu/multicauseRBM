@@ -2,20 +2,33 @@
 
 A significant hurdle for the project was gaining enough understanding of the existing work on RBMs to be able to implement the ORBMs algorithm and architecture. This was crucial as bugs in the implementation are a threat to validity.
 
-\todowording{Make sure you talk about why the sigmoid is the most appropriate atrication function! Maybe this should go in background..}
-
-%A large amount of the accomplishments in the project so far have been in gaining the understanding needed to really explore and verify this new technique - given it is built upon the existing work of Restricted Boltzmann Machines. This understanding means that robust correctness tests can be written. This in turn ensures that results produced have more credibility, so the implementation is known to be sound. %
-
 
 \section{Implementation Design}
 
-\subsection{Language Choice}
 \begin{itemize}
-  \item Library choice meant efficiency with benefits of python for quick dev
-  \item Easy to deploy to grid (versus java higher risk, lack of expeirence)
   \item Ordering of evaluation tasks made unit testing, with hand made test cases possible. Also less risk, remove the uncertainty around the RBM.
   \item testing approach
 \end{itemize}
+
+\subsection{Language Choice}
+
+
+The implementation of the ORBM and inference algorithm is in Python 3.4. Matlab and Java were the other languages considered.
+I have spent my University career working in Java, and nowdays is efficient to perform machine learning tasks, making it a natural option to consider.
+Matlab has a lot of online resources and often machine learing papers \cite{todo} include snippets or links to full Matlab programs. Also matlab has strong, efficient support for matrix operations which are very prolific in the RBM and ORBM evaluations.
+Python has a very sucinct syntax and shallow learning curve, as well as being the langauge of choice of my supervisor. \todowording{This is favourable as I can have support for translating the algorithm into python correctly.} Through libraries that supply wrappers for C-bindings efficient code can still be written. Three main factors influenced the choice for python:
+
+\begin{description}
+\item[Up front learning] Given the amount of up front learning of concepts required to implement the solution, python was favoured over Java or Matlab because is has a very shallow learning curve. Despite having expeirence in Java and Python. I had not worked with any machine learning or linear algerbra libraries so to much up front learning may have resulted in understanding the concepts well, but running out of time to implement and evaluate them.
+\item[Library Support] Matlab and Python were two contendors in this factor, as a lot of matlab machine learning code is avaliable with supporting papers \todocite{}. Python too has libraries such as NumPy, SciPy and Matplotlib \todocite{} which provide useful helper functions that actually aim to match Matlab's features \todocite{}.
+\item[Ease of Evaluation] Python provides strong plotting library that is inspired by Matlab and R --- MatplotLib \todocite{}. Also Matplotlib is completely interoperable with pythons numpy class and this combined with excellent matrix support through NumPy made python a compelling choice.
+
+Also the evalation requires bulk running a test to gain more confidence in the stochastic result. This is made possible by the ECS-Grid \todocite{}. Python is supported with very minimal extra work required. A simple script that manages input and output is required. However the Java support on the ECS grid requires significantly more setup \todocite{}. \todowording{This seemed like an unnesccariy risk to introduce to the project at a later stage.}
+\end{description}
+%
+% All of the languages considered have the efficiency for machine learning tasks, despite Python being on the slower end of the spectrum of languages, versus that of the compiled JVM languages like Matlab or Java, it is still fast enough. The complexity of the traditional RBM is relative to what is trying to be modelled, less of the language implementing it.
+% Java and Python have robust testing suites given they are used for non-academic goals. Matlab and R do have suites however the author has not had experience with them. Choosing from one of these two languages would increase the amount of upfront learning required and therefore increase this risk.
+% The author had the most experience with Python and Java, however Python was favoured due to it's Matlab-like library NumPy. Expressive matrix syntax combined with the familiarity and brevity of Python made it a compelling option.
 
 
 \subsection{Program Architecture}
@@ -108,7 +121,8 @@ To be able to use this reconstruction based evaluation, knowledge of the ground 
 \end{itemize}
 
 
-\subsection{Dataset choice}
+\subsection{Choice of Evaluatio Datasets}
+
 \begin{itemize}
   \item 2 Bit XOR - It's the minimal case. Can examine reconstructions and dreams/fantansy emperically. Also can check that code performs as expect by manually calcating expected values for the algorithm.
   \item X Neighbouring Bits On in Y Bit Pattern - A natural next step from 2 bit XOR. Still trivial to train an RBM to represent, quick feedback to ensure the algorithm works. Allows comparing the different approximations tractable as number of hidden units is small enough.
