@@ -1,6 +1,5 @@
 \chapter{Introduction}
 
-
 \section{A Problem}
 Consider an image of a face. At least two \emph{systems} are at play in the image of a face, the face itself and the illumination. Both face and illumination are complex and can vary greatly, but they are fundamentally acting independently of each other up until they compose to form the image.
 
@@ -24,11 +23,11 @@ This project contributes:
   \item\label{item-c2} A Python implementation of the new architecture.
   \item\label{item-c3} A suite of graded evaluations/tests that explore how the architecture and source separation algorithm work in practice.
 \end{enumerate}
-The evaluations will not address separating faces and illumination, instead only performing tasks such as separating two handwritten digits composed on each other (see figure \ref{F:Composition-Example}).
+The evaluations will not address separating faces and illumination, instead the more general case of two images overlaying to form the data. The implications of this are compelling as applications could include removing noise from images or extracting images that are composed of many subjects. These are aspirational goals and this project will only performing tasks such as separating two handwritten digits composed on each other (see figure \ref{F:Composition-Example}).
 
 \begin{figure}[h]
 \begin{center}
-  \includegraphics[width = 0.1\textwidth]{Assets/composition-example.png}
+  \includegraphics[width = 0.2\textwidth]{Assets/composition-example.png}
 \caption{An example composition of a handwritten four and three, illustrating a non-trival task where the ground truth is known.}
 \label{F:Composition-Example}
 \end{center}
