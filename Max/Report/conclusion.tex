@@ -3,4 +3,6 @@
 \begin{itemize}
   \item ORBM inference is working in smaller cases really well. Even better than the RBM!
   \item Training algorithm for this generative model has been proposed. Haven't been able to get it going but it could be really promising - Amounts to blind source separation.
+  \item Disparity in weights between the models will have an effect. In trying to reaosn about why the activation would turn off it occurred to me that a disparity in weights between the models could allow one model overpower another! This could be overcome by moving back to a single model - and training MNIST 0-9 in one model and repeating the last experiment.
+  \item No visible bias means that no activation in one model will make reconstructions incorrect for that model. But that is almost out of the scope for the ORBM.
 \end{itemize}
