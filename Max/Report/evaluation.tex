@@ -174,10 +174,41 @@ For a subset of values of $y \in Y, x \in X | 2 < x < y < 10$ the following proc
 %
 % The inference algorithm was run for 1000 reconstructions in the ORBM architecture for all unique compositions of the training set. The result was 1000 reconstructions for both the Full Correction and Approximate Correction, for some interesting compositions of the dataset.
 
-\todocite{Need to grab the images out of the ipython notebook.}
 
+\subsubsection{Results}
+
+A subset of the larger (but still small) dimention task results are shown in Figure \ref{F:X-Bit-ORBM-Inference-Results-1}.
+
+
+\begin{landscape}
+\begin{figure}
+  \begin{center}
+    \includegraphics[height=0.9\textheight]{Assets/results/xy-bit-results}
+  \end{center}
+  \caption{A figure showing interesting cases of ORBM reconstructions in $Y$ bit pattern, $X$ neighbouring bits on.}
+
+  \label{F:X-Bit-ORBM-Inference-Results-1}
+\end{figure}
+\end{landscape}
 
 \section{2D Patterns in a small dimensional space}
+
+
+\begin{wrapfigure}{l}{0.4\textwidth}
+  \begin{center}
+    \includegraphics[width=0.3\textwidth]{Assets/results/sq-dataset.png}
+  \end{center}
+  \caption{A figure illustrating the dataset used for this task. 2 by 2 pixel squares in a 5 by 5 pixel image.}
+  \label{F:Sq-Dataset}
+\end{wrapfigure}
+
+\begin{figure}[htb]
+  \begin{center}
+    \includegraphics[width=\textwidth]{Assets/results/sq-orbm-results.png}
+  \end{center}
+  \caption{Figure illustrating a subset of the the results from ORBM inference on 2 By 2 square images.}
+  \label{F:sq-orbm-results}
+\end{figure}
 
 
 
@@ -194,6 +225,16 @@ For a subset of values of $y \in Y, x \in X | 2 < x < y < 10$ the following proc
   \end{itemize}
 
     \section{2D Pattern, Different Rectangle Separation}
+
+    \begin{figure}[htb]
+      \begin{center}
+        \includegraphics[width=\textwidth]{Assets/results/rect-sq-orbm-results.png}
+      \end{center}
+      \caption{Figure illustrating a subset of the the results from ORBM inference on 2 by 2 squares combined with $x$ by $y$ pixel rectangles.}
+      \label{F:rect-orbm-results}
+    \end{figure}
+
+
     \begin{itemize}
       \item Dataset
       \begin{itemize}
@@ -211,9 +252,9 @@ For a subset of values of $y \in Y, x \in X | 2 < x < y < 10$ the following proc
 
     \subsubsection{Architecture and Parameters}
 
-    \begin{figure}{htb}
+    \begin{figure}[htb]
       \begin{center}
-        \includegraphics[width=0.3\textwidth]{Assets/results/Mixing Results.png}
+        \includegraphics[width=0.8\textwidth]{Assets/results/Mixing Results.png}
       \end{center}
       \caption{Mixing Time}
       \label{F:MNIST-Mixing-Time}
