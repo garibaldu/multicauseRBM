@@ -1,6 +1,6 @@
 \chapter{Design and Implementation}\label{C:work}
 
-A significant hurdle for the project was gaining enough understanding of the existing work on RBMs to be able to implement the ORBMs algorithm and architecture. This was crucial as bugs in the implementation are a threat to validity.
+A significant hurdle for the project was gaining enough understanding of the existing work on RBMs to be able to implement the ORBMs algorithm and architecture. This was crucial as an incorrect implementation invalidates  contributions \ref{item-c2} and \ref{item-c3} of this project.
 
 
 \section{Implementation Design}
@@ -11,7 +11,6 @@ A significant hurdle for the project was gaining enough understanding of the exi
 \end{itemize}
 
 \subsection{Language Choice}
-
 
 \todowording{The implementation of the ORBM and inference algorithm is in \emph{Python}, with \emph{Matlab} and \emph{Java} being the other languages considered.}
 
@@ -51,6 +50,9 @@ The implementation of the RBM, ORBM and algorithm is implemented with unit testi
 \end{center}
 \end{figure}
 
+\subsection{Testing Approach}
+
+The inference algorithm is the most crutial part of the implementation to test. In larger dimentional tasks, unit testing to ensure the algoruhtm produces the correct values becomes difficult. In smaller cases I was able to ensure the probabilities of $P(h|v)$ and $P(v|h)$ calculated by the implementation matches calculations I made by hand. Being an unsupervised black boxes, determining if an RBM (and by extension the ORBM) hidden representation is `correct` for larger tasks such as the MNIST handwritten digit dataset is non-trivial. Concerned by this risk, I designed my evaluations to build confidence in the algorithm and the implementation.
 
 \section{Evaluation Design: Evaluating RBMs and ORBMs}
 
@@ -78,17 +80,16 @@ The implementation of the RBM, ORBM and algorithm is implemented with unit testi
 
 \subsection{Reconstructions As a measure of Performance}
 
-\begin{itemize}
-  \item Cite literature where reconstructions are used, starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.
-\end{itemize}
+Reconstructions, as described in Section \ref{SS:RBM-Reconstructions}, are a good measure of performance. \todocite{Hinton showed this in papers, also cite more ppapers showing reconstruction use. starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.} Given the precident for using reconstructions as a performance measure, they will be the main way I evaluate the RBM in comparison to the ORBM.
+
 
 \subsection{Evaluating RBMs: Problem dependent}
 
   Evaluating RBMs is problem dependant, we can examine different the different approaches avaliable by splitting problems into two cases:
   \begin{description}
-  \item[Small Dimentionality] When the dimentionality of the input is very small ($<10$) and all possible inputs are known we can perform analytical evaluations of the RBM. By clamping the visible units of the RBM to each input in the training set create reconstructions can be created. This process can be repeated for each input showing the frequency that each reconstruction occurs on a bar graph. We can then ensure that the RBM is reconstructing the input perfectly. For instance, an RBM  trained on two bit XOR and clamped to the input $[1,0]$ bar graph of reconstructions illustrated in figure \ref{F:Two-Bit-RBM-Recons}.
+  \item[Problems with small dimentionality] When the dimentionality of the input is very small ($<10$) and all possible inputs are known we can perform analytical evaluations of the RBM. By clamping the visible units of the RBM to each input in the training set, reconstructions can be created. This process can be repeated for each input, recording the frequency that each reconstruction occurs on a bar graph. We can then ensure that the RBM is reconstructing the input perfectly. For instance, an RBM trained on two bit XOR and clamped to the input $[1,0]$, might have a bar graph of reconstructions as illustrated in figure \ref{F:Two-Bit-RBM-Recons}.
 
-  In a similar way to the reconstructions, samples can be drawn from RBM in a `free phase` without the input clamped to a given visible. The bar graph should exhibit dreams visible patterns from the training set approximately an equal amount. Using the two bit XOR example once more, an example bar graph is shown in figure\ref{F:XOR-ORBM}.
+  In a similar way to the reconstructions, samples can be drawn from RBM in a `free phase` without the input clamped to a given visible. The bar graph should exhibit dream visible patterns from the whole training set approximately an equal amount. Using the two bit XOR example once more, an example bar graph is shown in figure\ref{F:XOR-ORBM}.
 
 
   \begin{figure}[htb]
@@ -109,8 +110,8 @@ The implementation of the RBM, ORBM and algorithm is implemented with unit testi
 \end{figure}
 
 
-  \item[Large Dimentionalities] In non-trivial cases, with larger datasets, reconstructions can be inspected and compared to the training dataset, but empirically detecting if a model is trained is difficult given the unsupervised, black box nature of RBMs.
-  Alternatively a `score` can be assigned to each item in the trainin set, based on how well the RBM can reconstruct it. However in large cases your training set will not be complete --- you will not have every possible valid image like you would in a case where your image is 2 pixels.
+  \item[Problems  with large dimentionalities] In non-trivial cases, with larger datasets, reconstructions can be inspected and compared to the training dataset. However, empirically detecting if a model is trained is difficult, especially given the unsupervised, black box nature of RBMs.
+  Alternatively, a `score` can be assigned to each item in the trainin set based on how well the RBM can reconstruct it. However in large cases your training set will not be complete --- you will not have every possible valid image like you would in a case where your images are 2 pixels.
   Dreams can also be examined in larger cases, but again you cannot be as sure as in the smaller cases that you have a well trained RBM.
 
 \end{description}
@@ -123,13 +124,13 @@ The implementation of the RBM, ORBM and algorithm is implemented with unit testi
   \item Allows comparison of Approx corrections in smaller scale - fail there don't continue using them...
 \end{itemize}
 
-\todowording{My \todowording{x experiements} all followed the same high level process, working from trivial cases to more challenging tasks. The reasoning being that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.}
+\todowording{My \todowording{x experiements} all followed the same high level process, working from trivial cases to more challenging tasks. The reasoning being that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.} Also by incrementally increasing the difficulty of the task, it allows me to identify what qualities of the problem make the algorithm less or mor effective.
 
-\subsubsection{Growing Complexity of tasks}
+\subsubsection{Growing the complexity of evaluations}
 
+The evaluations in this project aimed to evaluate the ORBM and it's inference algorithm by examining reconstructions given a multi-subject. Because the multi-cause inputs were images composed of known images, I could then compare the reconstructions to the ground truth.
 
-
-The following evaluations aimed to evaluate the ORBM and it's inference algorithm by examining reconstructions given a multi-cause input. An example of a muli-cause input with two quadrilaterals is shown in figure \ref{F:Composite-Example}. The optimal reconstructions are equivalent to the two images that combined form the input.
+ An example of a muli-cause input with two quadrilaterals is shown in figure \ref{F:Composite-Example}. The optimal reconstructions are equivalent to the two images that combined form the input.
 
 \begin{wrapfigure}{r}{0.6\textwidth}
   \begin{center}

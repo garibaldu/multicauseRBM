@@ -243,7 +243,7 @@ In order to describe Gibbs sampling in the new architecture proposed, it must fi
 
 
 
-\subsubsection{Reconstructions: visualising what the RBM has learnt}
+\subsubsection{Reconstructions: visualising what the RBM has learnt}\label{SS:RBM-Reconstructions}
 
 RBMs create an internal representation given an input by sampling from $P(h|v)$. They can also generate a faux input given an internal representation. Performing one Gibbs iteration, that is, sampling from the hidden units given a `clamped` input $ P(h|v) $ and then taking the generated hidden state and generating a faux input (sampling from $P(v|h_{sampled})$) results in a \texttt{reconstruction}. Clamped input is where the visible units are set to be an input pattern. The model tries to reconstruct the input based on the internal representation it has learnt to model. This has applications in increasing the size of a dataset by introducing variation by generatin these faux inputs\todocite{}.
 

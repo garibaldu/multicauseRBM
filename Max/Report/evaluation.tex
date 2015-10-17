@@ -24,6 +24,7 @@ The starting point for the evalatuion is examining the ORBM reconstructions in a
   \label{F:Two-Bit-RBM-Recons}
 \end{wrapfigure}
 
+
 Being a trivial dimensionality, the RBMs weights were constructed by hand, meaning that only the ORBMs inference algorithm was being evaluated and not the training of the RBMs plugged into it. This network is picture in figure \ref{F:Two-Bit-RBM}, \todowording{with weights greater than 5} the networks stable state results in either $[1 , 0]$ or $[0 , 1]$. The RBMs had 2 hidden units and 2 visible units.
 
 \subsubsection{Method}
@@ -204,6 +205,20 @@ For a subset of values of $y \in Y, x \in X | 2 < x < y < 10$ the following proc
       \end{itemize}
     \end{itemize}
 
+    \section{MNIST Mixing Time}
+
+    \subsubsection{Description}
+
+    \subsubsection{Architecture and Parameters}
+
+    \begin{figure}{htb}
+      \begin{center}
+        \includegraphics[width=0.3\textwidth]{Assets/results/Mixing Results.png}
+      \end{center}
+      \caption{Mixing Time}
+      \label{F:MNIST-Mixing-Time}
+    \end{figure}
+
     \section{MNIST Digits Reconstructions}
 
     \subsubsection{Description}
@@ -267,7 +282,7 @@ For a subset of values of $y \in Y, x \in X | 2 < x < y < 10$ the following proc
     \caption{Dataset-wide MNIST Score Results }\label{fig:mnist-dataset-wide-results}
 \end{figure}
 
-    \begin{figure}[h]
+\begin{figure}[h]
     \centering
     \begin{subfigure}[t]{1\textwidth}
         \includegraphics[width=\textwidth]{Assets/b.png}
@@ -280,6 +295,22 @@ For a subset of values of $y \in Y, x \in X | 2 < x < y < 10$ the following proc
       \label{F:Cosine-9-x-scores}
     \end{subfigure}
     \caption{Cosine Score breakdown for the highest and lowest performing datasets, 0 and 9.}\label{fig:mnist-worse-best-results}
+\end{figure}
+
+\begin{figure}[htb]
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{Assets/results/orbm-Best-2-results.png}
+  \end{center}
+  \caption{Best Scores}
+  \label{F:Best-Results-MNIST}
+\end{figure}
+
+\begin{figure}[htb]
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{Assets/results/orbm-Worst-2-results.png}
+  \end{center}
+  \caption{Worst Scores}
+  \label{F:Worst-Results-MNIST}
 \end{figure}
 
 
