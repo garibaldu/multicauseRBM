@@ -54,7 +54,16 @@ The implementation of the RBM, ORBM and algorithm is implemented with unit testi
 
 The inference algorithm is the most crutial part of the implementation to test. In larger dimentional tasks, unit testing to ensure the algoruhtm produces the correct values becomes difficult. In smaller cases I was able to ensure the probabilities of $P(h|v)$ and $P(v|h)$ calculated by the implementation matches calculations I made by hand. Being an unsupervised black boxes, determining if an RBM (and by extension the ORBM) hidden representation is `correct` for larger tasks such as the MNIST handwritten digit dataset is non-trivial. Concerned by this risk, I designed my evaluations to build confidence in the algorithm and the implementation.
 
-\section{Evaluation Design: Evaluating RBMs and ORBMs}
+\section{Evaluation Design}
+
+\subsection{Examining the mixing time of inference in the ORBM}
+
+As described in Section \todocite{\ref{}}, sampling from $h^A$ and $h^B$ suffers from the effect of explaining away (\todocite{\ref{}}) which requires a Gibbs chain to run. While intractable for a large SBN, as only two causes are being modelled, ideally the Gibbs chain for this process won't take many iterations to mix. As the correction needs to be computed for each Gibbs iteration, a long Gibbs chain could be detrimental to performance.
+Finding this \emph{optimal mixing time} for the ORBM is only an issue as the number of dimensions and training examples increase. In smaller dimensions mixing can be overcome by using a large ($>1000$) number of Gibbs iterations. However in the larger problems this becomes intractable, so an optimal mixing time is desired.
+
+This project examines the mixing time by way of examining reconstructions at various points of the Gibbs chain. This is also interesting in that we can observe the dynamics of the network and the effect of apply the \emph{correction} has on reconstructions. \todocite{Hinton has shown this in practice as a useful thing to observe, cite his movies.}.
+
+\subsection{Evaluating RBMs and ORBMs}
 
   A challenge faced by this project and work with RBMs is that they are non-trivial to evaluate \todocite{}. Being unsupervised black box, one cannot merely inspect the hidden units for an input and be sure that a good model has been learnt. As I plug RBMs into the ORBM architecture it is important for the overal results that the RBMs are well trained.
 
@@ -78,18 +87,23 @@ The inference algorithm is the most crutial part of the implementation to test. 
   \caption{Hinton Diagrams illustrating a trained hidden unit, versus that of an untrained/unutilised hidden unit. This is with no measures to enforce sparsity.}\label{fig:mnist-worse-best-results}
 \end{figure}
 
-\subsection{Reconstructions As a measure of Performance}
+\subsection{Reconstructions: a measure of performance}
 
-Reconstructions, as described in Section \ref{SS:RBM-Reconstructions}, are a good measure of performance. \todocite{Hinton showed this in papers, also cite more ppapers showing reconstruction use. starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.} Given the precident for using reconstructions as a performance measure, they will be the main way I evaluate the RBM in comparison to the ORBM.
+Reconstructions, as described in Section \ref{SS:RBM-Reconstructions}, are a good measure of performance. \todocite{Hinton showed this in papers, also cite more ppapers showing reconstruction use. starting from early RBM training papers by Hinton, up to more recent in deeper networks - the goal being to show the reader that reconstructions are used well in practice.} Given the precident for using reconstructions as a performance measure, they will be the main way I evaluate the RBM in comparison to the ORBM. To be able to use this reconstruction based evaluation, knowledge of the ground truth was required. This was so:
+\begin{itemize}
+  \item RBMs could be trained and then plugged into the ORBM network.
+  \item Reconstructions could be compared directly (by score) to the ground truth.
+\end{itemize}
+
 
 
 \subsection{Evaluating RBMs: Problem dependent}
 
-  Evaluating RBMs is problem dependant, we can examine different the different approaches avaliable by splitting problems into two cases:
+  Evaluating RBMs is problem dependant, we can examine the different approaches avaliable by splitting problems into two cases:
   \begin{description}
-  \item[Problems with small dimentionality] When the dimentionality of the input is very small ($<10$) and all possible inputs are known we can perform analytical evaluations of the RBM. By clamping the visible units of the RBM to each input in the training set, reconstructions can be created. This process can be repeated for each input, recording the frequency that each reconstruction occurs on a bar graph. We can then ensure that the RBM is reconstructing the input perfectly. For instance, an RBM trained on two bit XOR and clamped to the input $[1,0]$, might have a bar graph of reconstructions as illustrated in figure \ref{F:Two-Bit-RBM-Recons}.
+  \item[Problems with small dimentionality] When the dimentionality of the input is very small ($<10$) and all possible inputs are known we can perform analytical evaluations of the RBM. By clamping the visible units of the RBM to each input in the training set, reconstructions can be created. This process can be repeated for each input, recording the frequency that each reconstruction occurs on a bar graph. We can then ensure that the RBM is reconstructing the input perfectly. For instance, an RBM trained on two bit XOR and clamped to the input $[1,0]$, might have a bar graph of reconstructions as illustrated in figure \todocite{\ref{F:Two-Bit-RBM-Recons}}.
 
-  In a similar way to the reconstructions, samples can be drawn from RBM in a `free phase` without the input clamped to a given visible. The bar graph should exhibit dream visible patterns from the whole training set approximately an equal amount. Using the two bit XOR example once more, an example bar graph is shown in figure\ref{F:XOR-ORBM}.
+  In a similar way to the reconstructions, samples can be drawn from RBM in a `free phase` without the input clamped to a given visible. The bar graph should exhibit dream visible patterns from the whole training set approximately an equal amount. Using the two bit XOR example once more, an example bar graph is shown in figure\todocite{\ref{F:XOR-ORBM}}.
 
 
   \begin{figure}[htb]
@@ -111,26 +125,15 @@ Reconstructions, as described in Section \ref{SS:RBM-Reconstructions}, are a goo
 
 
   \item[Problems  with large dimentionalities] In non-trivial cases, with larger datasets, reconstructions can be inspected and compared to the training dataset. However, empirically detecting if a model is trained is difficult, especially given the unsupervised, black box nature of RBMs.
-  Alternatively, a `score` can be assigned to each item in the trainin set based on how well the RBM can reconstruct it. However in large cases your training set will not be complete --- you will not have every possible valid image like you would in a case where your images are 2 pixels.
-  Dreams can also be examined in larger cases, but again you cannot be as sure as in the smaller cases that you have a well trained RBM.
+  Alternatively, a `score` can be assigned to each item in the training set based on how well the RBM can reconstruct it. However in large cases your training set will not be complete --- you will not have every possible valid image like you would in a case where your images are 2 pixels.
+  Dreams can also be examined in larger cases, but emperically detecting if they are `correct` is infeasible. Nevertheless, Dreams are useful to examine as dreams that look like items in the training set gives confidence the RBM \todowording{has learnt something.}
 
 \end{description}
 
-\subsection{Evaluation Methods}
 
-\begin{itemize}
-  \item Same models
-  \item Growing dimensionality, bit strings to 2d to MNIST
-  \item Allows comparison of Approx corrections in smaller scale - fail there don't continue using them...
-\end{itemize}
+\todowording{My \todowording{x experiements} all followed the same high level process, working from trivial cases to more challenging tasks. The reason for this being that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.} By incrementally increasing the difficulty of the task, it allows me to identify what qualities of the problem make the algorithm less or more effective.
 
-\todowording{My \todowording{x experiements} all followed the same high level process, working from trivial cases to more challenging tasks. The reasoning being that trivial cases make unit testing feasible, therefore ensuring conclusions can be drawn with regard to the algorithm and model, not an incorrect implementation.} Also by incrementally increasing the difficulty of the task, it allows me to identify what qualities of the problem make the algorithm less or mor effective.
-
-\subsubsection{Growing the complexity of evaluations}
-
-The evaluations in this project aimed to evaluate the ORBM and it's inference algorithm by examining reconstructions given a multi-subject. Because the multi-cause inputs were images composed of known images, I could then compare the reconstructions to the ground truth.
-
- An example of a muli-cause input with two quadrilaterals is shown in figure \ref{F:Composite-Example}. The optimal reconstructions are equivalent to the two images that combined form the input.
+The evaluations in this project aimed to evaluate the ORBM and it's inference algorithm by examining reconstructions given a \todowording{multi-subject image}. Because the multi-cause inputs were images composed of known images, I could then compare the reconstructions to the ground truth. An example of a multi-cause input with two quadrilaterals is shown in figure \ref{F:Composite-Example}. The optimal reconstructions are equivalent to the two images that combined form the input.
 
 \begin{wrapfigure}{r}{0.6\textwidth}
   \begin{center}
@@ -140,32 +143,23 @@ The evaluations in this project aimed to evaluate the ORBM and it's inference al
   \label{F:Composite-Example}
 \end{wrapfigure}
 
-In the smaller dimenisonal cases the reconstructions are inspected by hand, manually plotting the reconstructions and the frequency with which they occurred after a large amount of repetitions. In the larger dimensional tasks, two `scores` were used to evaluate reconstructions against the training set.
+In the smaller dimenisonal cases the reconstructions are inspected by plotting the reconstructions and the frequency with which they occurred after a large amount of repetitions. In the larger dimensional tasks, two `scores` are used to evaluate reconstructions against the corresponding item of the training set.
 
-To be able to use this reconstruction based evaluation, knowledge of the ground truth was required. This was so:
-\begin{itemize}
-  \item RBMs could be trained and then plugged into the ORBM network.
-  \item Reconstructions could be compared directly (by score) to the ground truth.
-\end{itemize}
 
 
 \subsection{Choice of Evaluation Datasets}
 
+As my evaluations follow the same outline of training RBMs, pluging them into the ORBM, and evaluating the reconstructions, the aspect of the evaluation that needs to be designed is the datasets for these tasks. It is important the images of the datasets are \emph{multi-subject} and that the individual images used to compose the training images are known. This is to allow the reconstructions of the ORBM (and RBM) can be compared to these underlying images, exploring how well the ORBM and RBM can perform source separations.
+
 \begin{itemize}
-  \item 2 Bit XOR - It's the minimal case. Can examine reconstructions and dreams/fantansy emperically. Also can check that code performs as expect by manually calcating expected values for the algorithm.
-  \item X Neighbouring Bits On in Y Bit Pattern - A natural next step from 2 bit XOR. Still trivial to train an RBM to represent, quick feedback to ensure the algorithm works. Allows comparing the different approximations tractable as number of hidden units is small enough.
-  \item Square Patterns in a 5 by 5 Pixel Image - Another natural step from neighbouring bits, trival to construct a dataset. Very easy to compose. Can use the same model for both models in the ORBM Architecture.
-  \item Rectangles in a 5 by 5 Pixel Image - Next step, builds on the previous test but adds a different model for each source. Also different shapes of model can be used.
-  \item Continous Rectangles (Pixel values 0 to 1) in a 5 by 5 Image - Another variation working towards the MNIST dataset, same as the previous but has continous visible pixels. Allows to different intensitities, interesting cases where the images overlap and increase in intensity.
-  \item MNIST Handwritten Digit Dataset - Pixel values from 0 to 1, 28 by 28 pixel image (784 pixel features.) Used extensiviely in previous studies. Gives me confidence that RBMs can learn these representations. Also allows metaparameters don't have to be tweaked as much as studies already have found reasonable values. Non-trivial to evaluate, but more of a real world case.
+  \item 2 Bit XOR --- The minimal case of image source separation. The RBMs are trained on a single bit being on in a two bit pattern. The training set then resembles a 2 bit XOR truth table. Because the dimensions of this task are so small, reconstructions and dreams can be evaluated emperically. Also the algorithm can be unit tested ensuring the outputs of the different steps are correct, comparing them to values calculated by hand. Also as the dimensionality is so small, the Approximated Correction \todocite{\ref{}} and the Full Correction \todocite{\ref{}} can be compared to ensure that the approximated correction works well in practice.
+  \item $X$ neighbouring bits on in $Y$ bit pattern --- This is a natural next step from 2 bit XOR, and is effectively the same task but in larger dimensions. It is trivial to train an RBM to represent this problem, and the algorithm is quick to run on such a small dimensonality creating a quick feedback loop for development.
+  \item 2 by 2 squares in a 5 by 5 pixel image --- This dataset extends the previous increasing to 25 dimensions. The dataset is trivial to construct and corresponds to a square of 2 by 2 pixels being on in a 5 by 5 pixel image. Interesting cases can be explored and then inspected visually as images, which are easier to interpret than bit strings (especially as the bit strings get larger than 10).
+  \item Rectangles in a 5 by 5 pixel image --- This dataset builds on the previous by introducing different shaped \emph{subjects} to the images. This means that two RBMs need to be trained, one for each subject. This dataset, much like the previous allows for compelling cases to be separated. It sets the scene for the larger dimension cases.
+  \item MNIST Handwritten Digit Dataset --- \todocite{MNIST} this is a prolific machine learning dataset \todocite{lots of papers please.}. By using the dataset in this project it aids in reproducibility of this project and as there has been previous work it is known that RBMs can be trained sucessfully on the data \todocite{MNIST RBM paper Hinton}. The dataset is comprised of 28 by 28 pixel handwritten digit images, where a pixel value is between 0 and 1. There are digits 0 through 9. For each digits it is composed with every other digit, making the novel, yet non-trival task of separating two digits from a single image.
 \end{itemize}
 
 
-\subsection{Mixing Time Evaluation}
-  \begin{itemize}
-    \item List the types Traceplot, Densityplots, Gelbin and Rubin multiple sequence diagnostics
-    \item Examine hidden state, reconstructions as gibbs iterations occur.
-  \end{itemize}
 
 
 % \subsection{Language Choice}\label{SS:language}
