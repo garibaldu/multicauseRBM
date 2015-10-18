@@ -262,10 +262,15 @@ This process was repeated except a different RBM was introduced, one that repres
   \caption{The algorithm explaining how the scores matrices were computed.}\label{alg:scores}
   \end{algorithm}
 
-  By finding the difference between the ORBMs reconstructions and the RBMs reconstruction we can create another matrix, in which a positive value represents a `win` for the ORBMs reconstructions and a negative value represents a `loss` (where the RBM outperformed the ORBM).
+  By finding the difference between the ORBMs reconstructions and the RBMs reconstruction we can create another matrix, in which a positive value represents a `win` for the ORBMs reconstructions and a negative value represents a `loss` (where the RBM outperformed the ORBM). These score difference matrices are seen in for the Cross Entropy and Cosine Angle scores in \ref{F:Cross-Entropy-MNIST} and \ref{F:Cosine-MNIST} respectively, where the colour encodes the score. For the Cosine score,  using the approximate correction, zero composed with every other digit yielded the best results for ORBM relative to the RBM, and nine the converse yielding particularly bad results (worse by a factor of 10 compared to zero). Given this, I plotted the RBMs Score versus the ORBM Score as a scatter plot, where each point corresponds to a score. This allows us to examine if the ORBM is performing worse as a whole, or if in some cases it is performing better than the RBM. These plots for zero and nine are shown in \ref{fig:mnist-worse-best-results}.
+  
+  Lastly, the top two scoring ORBM reconstructions are shown in Figure \ref{F:Best-Results-MNIST} for the composition of a four and a five image and a two and four image respectively. In the four composited with five input, the two closest five ORBM reconstruction compared to the ground truth is shown along with the reconstruction from the other model (RBM B) connected to the ORBM.
+  In the two composited with the four image, the two highest scoring four ORBM reconstructions are shown a long with the corresponding RBM reconstructions.
+  The opposite, worst scores are illustrated in \ref{F:Worst-Results-MNIST}
 
-  \subsubsection{Results}
-  These score difference matrices are seen in for the Cross Entropy and Cosine Angle scores in \ref{F:Cross-Entropy-MNIST} and \ref{F:Cosine-MNIST} respectively, where the colour encodes the score. For the Cosine score,  using the approximate correction, zero composed with every other digit yielded the best results for ORBM relative to the RBM, and nine the converse yielding particularly bad results (worse by a factor of 10 compared to zero). Given this, I plotted the RBMs Score versus the ORBM Score as a scatter plot, where each point corresponds to a score. This allows us to examine if the ORBM is performing worse as a whole, or if in some cases it is performing better than the RBM. These plots for zero and nine are shown in \ref{fig:mnist-worse-best-results}.
+  I selected four composited with five and two compositied with four as the four is a challenging digit in that there are strikingly different ways to draw a four. As a human looking at the composition inputs, it is not immdeitaly clear what parts of the image are caused by the four, and which are caused by the five or two respectively.
+
+
   \begin{figure}[h]
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
@@ -287,12 +292,12 @@ This process was repeated except a different RBM was introduced, one that repres
     \centering
     \begin{subfigure}[t]{1\textwidth}
         \includegraphics[width=\textwidth]{Assets/b.png}
-        \caption{ $(0,x)$ }
+        \caption{The cosine score for all digits composited with a handwritten zero.  }
       \label{F:Cosine-0-x-scores}
     \end{subfigure}
     \begin{subfigure}[t]{1\textwidth}
         \includegraphics[width=\textwidth]{Assets/(9,X)-ReconstructionScores.png}
-        \caption{ $(9,x)$ }
+        \caption{The cosine score for all digits composited with a handwritten nine.  }
       \label{F:Cosine-9-x-scores}
     \end{subfigure}
     \caption{Cosine Score breakdown for the highest and lowest performing datasets, 0 and 9.}\label{fig:mnist-worse-best-results}
@@ -302,7 +307,7 @@ This process was repeated except a different RBM was introduced, one that repres
   \begin{center}
     \includegraphics[width=0.9\textwidth]{Assets/results/orbm-Best-2-results.png}
   \end{center}
-  \caption{Best Scores}
+  \caption{The top two ORBM reconstrution results for two different compostions. The highest scoring fives form the basis for the left part of the diagram. The highest socring fours form the basis for the right part of the diagram.}
   \label{F:Best-Results-MNIST}
 \end{figure}
 
@@ -310,7 +315,7 @@ This process was repeated except a different RBM was introduced, one that repres
   \begin{center}
     \includegraphics[width=0.9\textwidth]{Assets/results/orbm-Worst-2-results.png}
   \end{center}
-  \caption{Worst Scores}
+  \caption{The worst two ORBM reconstruction results for two different compostions. The highest scoring fives form the basis for the left part of the diagram. The highest socring fours form the basis for the right part of the diagram.}
   \label{F:Worst-Results-MNIST}
 \end{figure}
 
@@ -349,89 +354,3 @@ As possible explaination could be that by plugging seporately traineded RBMs, in
     %     \end{itemize}
     %   \end{itemize}
     % \end{itemize}
-
-
-
-%   \begin{itemize}
-%     \item Method
-%     \item Can check the inference algorithm by using RBMs with hand trained weights
-%     \item Using a single RBM, copied.
-%     \item Diagram with small explaination why RBMs with these weights will work.
-%     \begin{itemize}
-%       \item 2 Hidden Units, 2 Visible Units. Weights Matrix of [-1,1],[1,-1]
-%       \item This ensures that if one visible unit is 1, the other will get set to off.
-%     \end{itemize}
-%     \item Look at the reconstructions of these RBMs, should match XOR patterns.
-%     \begin{itemize}
-%       \item 100000 free phase samples from RBMs resulted in [1,0] and [0,1] most of the time. (TODO-SHOW-GRAPHs). 100000 free phase samples is quite quick to calculate for only 4 weights.
-%       \item 2 sets of 100000 reconstructions given the patterns [1,0] and [0,1] resulted in all reconstructions for each set producing [1,0] and [0,1].
-%     \end{itemize}
-%     \item Hypothesis
-%     \item Clamp the visible to patterns of interest. Can see the dynamics of the system.
-%     \begin{itemize}
-%       \item 1,1 This should result in reconstructions matching XOR - [1,0] and [0,1]
-%       \item 1,0 This should result in reconstructions of just - [1,0]
-%       \item 0,1 Should behave symmertrically to [1,0].
-%       \item 0,0 Under the dynamics of the generative model should fall into [0,0].
-%     \end{itemize}
-%   \end{itemize}
-%
-%   \subsection{Y Bit pattern, X bits On}
-%   \begin{itemize}
-%     \item Have to train an RBM to recognise X neighbouring bits on at a time in a Y bit pattern. e.g. X = 2, Y = 5, [0,0,1,1,0]
-%     \item num Y hiddens, or more.
-%     \item While Y less than 10 it is easy to visualise if separation is occurring.
-%   \end{itemize}
-%
-%   \subsection{2D Pattern, Square Separation, Single Model}
-%   \begin{itemize}
-%     \item Dataset:
-%     \begin{itemize}
-%       \item 2x2 square in a 5x5 image. Dataset of every possible configuration of said square.
-%     \end{itemize}
-%     \item Method:
-%     \begin{itemize}
-%       \item train a single RBM to represent 2x2 squares in 5x5 space. Nice and small, can still inspect reconstructions, and dreams.
-%       \item Compose two square images with each other, can the ORBM architecture separate the images.
-%     \end{itemize}
-%   \end{itemize}
-%
-%   \subsection{2D Pattern, Different Rectangle Separation}
-%   \begin{itemize}
-%     \item Dataset
-%     \begin{itemize}
-%       \item n by m rectangles in 5x5 Images (TODO-IMAGE-IN-HERE) where n and m are not always equal.
-%     \end{itemize}
-%     \item Method
-%     \begin{itemize}
-%       \item Superimpose two images as the same way as before. How well can they separate.
-%     \end{itemize}
-%   \end{itemize}
-%
-%   \subsection{MNIST Digits}
-%   \begin{itemize}
-%     \item Dataset
-%     \begin{itemize}
-%       \item 500, 28 by 28 pixel, 0-1 valued, handwritten digit images form the training set.
-%     \end{itemize}
-%     \item Method
-%     \begin{itemize}
-%       \item Train an single RBM per digit (0-9) in the dataset. Each RBM having 100 hidden units, (TODO-CITE-COOKBOOK) for reasoning.
-%       \item For all 500 training digit images, compose it with every other digit, and itself. This way the ground truth, the sources are known, therefore making evaluation possible.
-%       \item For all of these compositions us the RBMs trained of the corresponding sources to:
-%       \begin{itemize}
-%         \item Compute the RBM reconstructions for the two sources given their composite input. (TODO-SHOW-DIAGRAM)
-%         \item Compute the ORBM reconstructions, the ORBM using the same RBMs as in the RBM evaluation.
-%         \item Because 28 by 28 pixels equates to 784 features, emperically examining all reconstructions is non-trivial. Hence some scoring functions are required.
-%         \item Scoring
-%         \item Cross Entropy - Approximate the Log likelihood of the underlying dataset.
-%         \item Pixel Difference Score - Absolute difference in pixels of the image
-%         \item Cosine Angle - between reconstruction and target vectors. This has the benefit of also being somewhat magnitude agnostic. (TODO-CITE-AS-MEASURE-WITH-JUSTIFICATION).
-%         \item Repeat this process 30x to give confidence in findings. Scores calculated can then be meaned over the 30 runs.
-%       \end{itemize}
-%     \end{itemize}
-%   \end{itemize}
-%
-%
-% % \subsection{Classifciation Accuracy on Hidden Representation}
-% %   Not sure about this one.

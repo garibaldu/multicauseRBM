@@ -125,8 +125,9 @@ Reconstructions, as described in Section \ref{SS:RBM-Reconstructions}, are a goo
 
 
   \item[Problems  with large dimentionalities] In non-trivial cases, with larger datasets, reconstructions can be inspected and compared to the training dataset. However, empirically detecting if a model is trained is difficult, especially given the unsupervised, black box nature of RBMs.
-  Alternatively, a `score` can be assigned to each item in the training set based on how well the RBM can reconstruct it. However in large cases your training set will not be complete --- you will not have every possible valid image like you would in a case where your images are 2 pixels.
-  Dreams can also be examined in larger cases, but emperically detecting if they are `correct` is infeasible. Nevertheless, Dreams are useful to examine as dreams that look like items in the training set gives confidence the RBM \todowording{has learnt something.}
+  Alternatively, a `score` can be assigned to each item in the training set based on how well the RBM can reconstruct it.
+  This project will use two scores the \emph{Cross Entropy}\ref{golik2013cross} and the \emph{Negative Cosine Angle} to compare the reconstructions to the ground truth images.
+  Dreams can also be examined in larger cases, but emperically detecting if they are `correct' is infeasible. Nevertheless, Dreams are useful to examine as dreams that look like items in the training set gives confidence the RBM \todowording{has learnt something.}
 
 \end{description}
 
