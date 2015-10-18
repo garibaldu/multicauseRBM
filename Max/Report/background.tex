@@ -166,7 +166,7 @@ P(x_j = 1, x_{\smallsetminus}j) = \frac{1}{1 + e^{-\sum_i w_{ji}x_i}}
 $$
 That is, Gibbs sampling in a Boltzmann Machine amounts to use the Sigmoid function of the weighted inputs~\cite{neal1992:connectionist}.
 
-\subsection{Gibbs Sampling in RBMs}
+\subsection{Gibbs Sampling in RBMs}\label{S:Gibbs-Sampling-RBM}
 
 
 
@@ -236,6 +236,6 @@ In order to describe Gibbs sampling in the new architecture proposed, it must fi
 
 RBMs create an internal representation given an input by sampling from $P(h|v)$. They can also generate a faux input given an internal representation (a $h$). Performing one Gibbs iteration, that is, sampling from the hidden units given a `clamped' input $ P(h|v) $ and then taking the generated hidden state and generating a faux input (sampling from $P(v|h_{sampled})$) results in a \texttt{reconstruction}. Clamped input is where the visible units are set to be an input pattern. The model tries to reconstruct the input based on the internal representation it has learnt to model.
 
-\subsubsection{RBM Fanstasies: The Free-Phase of a Generative model}
+\subsubsection{RBM Fanstasies: The Free-Phase of a Generative model}\label{S:Dreams}
 
-In the same way that a Generative model uses reconstructions to try and recreate the supplied input vector, performing many Gibbs iterations with no input pattern clamped and taking a sample is referred to free-phase sampling of the model. It allows the samples to explore the probability mass that has been built by the model during training. Sampling from these wanderings creates what are referred to as `fantasies` or `dreams`.
+In the same way that a Generative model uses reconstructions to try and recreate the supplied input vector, performing many Gibbs iterations with no input pattern clamped and taking a sample is referred to as free-phase sampling of the model. It allows the samples to explore the probability mass that has been built by the model during training. Sampling from these wanderings creates what are referred to as `fantasies` or `dreams`.
