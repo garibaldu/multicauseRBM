@@ -64,7 +64,7 @@ By collecting terms and simplifying this matches the earlier form in equation~\r
 
 \subsection{Architecture}
 
-Frean and Marsland extend on this idea of a `One Gibbs iteration unrolled RBM'. They propose adding another $U$ and $H$ layers to represent another rich source of data, which then combines with the orignal $U$ and $H$ layer via a SBN to form the visible layer, $V$. This architecture is illustrated in figure \ref{ORBM-Architecture}, where A and B are used to denote the two independant causes we are modeling. To clarify the ORBMs architecture, there are two RBMs, one for each cause. These RBMs are connected to a SBN into the visible layer, the weights of which are tied to the respective RBMs. Performing inference in this architecture is slightly simpler for performing inference, as the $U$ layers are not involved.
+Frean and Marsland extend on this idea of a `One Gibbs iteration unrolled RBM'. They propose adding another $U$ and $H$ layers to represent another rich source of data, which then combines with the original $U$ and $H$ layer via a SBN to form the visible layer, $V$. This architecture is illustrated in figure \ref{ORBM-Architecture}, where A and B are used to denote the two independent causes we are modeling. To clarify the ORBMs architecture, there are two RBMs, one for each cause. These RBMs are connected to a SBN into the visible layer, the weights of which are tied to the respective RBMs. Performing inference in this architecture is slightly simpler for performing inference, as the $U$ layers are not involved.
 
 By building on RBMs and an SBN we can leverage existing algorithms and work on RBMs. Also the potential for extending this work to deeper architectures could be possible. Also the architecture supports `plug and play` with the models in that existing RBMs can be plugged into the architecture. The implications of this are exciting in that an RBM that has been trained on hand written digits could be plugged into an RBM that has been trained on a paper texture (the bumps and ridges of paper). Then using the ORBM a `clean` representation of the text and paper could be separated out given an image of a digit on paper.
 
@@ -130,7 +130,7 @@ where $\phi_i^{AB} = \phi_i^{A} + \phi_i^{B}$. Note that $v$ plays no role in th
 This `full' correction (eq \ref{eq:Full-Corretion}) is a non-trivial computation to make in that for every weight, a series of semi-large matrix operations have to be performed. As a result, Frean and Marsland propose an approximation for this `full' correction.
 
 It is useful to see the correction for the $A$ model as contours on axes $\phi^A_i$ versus $\phi^{AB}_i$, for a positive weight $W^A_{ij}$.
-There are two plots for the two cases $h^A_j=0 \text{ and } h^A_j = 1$ These are plotted in figure \ref{F:Correction-Plot}. This function has defined `plataus` where the height of these platuas is $\pm $ the weight respectively. The correction essentailly adjusts the weight between $v_i$ and $h_j$ allowing it to be turned off, turned on, intensified, deintensified, or have no effect. This is similar to adjusting the visible activation based on what the two RBMs are doing and hence Frean and Marsland propose the following approximation:
+There are two plots for the two cases $h^A_j=0 \text{ and } h^A_j = 1$ These are plotted in figure \ref{F:Correction-Plot}. This function has defined `plateaus` where the height of these plateaus is $\pm $ the weight respectively. The correction essentially adjusts the weight between $v_i$ and $h_j$ allowing it to be turned off, turned on, intensified, de-intensified, or have no effect. This is similar to adjusting the visible activation based on what the two RBMs are doing and hence Frean and Marsland propose the following approximation:
 
 \begin{equation}\label{eq:Approx-Correction}
  C^A_{ji} = \sigma(\phi^{A_{j0}}_i + W^A_{ji}) - \sigma(\phi^{A_{j0}}_i W^A_{ji} + \phi^B_i)
@@ -140,7 +140,7 @@ There are two plots for the two cases $h^A_j=0 \text{ and } h^A_j = 1$ These are
 \begin{figure}[h]
 \begin{center}
   \includegraphics[width = 0.8\textwidth]{Assets/correction.png}
-\caption{A diagram that shows the structure of the correction over the weighted sums into the hiddens of one of the RBMS versus both. Note the platuaes that are $\pm weight$ in magnitude}
+\caption{A diagram that shows the structure of the correction over the weighted sums into the hiddens of one of the RBMS versus both. Note the plateaus that are $\pm weight$ in magnitude}
 \label{F:Correction-Plot}
 \end{center}
 \end{figure}
