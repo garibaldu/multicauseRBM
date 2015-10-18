@@ -145,7 +145,7 @@ There are two plots for the two cases $h^A_j=0 \text{ and } h^A_j = 1$ These are
 \end{center}
 \end{figure}
 
-\subsubsection{What happened to the biases?}
+\subsubsection{What happened to the biases?}\label{S:Biases}
 
 The ORBM utilises the hidden biases present on the RBMs when calculating the hidden states $h^A$ and $h^B$. However, the visible biases are not used in sampling from the visible. The reasoning behind this being that the RBMs visible bias acts like the `background rate`, i.e. what visible reconstruction would we see from an all zero hidden activation. As visible bias are not captured in the ORBM, it is important that RBMs plugged into it's structure do not use a visible bias when being trained.
 
