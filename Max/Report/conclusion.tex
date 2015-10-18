@@ -1,9 +1,16 @@
 \chapter{Conclusions and Future Work}
-restate contributions and how I ahcieved rhem
-what were my major findings focusing on the positives
-\begin{itemize}
-  \item ORBM inference is working in smaller cases really well. Even better than the RBM!
-  \item Training algorithm for this generative model has been proposed. Haven't been able to get it going but it could be really promising - Amounts to blind source separation.
-  \item Disparity in weights between the models will have an effect. In trying to reaosn about why the activation would turn off it occurred to me that a disparity in weights between the models could allow one model overpower another! This could be overcome by moving back to a single model - and training MNIST 0-9 in one model and repeating the last experiment.
-  \item No visible bias means that no activation in one model will make reconstructions incorrect for that model. But that is almost out of the scope for the ORBM.
-\end{itemize}
+
+\section{Conclusions}
+
+This project aimed to contribute:
+\begin{enumerate}[$\mathcal{C}$1.]
+  \item The first articulation of the proposed architecture, including the context needed to understand it. It does, by way of this report, particular the second and third chapters.
+  \item A Python implementation of the new architecture and algorithm. This was created in order to meet the last contribution. The code is publicly available on Github.
+  \item A suite of graded evaluations/tests that explore how the architecture and source separation algorithm work in practice. The project explores how the architecture and algorithm work in practice. However more questions are raised as to why it seems to break down, performing less strikingly in the larger more challenging cases.
+\end{enumerate}
+
+The main takeaway from the project is that the ORBM works in smaller problems, and the implications and applications if it does work in larger cases would be huge, so there is a motivation to continue this work going forward.
+
+\section{Future Work}
+
+Frean and Marsland should pursure exactly why the ORBM is not performing better than the RBM on the MNIST dataset. I would suggest ensuring both models have a similar range of weights, to ensure one does not over power the other. Or another approach would be to revert back to using a single model, except the model would be trained on all MNIST digits (0-9). Then a composite input would be shown to this model in the ORBM architecture and the reconstructions should separate the sources of that input. This would alleviate issues of weights having different ranges.
