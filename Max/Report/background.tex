@@ -16,7 +16,7 @@ Given $X$, the variables in the generative model, and $parent_i$ the parent unit
 \begin{equation}\label{eq:sbn-factorisation}
 P(X) = \prod_i P(x_i | parent_i)
 \end{equation}
-Connections between units in the Directed PGM express causation~\cite{pearl2014probabilistic}. They provide an expressive way to represent a collection of related, stochastic variables. See figure \ref{F:PGM-example} for the minimal example, where variable $A$ is dependent on $B$. As a result this network is often referred to as a Belief Network or Bayesian Network. A Belief Network's causal dependencies are expressed as a conditional probability table also know as `factor'. For example in figure \ref{F:PGM-example} the probabilities of $A$ being in a given state are dependent on $B$. The joint distrubution over $A$ and $B$, as in equation \ref{eq:sbn-factorisation}, can be expressed as:
+Connections between units in the Directed PGM express causation~\cite{Pearl:1988:PRI:52121}. They provide an expressive way to represent a collection of related, stochastic variables. See figure \ref{F:PGM-example} for the minimal example, where variable $A$ is dependent on $B$. As a result this network is often referred to as a Belief Network or Bayesian Network. A Belief Network's causal dependencies are expressed as a conditional probability table also know as `factor'. For example in figure \ref{F:PGM-example} the probabilities of $A$ being in a given state are dependent on $B$. The joint distrubution over $A$ and $B$, as in equation \ref{eq:sbn-factorisation}, can be expressed as:
 $$P(A,B) = P(A|B)P(B)$$
 \begin{wrapfigure}{r}{0.2\textwidth}
 \begin{center}

@@ -88,7 +88,7 @@ That is, the ORBM probability of $v$ given $h^{A} $ and $h^{B}$ is defined by:
 $$ \log P(v|h^A,h^B) = \sum_i v_i \log \sigma (\phi^A_i + \phi^B_i) + (1-v_i) \log (1 - \sigma(\phi^A_i + \phi^B_i)$$
 Where $\phi_i^A \text{ and } \phi_i^B $ are the weighted sums into the $ ith$ visible units from the models A and B respectively. In this generative model a visible unit is created by taking the weighted sum from both sources, adding their contribution and then passing through a Sigmoid function to give a probability.
 
-\subsubsection{Inference in the ORBM}
+\subsubsection{Inference in the ORBM}\label{S:ORBM-Inference}
 
 In a standard RBM sampling from $P(h_j=1)$ is given by $P(h_j=1) = \sigma(\psi_i)$, where $\psi_i$ is defined in equation \ref{psi-gibbs-update-rbm}. In an ORBM we cannot consider the single RBM alone when trying to find $P(h_j)$, as the hidden layers of the two RBMs in the ORBM are dependent given a visible layer $v$. This amounts to explaining away as described in section \ref{S:Explaining-Away}. There is a nice feature of the ORBM in that the hidden representations ($ h^A \text{ and } h^B $) we extract from the visible layer require no interaction with the $U$ layers to sample from. The $ U $ layers are only needed to generate a composite $ V $ pattern (or independent reconstructions).
 
