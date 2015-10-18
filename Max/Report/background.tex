@@ -1,22 +1,22 @@
 \chapter{Backgroud}
 
-As the proposed architecture and algorithm extend existing work on Probablistic Graphical Models, a substantial amount of background is required culminating with the new approach being derived. A robust understanding of these concepts is required for this project to implement and design appropriate evaluations for the proposed architecture.
+As the proposed architecture and algorithm extend existing work on Probabilistic Graphical Models, a substantial amount of background is required culminating with the new approach being derived. A robust understanding of these concepts is required for this project to implement and design appropriate evaluations for the proposed architecture.
 
 \section{Generative Models}\label{S:Generative-Models}
 
-This project works with nueral network based generative models.
+This project works with neural network based generative models.
 Generative models are a powerful way to model data. With generative models, we aim to learn a model that can both create the training data, represent it, and reconstruct it using the representation the model has learnt to create. Generative models can map input data from raw values to higher level features. Hinton~\cite{hinton:32723:vv}, gave a compelling argument for higher level features in the context of generative models. \begin{quote} ``Consider, for example, a set of images of a dog. Latent variables such as the position, size, shape and color of the dog are a good way of explaining the complicated, higher-order correlations between the individual pixel intensities, and some of these latent variables are very good predictors of the class label.''\end{quote}
 
 Generative models model a distribution over a collection of binary variables $X$, where $X$ is comprised of variables which can be observed or unobserved. The observed variables are referred to as \texttt{visible} variables or units ($v$). Conversely, unobserved variables correspond to the hidden units of the neural network ($h$). With these terms defined, the joint distribution that generative models model can be expressed as $P(X)$ where $X$ is comprised of $h,v$. Collections of these units, are often referred to as `patterns` or `vectors` in that they are represented by a vector or pattern of bits. For instance in the context of an image, a visible pattern is the pixels of the image flattened into a one dimensional vector.
 
 \section{Directed PGMs}
 
-The new approach proposed in this project uses both the two classes of Probablisitic Graphical Models, Directed and Undirected. A Directed PGM, is a notation for factorising over a collection of stochastic variables.
+The new approach proposed in this project uses both the two classes of Probabilistic Graphical Models, Directed and Undirected. A Directed PGM, is a notation for factorising over a collection of stochastic variables.
 Given $X$, the variables in the generative model, and $parent_i$ the parent unit of $x_i$, the distribution over $X$ in a directed PGM is defined by the following factorisation:
 \begin{equation}\label{eq:sbn-factorisation}
 P(X) = \prod_i P(x_i | parent_i)
 \end{equation}
-Connections between units in the Directed PGM express causation~\cite{Pearl:1988:PRI:52121}. They provide an expressive way to represent a collection of related, stochastic variables. See figure \ref{F:PGM-example} for the minimal example, where variable $A$ is dependent on $B$. As a result this network is often referred to as a Belief Network or Bayesian Network. A Belief Network's causal dependencies are expressed as a conditional probability table also know as `factor'. For example in figure \ref{F:PGM-example} the probabilities of $A$ being in a given state are dependent on $B$. The joint distrubution over $A$ and $B$, as in equation \ref{eq:sbn-factorisation}, can be expressed as:
+Connections between units in the Directed PGM express causation~\cite{Pearl:1988:PRI:52121}. They provide an expressive way to represent a collection of related, stochastic variables. See figure \ref{F:PGM-example} for the minimal example, where variable $A$ is dependent on $B$. As a result this network is often referred to as a Belief Network or Bayesian Network. A Belief Network's causal dependencies are expressed as a conditional probability table also know as `factor'. For example in figure \ref{F:PGM-example} the probabilities of $A$ being in a given state are dependent on $B$. The joint distribution over $A$ and $B$, as in equation \ref{eq:sbn-factorisation}, can be expressed as:
 $$P(A,B) = P(A|B)P(B)$$
 \begin{wrapfigure}{r}{0.2\textwidth}
 \begin{center}
@@ -57,7 +57,7 @@ Undirected PGMs do not represent causation, instead merely capturing a dependenc
 $$
 P(X) = \frac{1}{Z} \prod_i \Phi(x_i, x_j)
 $$
-The introduction of the normalisation $Z$ (often referred to as the partition function) adds nontrivial complexity to performing inference in Undirected PGMs~\cite{Salakhutdinov08learningand}, a sum over all $2^N$ configuratiions of $x$ is required.
+The introduction of the normalisation $Z$ (often referred to as the partition function) adds nontrivial complexity to performing inference in Undirected PGMs~\cite{Salakhutdinov08learningand}, a sum over all $2^N$ configurations of $x$ is required.
 
 Undirected PGMs do not capture causal relationships meaning computing the state of a variable given another is no longer hampered by the effect of explaining away. However, their reccurent structure, while expressive introduces an intractability in practice.
 
@@ -115,7 +115,7 @@ Sampling from $P(v|h)$ and $P(h|v)$ is required to train generative models, as o
 
 Gibbs sampling is a special case of Markov Chain Monte Carlo~\cite{hastings70}, a technique for drawing samples from a complex distribution. Sampling from the probability mass (or `joint distribution`) of a generative model is a common use case for Gibbs sampling~\cite{Pearl:1988:PRI:52121}.
 
-Gibbs sampling explores the desired probability distribution, taking samples of that distribution's state. One must leave iterations of `exploration' (of the probability mass) between drawing of a sample to ensure that the samples are independent~\cite{casella1992explaining}. The process of taking a step between states is referred to as a \texttt{Gibbs iteration} or a \texttt{Gibbs Step}. Formally the algorithm is descibed in algorithm~\ref{Alg:Gibbs-Sampling}.
+Gibbs sampling explores the desired probability distribution, taking samples of that distribution's state. One must leave iterations of `exploration' (of the probability mass) between drawing of a sample to ensure that the samples are independent~\cite{casella1992explaining}. The process of taking a step between states is referred to as a \texttt{Gibbs iteration} or a \texttt{Gibbs Step}. Formally the algorithm is described in algorithm~\ref{Alg:Gibbs-Sampling}.
 
 \begin{algorithm}[!ht]
  \KwData{A vector $x$ indexed by $j$.}
@@ -144,15 +144,13 @@ Sampling from $ P(v|h) $ (known as Ancestral Sampling in a SBN) is extremely eff
 \begin{equation}\label{eq:SBN-v-given-h}
 P(v|h) = \sum_i v_i \log \sigma_i(h) + (1-v_i)log(1-\sigma_i(h))
 \end{equation}
-As this process is calcuated by propagating probabilities from the root hidden causes, it is known in a SBN as Ancestral Sampling.
+As this process is calculated by propagating probabilities from the root hidden causes, it is known in a SBN as Ancestral Sampling.
 
 Conversly, sampling from $P(h|v)$ in an SBN is intractable. Performing inference in a Sigmoid Belief network would allow source separation, as each hidden unit could represent a simple cause. The SBN would be shown an input, and could extract representations of the seperate causes that likely gave rise to the input. There exist algorithms for performing inference in Sigmoid Belief Networks. For instance, the Belief Propagation algorithm proposed by Judea Pearl~\cite{Pearl1982} operates on this encoding, calculating the probabilities of a given network state (i.e. the state of all the variables). As well as constraining the architecture to be a Directed Acyclic Graph, Belief Propagation is intractable to use as the number of variables grow~\cite{elidan2007using}. As we want to work with cases with upwards of 100 visible and hidden nodes, these algorithms break down.
 
 Despite the Sigmoid Belief Network being expressive and providing a succinct encoding of conditional probabilities, Gibbs sampling is intractable for SBNs of practical size~\cite{Jensen95blockinggibbs}. The issue being that the Gibbs chain takes too long to mix~\cite{neal1992:connectionist}, which arises from the the `explaining away effect`~\cite{Hinton:2006:FLA:1161603.1161605}. Calling back to the example in section \ref{S:Explaining-Away}, instead of a single \texttt{burglar} or \texttt{earthquake} becoming dependent given the \texttt{alarm}, there is more in the realm of hundreds of burlgars and earthquakes all suddenly dependent.
 
 Being able to efficiently sample from $P(h|v)$ is also required for training generative models~\cite{elidan2007using} making Sigmoid Belief Networks impractical for not only inference, but also training.
-
-
 
 
 \subsection{Gibbs Sampling in a Boltzmann Machine}
@@ -169,8 +167,7 @@ That is, Gibbs sampling in a Boltzmann Machine amounts to use the Sigmoid functi
 \subsection{Gibbs Sampling in RBMs}\label{S:Gibbs-Sampling-RBM}
 
 
-
-A big payoff for the restriction in an RBM is inverting the model becomes tractable, as the latent variables no longer become dependant given the observed ones. This is illustrated in figure~\ref{F:Restricted-Boltzmann-Machine} the hidden unit $h_1$ is not dependent on $h_2$, regardless if we know anything about the visible units. Firstly, this is the opposite of a SBN, where knowledge of the visible units makes the hidden units dependant. Secondly, by removing the recurrence present in Boltzmann Machines, it reduces the expresiveness of the RBM network. This does make the RBM useable in practice, as the Gibbs sampling process can stop after one Gibbs step\cite{fischer2014training}.
+A big payoff for the restriction in an RBM is inverting the model becomes tractable, as the latent variables no longer become dependant given the observed ones. This is illustrated in figure~\ref{F:Restricted-Boltzmann-Machine} the hidden unit $h_1$ is not dependent on $h_2$, regardless if we know anything about the visible units. Firstly, this is the opposite of a SBN, where knowledge of the visible units makes the hidden units dependent. Secondly, by removing the recurrence present in Boltzmann Machines, it reduces the expressiveness of the RBM network. This does make the RBM useable in practice, as the Gibbs sampling process can stop after one Gibbs step\cite{fischer2014training}.
 
 In order to describe Gibbs sampling in the new architecture proposed, it must first be explained for a standard RBM --- The process of Gibbs sampling is as follows:
   \begin{itemize}
@@ -236,6 +233,6 @@ In order to describe Gibbs sampling in the new architecture proposed, it must fi
 
 RBMs create an internal representation given an input by sampling from $P(h|v)$. They can also generate a faux input given an internal representation (a $h$). Performing one Gibbs iteration, that is, sampling from the hidden units given a `clamped' input $ P(h|v) $ and then taking the generated hidden state and generating a faux input (sampling from $P(v|h_{sampled})$) results in a \texttt{reconstruction}. Clamped input is where the visible units are set to be an input pattern. The model tries to reconstruct the input based on the internal representation it has learnt to model.
 
-\subsubsection{RBM Fanstasies: The Free-Phase of a Generative model}\label{S:Dreams}
+\subsubsection{RBM Fantasies: The Free-Phase of a Generative model}\label{S:Dreams}
 
 In the same way that a Generative model uses reconstructions to try and recreate the supplied input vector, performing many Gibbs iterations with no input pattern clamped and taking a sample is referred to as free-phase sampling of the model. It allows the samples to explore the probability mass that has been built by the model during training. Sampling from these wanderings creates what are referred to as `fantasies` or `dreams`.
