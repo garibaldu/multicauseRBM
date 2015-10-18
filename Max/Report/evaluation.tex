@@ -56,11 +56,11 @@ $[0, 1]$      & $[0,1]$               & $[0,1]$               \\ \hline
 
 \subsubsection{XOR ORBM Analysis}
 
-The results of this process are shown in figure \ref{F:Two-Bit-RBM-Inference-Results-1}. The ORBM is able to separate the causes with both types of correction, as the model is being duplicated, it produces $[1,0]$ and $[0,1]$ approximately half the time and symetrically $[0,1]\text{ }[1,0]$ the other half of the time. These reconstructions were compared to one of the RBMs trained to recognised a single pattern being on in two bits. As expected a machine that has been trained to recognise one bit, has no concept of two bits being on and hence the reconstructions show no mechanism for seperating the sources. This is illustrated in the bottom right of Figure \ref{F:Two-Bit-RBM-Inference-Results-1}.
+The results of this process are shown in figure \ref{F:Two-Bit-RBM-Inference-Results-1}. The ORBM is able to separate the causes with both types of correction, as the model is being duplicated, it produces $[1,0]$ and $[0,1]$ approximately half the time and symmetrically $[0,1]\text{ }[1,0]$ the other half of the time. These reconstructions were compared to one of the RBMs trained to recognised a single pattern being on in two bits. As expected a machine that has been trained to recognise one bit, has no concept of two bits being on and hence the reconstructions show no mechanism for separating the sources. This is illustrated in the bottom right of Figure \ref{F:Two-Bit-RBM-Inference-Results-1}.
 
 The results of repeating this process with the input $[1,0]$ yielded successful results. We would hope that ORBM architecture could also handle inference with just a single subject. The results of this are shown in the top right and bottom left of Figure \ref{F:Two-Bit-RBM-Inference-Results-1}.
 
-The ORBM was able to extract the target patterns $[1,0]$ and $[0,1]$ given the input $[1,1]$. This was the case for both the Approximated and Full corrections, which gave confidence that the more computationally efficient Approximated correction could be relied on going forward --- as for larger datasets it is a lot faster in practice. The generative model also copes with the subject overlapping, which in the two bit case arised when $[1,0]$ is composed with $[1,0]$. In both the Approximated and Full corrections the highest occuring reconstruction is the target $[1,0]$, however there appears to be a lot less confidence.
+The ORBM was able to extract the target patterns $[1,0]$ and $[0,1]$ given the input $[1,1]$. This was the case for both the Approximated and Full corrections, which gave confidence that the more computationally efficient Approximated correction could be relied on going forward --- as for larger datasets it is a lot faster in practice. The generative model also copes with the subject overlapping, which in the two bit case arised when $[1,0]$ is composed with $[1,0]$. In both the Approximated and Full corrections the highest occurring reconstruction is the target $[1,0]$, however there appears to be a lot less confidence.
 
 
 \begin{landscape}
@@ -106,11 +106,11 @@ For a subset of values of $y \in Y, x \in X | 2 < x < y < 10$ the following proc
 \begin{enumerate}
   \item A single RBM was trained on all possible permutations of $X$ neighbouring bits being on in a $Y$ bit string (as seen in the Matrix~\ref{eq:Example-xy-dataset}).
   \item The trained RBM was duplicated and plugged into the ORBM architecture.
-  \item For a subset of possible compositions of two patterns, generate reconstructions using the ORBM (and the approximate correction). Where the cases examined are interesting cases such as partial overalapping and completely separate subjects.
+  \item For a subset of possible compositions of two patterns, generate reconstructions using the ORBM (and the approximate correction). Where the cases examined are interesting cases such as partial overlapping and completely separate subjects.
   \item Finally reconstructions are plotted on bar graphs ensuring they match the expected results.
 \end{enumerate}
 
-A subset of the larger (but still small) dimension task results are shown in Figure \ref{F:X-Bit-ORBM-Inference-Results-1}. These illustrate the more interesting cases and the ORBM correctly separates the sources in all of them. The top left graph in Figure \ref{F:X-Bit-ORBM-Inference-Results-1} extends the work in section \ref{S:XOR} by recognising a single bit in a 5 bit pattern and the ORBM is sucessful. The top right graph illustrates the case of a 1 bit overlap of data made up of 2 neighbouring bits. The bottom left graph also exemplifies a 1 bit overlay but this time with a `wider` pattern of 3 bits. The bottom right graph shows the case where the two `subjects` are side by side, not overlapping. This is a disparity here that would likely be solved creating more reconstructions.
+A subset of the larger (but still small) dimension task results are shown in Figure \ref{F:X-Bit-ORBM-Inference-Results-1}. These illustrate the more interesting cases and the ORBM correctly separates the sources in all of them. The top left graph in Figure \ref{F:X-Bit-ORBM-Inference-Results-1} extends the work in section \ref{S:XOR} by recognising a single bit in a 5 bit pattern and the ORBM is successful. The top right graph illustrates the case of a 1 bit overlap of data made up of 2 neighboring bits. The bottom left graph also exemplifies a 1 bit overlay but this time with a `wider` pattern of 3 bits. The bottom right graph shows the case where the two `subjects` are side by side, not overlapping. This is a disparity here that would likely be solved creating more reconstructions.
 
 \begin{landscape}
 \begin{figure}
@@ -151,12 +151,12 @@ A subset of compelling results from this process were extracted and are shown in
 
 \subsubsection{Square results}
 \begin{description}
-  \item[Column 1] Shows two squares sitting side by side. As expected the RBM, only modelling a single square recontructs a square in the middle of the two. The ORBM is able to successfully extract and reconstruct the separate squares.
+  \item[Column 1] Shows two squares sitting side by side. As expected the RBM, only modeling a single square reconstructs a square in the middle of the two. The ORBM is able to successfully extract and reconstruct the separate squares.
   \item[Columns 2 and 3] Here we see a single pixel overlap, the ORBM successfully reconstructing the ground truth. The RBM, despite having identical weights to the RBM that is plugged into the ORBM there is no mechanism to separate the sources. The ORBM does not perform perfectly in column 3, in that one if it's reconstructions is correct but the other is noiser than the RBM.
   \item[Columns 4, 5 and 6] Much like column 1 we have disjoint subjects, the ORBM successfully separates them, however the RBM performs much, much worse.
 \end{description}
 
-This process was repeated except a different RBM was introduced, one that represents a rectangle instead of sqaure. Plugging the original square model and the new rectangle into the ORBM architecture. The results for this aspect are shown in \ref{F:rect-orbm-results}.
+This process was repeated except a different RBM was introduced, one that represents a rectangle instead of square. Plugging the original square model and the new rectangle into the ORBM architecture. The results for this aspect are shown in \ref{F:rect-orbm-results}.
 
 \subsubsection{Rectangle results}
 \begin{description}
@@ -209,9 +209,9 @@ This process was repeated except a different RBM was introduced, one that repres
     \caption{A figure visualising how reconstructions change in the ORBM as Gibbs iterations are run for two compositions of digits three and two.}
     \label{F:MNIST-Mixing-Time}
   \end{figure}
-  By visiually inspecting the reconstructions and the associated hidden activations (the hidden activations are not pictured) at Gibbs iterations 1,2,5,10,50,100, and 500 it can be seen the Gibbs chain mixes very quickly. Viewing these reconstructions as animations it is easier to see how the reconstructions stabilise and this lead to the choice of using 100 Gibbs iterations, just to be enusre the chain is definitly mixed while not being such a long chain that it is intractble to run.
+  By visually inspecting the reconstructions and the associated hidden activations (the hidden activations are not pictured) at Gibbs iterations 1,2,5,10,50,100, and 500 it can be seen the Gibbs chain mixes very quickly. Viewing these reconstructions as animations it is easier to see how the reconstructions stabilise and this lead to the choice of using 100 Gibbs iterations, just to be ensure the chain is definitely mixed while not being such a long chain that it is intractable to run.
 
-  This diagram also reveals an interesting case where the hidden activations have turned completley off. The reconstruction however appears grey with all values pixel being $0.5$. As mentioned in Section \ref{S:Biases}, the ORBM does not use a visible bias which would be responsibile for making an all zero reconstruction given no activations in the hidden layer.
+  This diagram also reveals an interesting case where the hidden activations have turned completely off. The reconstruction however appears grey with all values pixel being $0.5$. As mentioned in Section \ref{S:Biases}, the ORBM does not use a visible bias which would be responsible for making an all zero reconstruction given no activations in the hidden layer.
 
 
   Given the results of the exploration of the mixing time, 100 Gibbs iterations were used when generating the hidden states ($h^A$ and $h^B$) for a given input. The RBMs plugged into the ORBM were also used to create standard RBM reconstructions, to compare against the ORBM. Given the ORBMs reconstructions (two per image) and the RBM reconstructions (also two per image), two scores were applied to compare these reconstructions to the ground truth:
@@ -245,7 +245,7 @@ This process was repeated except a different RBM was introduced, one that repres
   In the two composited with the four image, the two highest scoring four ORBM reconstructions are shown a long with the corresponding RBM reconstructions.
   The opposite, worst scores are illustrated in \ref{F:Worst-Results-MNIST}
 
-  I selected four composited with five and two compositied with four as the four is a challenging digit in that there are strikingly different ways to draw a four. As a human looking at the composition inputs, it is not immdeitaly clear what parts of the image are caused by the four, and which are caused by the five or two respectively.
+  I selected four composited with five and two composited with four as the four is a challenging digit in that there are strikingly different ways to draw a four. As a human looking at the composition inputs, it is not immediately clear what parts of the image are caused by the four, and which are caused by the five or two respectively.
 
 
   \begin{figure}[h]
