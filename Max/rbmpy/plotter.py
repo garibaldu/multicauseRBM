@@ -178,9 +178,9 @@ def plot_dict(to_plot, title = "", size = None):
 
 	indexes = np.arange(len(labels))
 	width = 1
-
+	plt.suptitle(title)
 	plt.bar(indexes, values, width)
-	plt.xticks(indexes + width * 0.5, labels)
+	plt.xticks(indexes + width * 0.5, labels, rotation='vertical')
 	plt.show()
 
 
