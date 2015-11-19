@@ -98,3 +98,8 @@ Max/MNIST_Digits/9s-img-dataset.npy
 *.synctex.gz
 *.synctex.gz(busy)
 *.pdfsync
+
+## Report Assets
+Assets/
+Results/
+correction.png
