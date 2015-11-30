@@ -4,12 +4,13 @@ import rbm
 
 if __name__ == '__main__':
 
-    iterations = 100
-    learning_rate, momentum, L1_penalty, minibatch_size = 0.1, 0.95, 0.005, 50
+    iterations = 250
+    learning_rate, momentum, L1_penalty, minibatch_size = 0.01, 0.25, 0.0, 50
 
 
     L1 = rbm.RBM('RBM9') # should attempt to read an existing RBM in.
-    L1_inpats = load_mnist_digits([1,2], dataset_size=100)
+    digits = [0,1,2,3,4]
+    L1_inpats = load_mnist_digits(digits, dataset_size=100)
 
     L2 = rbm.RBM('lay2_RBM9', num_hid=100, num_vis=L1.num_hid) # a new layer 2.
     L2_inpats = L1.pushup(L1_inpats)
