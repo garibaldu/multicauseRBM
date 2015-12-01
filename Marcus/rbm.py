@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy.random as rng
 from scipy.special import expit as sigmoid
 np.set_printoptions(precision=2)
-from orbiumutils import *
 
 
 
@@ -41,7 +40,7 @@ class RBM(object):
                 self.vis_bias = data['vis_bias']
                 self.num_hid = self.W.shape[0]
                 self.num_vis = self.W.shape[1]
-            print ('%d hids, and %d vis in %s' % (self.num_hid, self.num_vis, self.name))
+            print ('NAME: %s, is an RBM with %d hids and %d vis' % (self.name, self.num_hid, self.num_vis))
 
         self.DROPOUT = DROPOUT
         self.W_change = 0.0
@@ -60,8 +59,14 @@ class RBM(object):
 
     def pushdown(self, hid_pats):
         """ push hidden pats into visible, BUT JUST CALC PROBS """
-        vis_prob1 = sigmoid(np.dot(hid_pats, self.W) + self.vis_bias)
-        return vis_prob1  # OR....  1*(v_prob1 > rng.random(size=v_prob1.shape))
+        if self.DROPOUT:
+            dropout = rng.randint(2, size=(hid_pats.shape[0], self.num_hid))
+            vis_prob1 = sigmoid(np.dot(hid_pats*dropout, self.W) + self.vis_bias)
+        else:
+            FACTOR = 0.5
+            vis_prob1 = sigmoid(np.dot(hid_pats, FACTOR*self.W) + self.vis_bias)
+        #return vis_prob1  # OR....  1*(v_prob1 > rng.random(size=v_prob1.shape))
+        return 1*(vis_prob1 > rng.random(size=vis_prob1.shape))
 
         
     def train(self, indata, num_iterations, rate, momentum, L1_penalty, minibatch_size):
@@ -71,11 +76,8 @@ class RBM(object):
         announce_every = num_iterations / 5
         start = time.time()
         num_pats = indata.shape[0]
-        rand_order = rng.permutation(np.arange(num_pats))
 
         for t in range(num_iterations+1):
-            if self.DROPOUT:
-                dropout = rng.randint(2, size=(minibatch_size, self.num_hid))
             start_index = 0
             while start_index < num_pats-1:
                 next_index = min(start_index + minibatch_size, num_pats)
@@ -89,8 +91,6 @@ class RBM(object):
             
             
                 # push hidden pats into visible 
-                if self.DROPOUT:
-                    hid_first = hid_first * dropout
                 vis_reconstruction = self.pushdown(hid_first)
 
                 # push reconstructed visible pats back into hidden
@@ -123,34 +123,26 @@ class RBM(object):
         """ 
         reality-check by looking at the weights, and their updates, for some particular hidden units.
         """
-        nc = 5
         plt.clf()
-        plt.subplot(2,nc,1)
-        plt.imshow(self.vis_bias.reshape(28,28), interpolation='nearest',cmap='Blues')
-        plt.text(0,-2,'bias weights')
-        plt.axis('off')
+        rows, cols = 5, 6
 
-        plt.subplot(2,nc, 1 + nc)
-        plt.imshow(self.vis_bias_change.reshape(28,28), interpolation='nearest',cmap='Reds')
-        plt.text(0,-2,'bias wgt changes')
-        plt.axis('off')
-        col_counter = 1
+        i=0
         maxw = np.max(np.abs(self.W))
-        maxc = np.max(np.abs(self.W_change))
-        for c in range(2, nc + 1):
-            i = rng.randint(self.num_hid) # random choice of hidden node
-    
-            plt.subplot(2, nc, 1 + col_counter)
-            plt.imshow(self.W[i].reshape(28,28), interpolation='nearest',cmap='RdBu', vmin=-maxw, vmax=maxw)
-            plt.text(0,-2,'hid%d wgts' %(i))
-            plt.axis('off')
-    
-            plt.subplot(2, nc, 1 + nc + col_counter)
-            plt.imshow(self.W_change[i].reshape(28,28), interpolation='nearest',cmap='RdBu', vmin=-maxc, vmax=maxc)
-            plt.text(0,-2,'hid%d changes' %(i))
-            plt.axis('off')
-            col_counter += 1
+        for r in range(rows):
+            for c in range(cols):
+                i += 1
+                plt.subplot(rows,cols,i)
+                if (i == 1):
+                    img = self.vis_bias.reshape(28,28)
+                    plt.text(0,-2,'bias', fontsize=8, color='red')
+                else:
+                    j = rng.randint(self.num_hid) # random choice of hidden node
+                    img = self.W[j].reshape(28,28)
+                    plt.text(0,-2,'hid %d' %(j), fontsize=8)
 
+                plt.imshow(img, interpolation='nearest',cmap='RdBu', vmin=-maxw, vmax=maxw)
+                plt.axis('off')
+        
         filename = '%s_weights.png' % (self.name)
         plt.savefig(filename)
         print('Saved figure named %s' % (filename))
@@ -174,32 +166,49 @@ class RBM(object):
         plt.savefig(filename)
         print('Saved %s' % (filename))
         
-    def make_dynamics_figure(self, indata):
+
+    def make_dynamics_figure(self, indata, SCRAMBLE=False):
+        if SCRAMBLE: # initialise with completely scrambled training pics.
+            num_pixels = indata.shape[1]
+            for i in range(indata.shape[0]):
+                img = indata[i]
+                rand_order = rng.permutation(np.arange(num_pixels))
+                indata[i] = img[rand_order]
+
+
+        ## WATCH OUT FOR CONSEQUENCES!!!
+        # self.DROPOUT = True
+        ### WATCH OUT FOR CONSEQUENCES!!!
+
         num_pats = indata.shape[0]
         num_examples = 5
-        Vis_test = np.copy(indata[rng.randint(0, num_pats, size=(num_examples)), :])
-        if self.DROPOUT:
-            dropout = rng.randint(2, size=(num_pats, self.num_hid))
+        eg_indices = rng.randint(0, num_pats, size=(num_examples))
+        Vis_test = np.copy(indata[eg_indices, :])
         i = 0
         num_Gibbs = 0
-        num_rows = 8
+        num_rows = 7
         plt.clf()
+        total_time = 0
+        print('here we go...')
         for s in range(num_rows):
+            print('doing another %d steps of alternating Gibbs Sampling...' % (num_Gibbs))
             for t in range(num_Gibbs):
                 hid = self.pushup(Vis_test)
                 Vis_test = self.pushdown(hid)
+                total_time += 1
                 
             for n in range(num_examples):
                 i += 1
                 plt.subplot(num_rows,num_examples,i)
                 plt.imshow(Vis_test[n].reshape(28,28), cmap='Greys', vmin=0., vmax=1., interpolation='nearest')
                 plt.axis('off')
-        
+                plt.text(0,-2,'iter %d' %(total_time), fontsize=8)
             num_Gibbs = max(1, num_Gibbs * 4)  # wait X times longer each time before showing the next sample.
 
         filename = '%s_gibbs_chains.png' % (self.name)
         plt.savefig(filename)
         print('Saved %s' % (filename))
+
 
     def save_as_pickle(self, annotation=''):
         """
@@ -225,3 +234,72 @@ def random_hidden_for_rbm(rbm):
 def weights_into_hiddens(weights):
     num_vis = math.sqrt(weights.shape[1])
     return weights.reshape(weights.shape[0],num_vis, num_vis)
+
+def load_mnist_digits(digits, dataset_size):
+    vis_train_pats = flatten_dataset(load_mnist_digit(digits[0],dataset_size))
+    for i in digits[1:]:
+        vis_train_pats = np.vstack((vis_train_pats, flatten_dataset(load_mnist_digit(i,dataset_size))))
+    # Now scramble the order.
+    num_pats = vis_train_pats.shape[0]
+    rand_order = rng.permutation(np.arange(num_pats))
+    vis_train_pats = vis_train_pats[rand_order]
+    # THE FOLLOWING WRITES LIST OF DIGIT IMAGES AS A CSV TO A PLAIN TXT FILE
+    # np.savetxt(fname='mnist_digits.txt', X=vis_train_pats, fmt='%.2f', delimiter=',')
+    return vis_train_pats
+
+
+def load_mnist_digit(digit, dataset_size):
+    assert(digit >= 0 and digit < 10)
+    with open("datasets/{}.npy".format(digit),'rb') as f:
+        return np.load(f)[:dataset_size]
+    
+def flatten_dataset(images):
+    smushed = images.copy()
+    return smushed.reshape((smushed.shape[0], -1))
+
+def show_example_images(pats):
+    i=0
+    plt.clf()
+    for r in range(6):
+        for c in range(6):
+            plt.subplot(6,6,i+1)
+            plt.imshow(pats[i].reshape(28,28), cmap='Greys', interpolation='nearest')
+            plt.axis('off')
+            i += 1
+    filename = 'examples.png'
+    plt.savefig(filename)
+    print('Saved figure named %s' % (filename))
+
+
+def make_2layer_dynamics_figure(L1, L2):
+    ## WATCH OUT FOR CONSEQUENCES!!!
+    L1.DROPOUT = False
+    L2.DROPOUT = False
+    ### WATCH OUT FOR CONSEQUENCES!!!
+
+    num_examples = 5    
+    mid_pats =  random_visibles_for_rbm(L2, num_examples)
+    i = 0
+    num_Gibbs = 1
+    num_rows = 7
+    plt.clf()
+    total_time = 0
+    for s in range(num_rows):
+        print (num_Gibbs)
+        for t in range(num_Gibbs):
+            top_pats = L2.pushup(mid_pats)
+            mid_pats = L2.pushdown(top_pats)
+            total_time += 1
+                
+        vis_pats = L1.pushdown(mid_pats)
+        for n in range(num_examples):
+            i += 1
+            plt.subplot(num_rows,num_examples,i)
+            plt.imshow(vis_pats[n].reshape(28,28), cmap='Greys', vmin=0., vmax=1., interpolation='nearest')
+            plt.axis('off')
+            plt.text(0,-2,'iter %d' %(total_time), fontsize=8)
+        num_Gibbs = max(1, num_Gibbs * 4)  # wait X times longer each time before showing the next sample.
+
+    filename = '%s_2layer_chains.png' % (L2.name)
+    plt.savefig(filename)
+    print('Saved %s' % (filename))
