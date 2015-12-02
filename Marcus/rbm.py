@@ -33,7 +33,7 @@ class RBM(object):
             # read in from a saved npz file
             if not(filename.endswith('.npz')):
                 filename = filename + '.npz'
-            with np.load(filename) as data:
+            with np.load('./saved_nets/' + filename) as data:
                 self.name = filename[:-4]
                 self.W = data['W']
                 self.hid_bias = data['hid_bias']
@@ -65,8 +65,8 @@ class RBM(object):
         else:
             FACTOR = 0.5
             vis_prob1 = sigmoid(np.dot(hid_pats, FACTOR*self.W) + self.vis_bias)
-        #return vis_prob1  # OR....  1*(v_prob1 > rng.random(size=v_prob1.shape))
-        return 1*(vis_prob1 > rng.random(size=vis_prob1.shape))
+        return vis_prob1  # OR....  1*(v_prob1 > rng.random(size=v_prob1.shape))
+        #return 1*(vis_prob1 > rng.random(size=vis_prob1.shape))
 
         
     def train(self, indata, num_iterations, rate, momentum, L1_penalty, minibatch_size):
@@ -88,15 +88,13 @@ class RBM(object):
                 hid_first = self.pushup(vis_minibatch)
                 # Einstein alternative suggested by Paul Mathews.
                 Hebb = np.einsum('ij,ik->jk', hid_first, vis_minibatch) 
-            
-            
+
                 # push hidden pats into visible 
                 vis_reconstruction = self.pushdown(hid_first)
-
                 # push reconstructed visible pats back into hidden
                 hid_second = self.pushup(vis_reconstruction)
 
-                AntiHebb = np.einsum('ij,ik->jk', hid_second, vis_reconstruction) 
+                AntiHebb = np.einsum('ij,ik->jk', hid_second, vis_reconstruction) # sim to Hebb
 
                 self.W_change = rate * (Hebb - AntiHebb)/minibatch_size  +  momentum * self.W_change
                 self.W += self.W_change - L1_penalty * np.sign(self.W)
@@ -132,7 +130,7 @@ class RBM(object):
             for c in range(cols):
                 i += 1
                 plt.subplot(rows,cols,i)
-                if (i == 1):
+                if (i == 1):  # the very first one will be the bias weights
                     img = self.vis_bias.reshape(28,28)
                     plt.text(0,-2,'bias', fontsize=8, color='red')
                 else:
@@ -141,6 +139,7 @@ class RBM(object):
                     plt.text(0,-2,'hid %d' %(j), fontsize=8)
 
                 plt.imshow(img, interpolation='nearest',cmap='RdBu', vmin=-maxw, vmax=maxw)
+                # setting vmin and vmax there ensures zero weights aren't coloured.
                 plt.axis('off')
         
         filename = '%s_weights.png' % (self.name)
@@ -150,7 +149,7 @@ class RBM(object):
 
     def show_patterns(self, vis_pats):
         num_pats = vis_pats.shape[0]
-        num_rows, num_cols = 5, 6
+        num_rows, num_cols = 6, 6
         num_examples = num_rows*num_cols + 1
         Vis_test = np.copy(vis_pats[rng.randint(0, num_pats, size=(num_examples)), :])
         i = 0
@@ -169,9 +168,10 @@ class RBM(object):
 
     def make_dynamics_figure(self, indata, SCRAMBLE=False):
         if SCRAMBLE: # initialise with completely scrambled training pics.
+            safe = np.copy(indata)
             num_pixels = indata.shape[1]
             for i in range(indata.shape[0]):
-                img = indata[i]
+                img = safe[i]
                 rand_order = rng.permutation(np.arange(num_pixels))
                 indata[i] = img[rand_order]
 
@@ -185,14 +185,14 @@ class RBM(object):
         eg_indices = rng.randint(0, num_pats, size=(num_examples))
         Vis_test = np.copy(indata[eg_indices, :])
         i = 0
-        num_Gibbs = 0
+        next_stop = 1
         num_rows = 7
         plt.clf()
         total_time = 0
         print('here we go...')
         for s in range(num_rows):
-            print('doing another %d steps of alternating Gibbs Sampling...' % (num_Gibbs))
-            for t in range(num_Gibbs):
+            print('doing alternating Gibbs Sampling until t=%d' % (next_stop))
+            while total_time < next_stop:
                 hid = self.pushup(Vis_test)
                 Vis_test = self.pushdown(hid)
                 total_time += 1
@@ -203,7 +203,7 @@ class RBM(object):
                 plt.imshow(Vis_test[n].reshape(28,28), cmap='Greys', vmin=0., vmax=1., interpolation='nearest')
                 plt.axis('off')
                 plt.text(0,-2,'iter %d' %(total_time), fontsize=8)
-            num_Gibbs = max(1, num_Gibbs * 4)  # wait X times longer each time before showing the next sample.
+            next_stop = max(1, next_stop) * 5  # wait X times longer each time before showing the next sample.
 
         filename = '%s_gibbs_chains.png' % (self.name)
         plt.savefig(filename)
@@ -217,7 +217,7 @@ class RBM(object):
         name = self.name
         if len(annotation)>0: 
             name = name + annotation
-        filename = '%s.npz' % (name)
+        filename = './saved_nets/%s.npz' % (name)
         np.savez(filename, W=self.W, hid_bias=self.hid_bias, vis_bias=self.vis_bias)
         print('Saved the pickle of %s' % (filename))
         
@@ -257,16 +257,17 @@ def flatten_dataset(images):
     smushed = images.copy()
     return smushed.reshape((smushed.shape[0], -1))
 
-def show_example_images(pats):
+def show_example_images(pats, filename='examples.png'):
+    rows = 7
+    cols = 10
     i=0
     plt.clf()
-    for r in range(6):
-        for c in range(6):
-            plt.subplot(6,6,i+1)
+    for r in range(rows):
+        for c in range(cols):
+            plt.subplot(rows,cols,i+1)
             plt.imshow(pats[i].reshape(28,28), cmap='Greys', interpolation='nearest')
             plt.axis('off')
             i += 1
-    filename = 'examples.png'
     plt.savefig(filename)
     print('Saved figure named %s' % (filename))
 
@@ -280,13 +281,13 @@ def make_2layer_dynamics_figure(L1, L2):
     num_examples = 5    
     mid_pats =  random_visibles_for_rbm(L2, num_examples)
     i = 0
-    num_Gibbs = 1
+    next_stop = 1
     num_rows = 7
     plt.clf()
     total_time = 0
     for s in range(num_rows):
-        print (num_Gibbs)
-        for t in range(num_Gibbs):
+        print ('alternating Gibbs to iter %d' % (next_stop))
+        while total_time < next_stop:
             top_pats = L2.pushup(mid_pats)
             mid_pats = L2.pushdown(top_pats)
             total_time += 1
@@ -298,7 +299,7 @@ def make_2layer_dynamics_figure(L1, L2):
             plt.imshow(vis_pats[n].reshape(28,28), cmap='Greys', vmin=0., vmax=1., interpolation='nearest')
             plt.axis('off')
             plt.text(0,-2,'iter %d' %(total_time), fontsize=8)
-        num_Gibbs = max(1, num_Gibbs * 4)  # wait X times longer each time before showing the next sample.
+        next_stop = max(1, next_stop) * 5  # wait X times longer each time before showing the next sample.
 
     filename = '%s_2layer_chains.png' % (L2.name)
     plt.savefig(filename)
