@@ -14,7 +14,7 @@ if __name__ == '__main__':
     opts, args = parser.parse_args()
     EXIT = False
     if (opts.name is None):
-        print "ERROR: you must supply a name for the trained RBM\n"
+        print ("ERROR: you must supply a name for the trained RBM\n")
         EXIT = True
     if EXIT: 
         parser.print_help()

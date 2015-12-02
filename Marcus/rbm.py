@@ -5,7 +5,8 @@ import numpy.random as rng
 from scipy.special import expit as sigmoid
 np.set_printoptions(precision=2)
 
-
+def inverse_sigmoid(prob1):
+    return np.log(prob1/(1-prob1))
 
 class RBM(object):
     """ 
@@ -149,7 +150,7 @@ class RBM(object):
 
     def show_patterns(self, vis_pats):
         num_pats = vis_pats.shape[0]
-        num_rows, num_cols = 6, 6
+        num_rows, num_cols = 7, 10
         num_examples = num_rows*num_cols + 1
         Vis_test = np.copy(vis_pats[rng.randint(0, num_pats, size=(num_examples)), :])
         i = 0
@@ -186,7 +187,7 @@ class RBM(object):
         Vis_test = np.copy(indata[eg_indices, :])
         i = 0
         next_stop = 1
-        num_rows = 7
+        num_rows = 6
         plt.clf()
         total_time = 0
         print('here we go...')

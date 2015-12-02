@@ -16,7 +16,7 @@ if __name__ == '__main__':
     opts, args = parser.parse_args()
     EXIT = False
     if (opts.L1name is None) or (opts.L2name is None):
-        print "ERROR: you must supply a name for both of the RBMs\n"
+        print ("ERROR: you must supply a name for both of the RBMs\n")
         EXIT = True
     if EXIT: 
         parser.print_help()

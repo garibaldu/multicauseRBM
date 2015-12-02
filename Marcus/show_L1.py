@@ -4,11 +4,11 @@ import os, sys, optparse
 if __name__ == '__main__':
 
     parser = optparse.OptionParser(usage="usage %prog [options]")
-    parser.add_option("-f", "--name", type = "str", dest = "name", help = "name for the trained RBM")
+    parser.add_option("-f", "--name", type = "str", dest = "name", help = "name of the RBM")
     opts, args = parser.parse_args()
     EXIT = False
     if (opts.name is None):
-        print "ERROR: you must supply a name for the trained RBM\n"
+        print("ERROR: you must supply a name for the trained RBM\n")
         EXIT = True
     if EXIT: 
         parser.print_help()
