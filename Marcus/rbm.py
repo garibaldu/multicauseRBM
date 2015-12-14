@@ -249,6 +249,7 @@ def load_mnist_digits(digits, dataset_size):
     # THE FOLLOWING WRITES LIST OF DIGIT IMAGES AS A CSV TO A PLAIN TXT FILE
     # np.savetxt(fname='mnist_digits.txt', X=vis_train_pats, fmt='%.2f', delimiter=',')
     vis_train_pats = (vis_train_pats + 1.0)/2.0 # so range is 0.5 to 1.0 now.
+    print('visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
     return vis_train_pats
 
 
@@ -269,7 +270,7 @@ def show_example_images(pats, filename='examples.png'):
     for r in range(rows):
         for c in range(cols):
             plt.subplot(rows,cols,i+1)
-            plt.imshow(pats[i].reshape(28,28), cmap='Greys', interpolation='nearest')
+            plt.imshow(pats[i].reshape(28,28), cmap='Greys', interpolation='nearest', vmin=0.0, vmax=1.0)
             plt.axis('off')
             i += 1
     plt.savefig(filename)
@@ -285,7 +286,7 @@ def make_2layer_dynamics_figure(L1, L2):
     num_examples = 5    
     mid_pats =  random_visibles_for_rbm(L2, num_examples)
     i = 0
-    next_stop = 1
+    next_stop = 0
     num_rows = 7
     plt.clf()
     total_time = 0
