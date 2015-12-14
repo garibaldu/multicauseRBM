@@ -287,7 +287,7 @@ def make_2layer_dynamics_figure(L1, L2):
     mid_pats =  random_visibles_for_rbm(L2, num_examples)
     i = 0
     next_stop = 0
-    num_rows = 7
+    num_rows = 6
     plt.clf()
     total_time = 0
     for s in range(num_rows):
