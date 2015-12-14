@@ -66,7 +66,8 @@ class RBM(object):
         else:
             FACTOR = 0.5
             vis_prob1 = sigmoid(np.dot(hid_pats, FACTOR*self.W) + self.vis_bias)
-        return vis_prob1  # OR....  1*(v_prob1 > rng.random(size=v_prob1.shape))
+        return vis_prob1  
+        # OR....  
         #return 1*(vis_prob1 > rng.random(size=vis_prob1.shape))
 
         
@@ -74,6 +75,7 @@ class RBM(object):
         """
         Train the RBM's weights on the supplied data, using CD1 with momentum, an L1 penalty, and (optionally) dropout.
         """
+        print('training with rate %.5f, momentum %.2f, L1 penalty %.6f, minibatches of %d' % (rate, momentum, L1_penalty, minibatch_size))
         announce_every = num_iterations / 5
         start = time.time()
         num_pats = indata.shape[0]
@@ -107,7 +109,7 @@ class RBM(object):
                 self.vis_bias += self.vis_bias_change
             
             if (t % announce_every == 0): 
-                C = np.power(vis_reconstruction - vis_minibatch, 2.0).mean()
+                C = np.power(self.pushdown(self.pushup(vis_minibatch)) - vis_minibatch, 2.0).mean()
                 print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.4f' % (t, time.time() - start, C))
 
         return
@@ -123,7 +125,7 @@ class RBM(object):
         reality-check by looking at the weights, and their updates, for some particular hidden units.
         """
         plt.clf()
-        rows, cols = 5, 6
+        rows, cols = 7, 8
 
         i=0
         maxw = np.max(np.abs(self.W))
@@ -186,7 +188,7 @@ class RBM(object):
         eg_indices = rng.randint(0, num_pats, size=(num_examples))
         Vis_test = np.copy(indata[eg_indices, :])
         i = 0
-        next_stop = 1
+        next_stop = 0
         num_rows = 6
         plt.clf()
         total_time = 0
@@ -246,6 +248,7 @@ def load_mnist_digits(digits, dataset_size):
     vis_train_pats = vis_train_pats[rand_order]
     # THE FOLLOWING WRITES LIST OF DIGIT IMAGES AS A CSV TO A PLAIN TXT FILE
     # np.savetxt(fname='mnist_digits.txt', X=vis_train_pats, fmt='%.2f', delimiter=',')
+    vis_train_pats = (vis_train_pats + 1.0)/2.0 # so range is 0.5 to 1.0 now.
     return vis_train_pats
 
 

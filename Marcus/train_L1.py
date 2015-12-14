@@ -31,6 +31,7 @@ if __name__ == '__main__':
     else:
         r = rbm.RBM(opts.name, opts.num_hids, num_vis=inpats.shape[1], DROPOUT=True)
 
-    r.train(inpats, opts.iterations, opts.rate, opts.momentum, L1_penalty=0.0001, minibatch_size=32)
+    r.train(inpats, 20, rate=0.01, momentum=0.2, L1_penalty=0.0, minibatch_size=32)
+    r.train(inpats, opts.iterations, opts.rate, opts.momentum, L1_penalty=0.00001, minibatch_size=50)
     r.save_as_pickle()
 
