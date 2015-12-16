@@ -62,13 +62,18 @@ class RBM(object):
         """ push hidden pats into visible, BUT JUST CALC PROBS """
         if self.DROPOUT:
             dropout = rng.randint(2, size=(hid_pats.shape[0], self.num_hid))
-            vis_prob1 = sigmoid(np.dot(hid_pats*dropout, self.W) + self.vis_bias)
+            vis = np.dot(hid_pats*dropout, self.W) + self.vis_bias
         else:
             FACTOR = 0.5
-            vis_prob1 = sigmoid(np.dot(hid_pats, FACTOR*self.W) + self.vis_bias)
-        return vis_prob1  
+            vis = np.dot(hid_pats, FACTOR*self.W) + self.vis_bias
+        return vis
         # OR....  
         #return 1*(vis_prob1 > rng.random(size=vis_prob1.shape))
+
+
+    def explainaway(self, other_phi, my_h, v):
+        psi = np.dot(v - other_phi, self.W.T) + (my_h - 0.5)*np.sum(self.W**2,axis=1)
+        return psi
 
         
     def train(self, indata, num_iterations, rate, momentum, L1_penalty, minibatch_size):
@@ -161,7 +166,7 @@ class RBM(object):
             for c in range(num_cols):
                 i += 1
                 plt.subplot(num_rows,num_cols,i)
-                plt.imshow(Vis_test[i].reshape(28,28), cmap='Greys', vmin=0., vmax=1., interpolation='nearest')
+                plt.imshow(Vis_test[i].reshape(28,28), cmap='Greys', vmin=-1., vmax=1., interpolation='nearest')
                 plt.axis('off')
 
         filename = '%s_visibles.png' % (self.name)
@@ -203,7 +208,7 @@ class RBM(object):
             for n in range(num_examples):
                 i += 1
                 plt.subplot(num_rows,num_examples,i)
-                plt.imshow(Vis_test[n].reshape(28,28), cmap='Greys', vmin=0., vmax=1., interpolation='nearest')
+                plt.imshow(Vis_test[n].reshape(28,28), cmap='Greys', vmin=-1., vmax=1., interpolation='nearest')
                 plt.axis('off')
                 plt.text(0,-2,'iter %d' %(total_time), fontsize=8)
             next_stop = max(1, next_stop) * 2  # wait X times longer each time before showing the next sample.
@@ -247,7 +252,7 @@ def load_mnist_digits(digits, dataset_size):
     vis_train_pats = vis_train_pats[rand_order]
     # THE FOLLOWING WRITES LIST OF DIGIT IMAGES AS A CSV TO A PLAIN TXT FILE
     # np.savetxt(fname='mnist_digits.txt', X=vis_train_pats, fmt='%.2f', delimiter=',')
-    #vis_train_pats = vis_train_pats*2.0 - 1.0 # so range is somethigng...now.
+    vis_train_pats = vis_train_pats*2.0 - 1.0 # so range is somethigng...now.
     print('visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
     return vis_train_pats
 
@@ -269,7 +274,7 @@ def show_example_images(pats, filename='examples.png'):
     for r in range(rows):
         for c in range(cols):
             plt.subplot(rows,cols,i+1)
-            plt.imshow(pats[i].reshape(28,28), cmap='Greys', interpolation='nearest', vmin=0.0, vmax=1.0)
+            plt.imshow(pats[i].reshape(28,28), cmap='Greys', interpolation='nearest', vmin=-1.0, vmax=1.0)
             plt.axis('off')
             i += 1
     plt.savefig(filename)
@@ -300,7 +305,7 @@ def make_2layer_dynamics_figure(L1, L2):
         for n in range(num_examples):
             i += 1
             plt.subplot(num_rows,num_examples,i)
-            plt.imshow(vis_pats[n].reshape(28,28), cmap='Greys', vmin=0., vmax=1., interpolation='nearest')
+            plt.imshow(vis_pats[n].reshape(28,28), cmap='Greys', vmin=-1., vmax=1., interpolation='nearest')
             plt.axis('off')
             plt.text(0,-2,'iter %d' %(total_time), fontsize=8)
         next_stop = max(1, next_stop) * 5  # wait X times longer each time before showing the next sample.
