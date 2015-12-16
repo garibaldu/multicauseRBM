@@ -4,6 +4,7 @@ import os, sys, optparse
 import numpy.random as rng
 from scipy.special import expit as sigmoid
 np.set_printoptions(precision=2)
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
 
@@ -37,26 +38,36 @@ if __name__ == '__main__':
     B_inpats = inpats[rand_order]
 
 
-    #lbm.show_example_images(A_inpats, 'A_inpats.png')
     #lbm.show_example_images(B_inpats, 'B_inpats.png')
     v = A_inpats + B_inpats
     #lbm.show_example_images(v, 'combos.png')
 
+    A.DROPOUT = False
+    B.DROPOUT = False
+
     # initialise the two hidden layers (cheating a bit)
-    hA = A.pushup(A_inpats)
-    hB = B.pushup(B_inpats)
+    hA = lbm.random_hiddens_for_rbm(A, num_pats)
+    hB = lbm.random_hiddens_for_rbm(B, num_pats)
+    #hB = B.pushup(B_inpats)
+    
     print (hA)
     print (hB)
+    plt.imshow(hA)
+    plt.savefig('thing.png')
+
+    lbm.show_example_images(A.pushdown(A.pushup(A_inpats)), 'bollocks.png')
 
     print ('---------------')
-    
-    phiB = B.pushdown(hB)
-    psiA = A.explainaway(phiB, hA, v)
-    hA = 1*(sigmoid(psiA) > rng.random(size=psiA.shape))
-    print (hA)
 
-    phiA = A.pushdown(hA)
-    psiB = B.explainaway(phiA, hB, v)
-    hB = 1*(sigmoid(psiB) > rng.random(size=psiB.shape))
-    print (hB)
+    for t in range(100):
+        phiB = B.pushdown(hB)
+        psiA = A.explainaway(phiB, hA, v)
+        hA = 1*(sigmoid(psiA) > rng.random(size=psiA.shape))
 
+        phiA = A.pushdown(hA)
+        psiB = B.explainaway(phiA, hB, v)
+        hB = 1*(sigmoid(psiB) > rng.random(size=psiB.shape))
+
+    lbm.show_example_images(v, 'unexplained.png')
+    lbm.show_example_images(phiA, 'explainedA.png')
+    lbm.show_example_images(phiB, 'explainedB.png')

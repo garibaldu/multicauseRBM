@@ -72,7 +72,8 @@ class RBM(object):
 
 
     def explainaway(self, other_phi, my_h, v):
-        psi = np.dot(v - other_phi, self.W.T) + (my_h - 0.5)*np.sum(self.W**2,axis=1)
+        psi = np.dot(v - other_phi, self.W.T) + self.hid_bias
+        psi += (my_h - 0.5)*np.sum(self.W**2,axis=1)
         return psi
 
         
