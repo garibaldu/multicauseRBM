@@ -111,8 +111,11 @@ class RBM(object):
                 # Now we have to do the visible and hidden bias weights as well.
                 self.hid_bias_change = rate * (hid_first.mean(0) - hid_second.mean(0))   +  momentum * self.hid_bias_change
                 self.hid_bias += self.hid_bias_change
-                self.vis_bias_change = rate * (vis_minibatch.mean(0) - vis_reconstruction.mean(0))   +  momentum * self.vis_bias_change
+                self.vis_bias_change = rate * (vis_minibatch.mean(0) - vis_reconstruction.mean(0))   + momentum * self.vis_bias_change
                 self.vis_bias += self.vis_bias_change
+
+                self.vis_bias = 0.0*self.vis_bias_change
+
             
             if (t % announce_every == 0): 
                 C = np.power(self.pushdown(self.pushup(vis_minibatch)) - vis_minibatch, 2.0).mean()

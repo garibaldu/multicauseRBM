@@ -21,7 +21,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
 
-    digits = [2,4]
+    digits = [6]
     inpats = rbm.load_mnist_digits(digits, opts.nitems)
     
     if os.path.isfile('./saved_nets/' + opts.name + '.npz'):

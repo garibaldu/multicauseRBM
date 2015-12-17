@@ -22,7 +22,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
 
-    digits = [2,4]
+    digits = [6,9]
     inpats = lbm.load_mnist_digits(digits, opts.nitems)
     
     if os.path.isfile('./saved_nets/' + opts.nameA + '.npz'):
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     print ('---------------')
 
-    for t in range(100):
+    for t in range(500):
         phiB = B.pushdown(hB)
         psiA = A.explainaway(phiB, hA, v)
         hA = 1*(sigmoid(psiA) > rng.random(size=psiA.shape))
