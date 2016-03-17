@@ -73,7 +73,7 @@ class RBM(object):
 
     def explainaway(self, other_phi, my_h, v):
         psi = np.dot(v - other_phi, self.W.T) + self.hid_bias
-        psi += (my_h - 0.5)*np.sum(self.W**2,axis=1)
+        #psi += (my_h - 0.5)*np.sum(self.W**2,axis=1)
         return psi
 
         
@@ -260,6 +260,24 @@ def load_mnist_digits(digits, dataset_size):
     print('visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
     return vis_train_pats
 
+def generate_smooth_bkgd(dataset_size):
+    bkgd_imgs = np.ones((dataset_size, 28, 28), dtype=float)
+    x = np.linspace(-1.0,1.0,28)
+    y = np.linspace(-1.0,1.0,28)
+    X, Y = np.meshgrid(x,y)
+    print('dataset size: ', dataset_size)
+    for i in range(dataset_size):
+        xslope, yslope = .5*(2.*rng.rand()-1.), .5*(2*rng.rand()-1.)
+        intercept = 0.5*(2.*rng.rand()-1.)
+        img = xslope*X + yslope*Y + intercept
+        img = img - np.min(np.ravel(img))
+        img = img / np.max(np.ravel(img))
+        bkgd_imgs[i] = 2*img - 1.0
+    vis_train_pats = flatten_dataset(bkgd_imgs)
+    print('visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
+    print('vis_train_pats shape is ', vis_train_pats.shape) 
+    return vis_train_pats
+
 
 def load_mnist_digit(digit, dataset_size):
     assert(digit >= 0 and digit < 10)
@@ -278,7 +296,11 @@ def show_example_images(pats, filename='examples.png'):
     for r in range(rows):
         for c in range(cols):
             plt.subplot(rows,cols,i+1)
-            plt.imshow(pats[i].reshape(28,28), cmap='Greys', interpolation='nearest', vmin=-1.0, vmax=1.0)
+            j = rng.randint(0,len(pats))
+            plt.imshow(pats[j].reshape(28,28), cmap='Greys', interpolation='nearest', vmin=-1.0, vmax=1.0)
+            maxval = pats[j].max()
+            minval = pats[j].min()
+            plt.text(0,0,"%.1f, %.1f" %(minval, maxval), fontsize=7, color='b')
             plt.axis('off')
             i += 1
     plt.savefig(filename)

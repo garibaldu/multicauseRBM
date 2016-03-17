@@ -22,8 +22,6 @@ if __name__ == '__main__':
         sys.exit(-1)
 
 
-    digits = [6,9]
-    inpats = lbm.load_mnist_digits(digits, opts.nitems)
     
     if os.path.isfile('./saved_nets/' + opts.nameA + '.npz'):
         A = lbm.RBM(opts.nameA) # attempt to read an existing RBM in.
@@ -35,13 +33,11 @@ if __name__ == '__main__':
     else:
         sys.exit('no file for B')
 
-    A_inpats = inpats
-
-    num_pats = inpats.shape[0]
-    rand_order = rng.permutation(np.arange(num_pats))
-    B_inpats = inpats[rand_order]
-
-
+    digits = [6]
+    A_inpats = lbm.load_mnist_digits(digits, opts.nitems)
+    B_inpats = lbm.generate_smooth_bkgd(opts.nitems)
+    num_pats = A_inpats.shape[0]
+    
     v = A_inpats + B_inpats
 
     A.DROPOUT = False
@@ -55,9 +51,8 @@ if __name__ == '__main__':
     hA = lbm.random_hiddens_for_rbm(A, num_pats)
     hB = lbm.random_hiddens_for_rbm(B, num_pats)
     hA = A.pushup(v)
-    hB = A.pushup(v)
+    hB = B.pushup(v)
     
-
 
     plt.subplot(121)
     plt.imshow(hA)
@@ -67,7 +62,7 @@ if __name__ == '__main__':
 
     print ('---------------')
 
-    for t in range(500):
+    for t in range(100):
         phiB = B.pushdown(hB)
         psiA = A.explainaway(phiB, hA, v)
         hA = 1*(sigmoid(psiA) > rng.random(size=psiA.shape))
@@ -76,6 +71,7 @@ if __name__ == '__main__':
         psiB = B.explainaway(phiA, hB, v)
         hB = 1*(sigmoid(psiB) > rng.random(size=psiB.shape))
 
+        
     lbm.show_example_images(v, 'unexplained.png')
     lbm.show_example_images(phiA, 'explainedA.png')
     lbm.show_example_images(phiB, 'explainedB.png')
