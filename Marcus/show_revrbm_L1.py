@@ -1,4 +1,4 @@
-import lbm as rbm
+import revrbm as rbm
 import os, sys, optparse
 
 if __name__ == '__main__':

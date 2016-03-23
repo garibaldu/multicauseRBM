@@ -1,5 +1,5 @@
 import numpy as np
-import lbm
+import revrbm
 import os, sys, optparse
 
 if __name__ == '__main__':
@@ -23,21 +23,22 @@ if __name__ == '__main__':
         sys.exit(-1)
 
 
-    digits = [6]  # the digits we'll train on.
+    digits = [2,4]  # the digits we'll train on.
+    tmpN = opts.nitems * len(digits)
     print ("opts.nitems = ", opts.nitems)
-    inpats = np.zeros((opts.nitems * 2, 28*28), dtype=float)
-    inpats[:opts.nitems] = lbm.load_mnist_digits(digits, opts.nitems) 
-    inpats[opts.nitems:] = lbm.generate_smooth_bkgd(opts.nitems)
+    inpats = np.zeros((tmpN * 2, 28*28), dtype=float)
+    inpats[:tmpN] = revrbm.load_mnist_digits(digits, opts.nitems) 
+    inpats[tmpN:] = revrbm.generate_smooth_bkgd(tmpN)
     #sys.exit(0)
-    lbm.show_example_images(inpats, filename='examples.png')
+    revrbm.show_example_images(inpats, filename='examples.png')
     #sys.exit(0)
         
     if os.path.isfile('./saved_nets/' + opts.name + '.npz'):
-        r = lbm.RBM(opts.name) # attempt to read an existing RBM in.
+        r = revrbm.RBM(opts.name) # attempt to read an existing RBM in.
         if (opts.newname is not None): # rename the net if a new name is provided
             r.rename(opts.newname)
     else:
-        r = lbm.RBM(opts.name, opts.num_hids, num_vis=inpats.shape[1], DROPOUT=True)
+        r = revrbm.RBM(opts.name, opts.num_hids, num_vis=inpats.shape[1], DROPOUT=True)
 
 
     r.train(inpats, opts.iterations, opts.rate, opts.momentum, opts.L1_penalty, minibatch_size=50)

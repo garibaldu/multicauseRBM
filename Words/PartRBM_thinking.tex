@@ -1,0 +1,764 @@
+
+% Default to the notebook output style
+
+    
+
+
+% Inherit from the specified cell style.
+
+
+
+
+    
+\documentclass{article}
+
+    
+    
+    \usepackage{graphicx} % Used to insert images
+    \usepackage{adjustbox} % Used to constrain images to a maximum size 
+    \usepackage{color} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage[utf8x]{inputenc} % Allow utf-8 characters in the tex document
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range 
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    
+
+    
+    
+    \definecolor{orange}{cmyk}{0,0.4,0.8,0.2}
+    \definecolor{darkorange}{rgb}{.71,0.21,0.01}
+    \definecolor{darkgreen}{rgb}{.12,.54,.11}
+    \definecolor{myteal}{rgb}{.26, .44, .56}
+    \definecolor{gray}{gray}{0.45}
+    \definecolor{lightgray}{gray}{.95}
+    \definecolor{mediumgray}{gray}{.8}
+    \definecolor{inputbackground}{rgb}{.95, .95, .85}
+    \definecolor{outputbackground}{rgb}{.95, .95, .95}
+    \definecolor{traceback}{rgb}{1, .95, .95}
+    % ansi colors
+    \definecolor{red}{rgb}{.6,0,0}
+    \definecolor{green}{rgb}{0,.65,0}
+    \definecolor{brown}{rgb}{0.6,0.6,0}
+    \definecolor{blue}{rgb}{0,.145,.698}
+    \definecolor{purple}{rgb}{.698,.145,.698}
+    \definecolor{cyan}{rgb}{0,.698,.698}
+    \definecolor{lightgray}{gray}{0.5}
+    
+    % bright ansi colors
+    \definecolor{darkgray}{gray}{0.25}
+    \definecolor{lightred}{rgb}{1.0,0.39,0.28}
+    \definecolor{lightgreen}{rgb}{0.48,0.99,0.0}
+    \definecolor{lightblue}{rgb}{0.53,0.81,0.92}
+    \definecolor{lightpurple}{rgb}{0.87,0.63,0.87}
+    \definecolor{lightcyan}{rgb}{0.5,1.0,0.83}
+    
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatability definitions
+    \def\gt{>}
+    \def\lt{<}
+    % Document parameters
+    \title{PartRBM\_thinking}
+    
+    
+    
+
+    % Pygments definitions
+    
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % Exact colors from NB
+    \definecolor{incolor}{rgb}{0.0, 0.0, 0.5}
+    \definecolor{outcolor}{rgb}{0.545, 0.0, 0.0}
+
+
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=blue,
+      linkcolor=darkorange,
+      citecolor=darkgreen,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+    \begin{document}
+    
+    
+    \maketitle
+    
+    
+
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}3}]:} \PY{o}{\PYZpc{}}\PY{k}{matplotlib} \PY{n}{inline} 
+\end{Verbatim}
+
+    \subsection{The vanilla RBM.}\label{the-vanilla-rbm.}
+
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  weights \(W_{ji}\) means the weight between the j-th hidden unit and
+  the i-th visible unit.
+\item
+  \(W_{0i}\) is ``bias'' into the i-th visible unit.
+\item
+  \(W_{j0}\) is ``bias'' into the j-th hidden unit. The joint
+  probability under the RBM factorisation is:
+  \[ P^\star(h,v) = \prod_i \prod_j e^{h_j W_{ji} v_i} \;\; \times \;\; \prod_{i^\prime} e^{W_{0i^\prime} v_{i^\prime}} \;\; \times \;\; \prod_{j^\prime} e^{W_{j^\prime 0} h_{j^\prime}} \]
+  and its logarithm is
+  \[ \log P^\star(h,v) = \sum_i  \sum_j h_j W_{ji} v_i \;\; + \;\; \sum_i W_{0i} v_i \;\; + \;\; \sum_j W_{j0} h_j \]
+\end{itemize}
+
+    \subsection{Gibbs in vanilla RBM}\label{gibbs-in-vanilla-rbm}
+
+To sample from this distribution we can figure out the Gibbs update
+step.
+
+The probability \(p(h_j=1|v)\) that the j-th hidden unit generates a 1
+can be written as $ \sigma(\psi\_j) $ with \(\sigma(x)=1/(1+e^{-x})\)
+and \(\psi_j = \log P^*(h,v | h_j =1 ) - \log P^*(h,v | h_j = 0)\). And
+from the \(\log P^\star(h,v)\) given above, this is easily seen to be $
+\psi_j(v) = \sum_i W}\{ji\} v\_i + W}\{j0\}$
+
+Similarly, for the visible units the probability \(p(v_i=1|h)\) that the
+i-th visible generates a 1 can be written as $\sigma(\phi\_i(h)) $
+with \(\phi_i(h) = \log P^*(h,v | v_i =1 ) - \log P^*(h,v | v_i = 0)\).
+And similarly this can be seen to be $ \phi_i(h) = \sum_j
+W}\{ji\} h\_j + W}\{0i\}$ for the i-th visible unit.
+
+For convenience we will sometimes write \(\sigma(\phi_i(h))\) as just
+\(\sigma_i(h)\).
+
+    \subsection{Gibbs in an equivalent
+network}\label{gibbs-in-an-equivalent-network}
+
+Note this is equivalent to a 3 layer network in which the top 2 layers
+form an RBM and the lower one is a sigmoid belief network. Sampling from
+the latter model involves drawing Bernoulli variables repeatedly (eg.
+via alternating Gibbs sampling) from the RBM until equilibrium and then
+sampling \(v\) from the visibles given the hiddens \(h\), ie.
+``ancestral sampling'' in the belief net, but from an \(h\) generated by
+an RBM.
+
+We know (from above) how to generate the \(h\) sample: Gibbs sampling
+from the RBM will do it. Then, the conditional probability of \(v\)
+under a sigmoid belief net is (by definition)
+\(p(v_i=1|h) = \sigma_i(h)\). Thus _Gibbs sampling from a simple
+RBM ending in a sample for \(v\) is the same as sampling \(h\) from the
+same RBM and then using a sigmoid belief net for the last step}.
+
+However, there's another way to draw such samples. Write (product rule)
+\(\log P^\star(h,v) = \log P^\star(h) + \log P(v|h)\). We have the
+second term already:
+\[ \log P(v|h) = \sum_i v_i \log \sigma_i(h) + (1-v_i) \log (1 - \sigma_i(h)\]
+
+    To find \(P^\star(h)\) we need to marginalise that joint over all
+\(\mathbf{v}\) configurations:
+\[\begin{align} P^\star(h) &= \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \exp \bigg[  \log P^{\star}(h,v) \bigg] \\
+&= \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \exp \bigg[  \sum_i  \sum_j h_j W_{ji} v_i \;\; + \;\; \sum_i W_{0i} v_i \;\; + \;\; \sum_j W_{j0} h_j \bigg] \\
+&= \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \exp \bigg[  \sum_i v_i \phi_i(h)  \;\; + \;\; \sum_j W_{j0} h_j \bigg] \\
+\text{where } \phi_i(h) &= \sum_j W_{ji} h_j + W_{0i} \\
+&= \exp\left[ \sum_j h_j  W_{j0} \right] \;\; \times \sum_{v_1=0}^1 \cdots \sum_{v_n=0}^1 \prod_i \exp\bigg[ v_i \phi_i(h) \bigg] \\
+&= \exp\left[\sum_j h_j  W_{j0}\right] \;\; \times \prod_i \bigg( 1 + e^{\phi_i(h) } \bigg) \\
+\text{and so}
+\log P^\star(h) &= \sum_j h_j  W_{j0} \;\; +  \sum_i \log \bigg( 1 + e^{\phi_i(h) } \bigg)
+\\
+&= \sum_j h_j  W_{j0} \;\; + \; \sum_i \phi_i(h) \;  - \; \sum_i \log \sigma_i(h) 
+\end{align} \]
+
+    So far we've figured out \(\log P^\star(h)\) for the RBM that is the
+``top layer''.
+
+Therefore another way to write \(\log P^\star(h,v)\) is \[ 
+\log P^\star(h,v) = \underbrace{\sum_j h_j  W_{j0} \;\; + \; \sum_i \phi_i(h) \;  - \; \sum_i \log \sigma_i(h)}_{\log P^\star(h)} \;\;+\;\; \underbrace{\sum_i v_i \log \sigma_i(h) + (1-v_i) \log (1 - \sigma_i(h))}_{\log P(v \mid h)} 
+\] By collecting terms and simplifying one can readily those that this
+matches the earlier form.
+
+    \section{a model of two causes}\label{a-model-of-two-causes}
+
+Now we'd like to change this slightly, so that 2 RBMs that are
+independent are used to model two causes, which are then combined at the
+last moment via a sigmoid belief net to form \(v\). Suppose that at a
+given moment the 2nd RBM is in a state which contributes an extra
+activation \(\epsilon_i\) respectively to each of the visible units.
+We're interested in how this will affect the Gibbs updates to the hidden
+units \(h\) in the first RBM.
+
+Note: \(\epsilon_i\) is in general going to be a weighted sum of inputs
+from the second RBM's hidden layer, _plus a new bias} arising from
+the second RBM. Although the two biases both going into the visible
+units seems (and might be) redundant, in the generative model it seems
+sensible that visible activations under the two ``causes'' would have
+different background rates if taken separately (ie. different biases).
+So for now I think we should leave them in, but maybe hope to eliminate
+/ merge if possible in future, if it helps anything\ldots{}
+
+Before going on to the Gibbs Sampler version in which visible units are
+clampled, consider ``ancestral'' sampling from the model: each RBM
+independently does alternating Gibbs Sampling for a (longish) period,
+and then both combine to generate a sample \(v\) vector, by adding both
+their weighted sums (\(\phi\)) _and adding in both their visible
+biases too} . That's a much more efficient way to do the ``sleep'' phase
+than doing what follows (which is mandatory for the ``wake'' phase
+samples however).
+
+    The Gibbs update step is given by $p\_j = \sigma(\phi\_j) $ with $
+\psi\_j = \log P\^{}_(h,v ; h\_j =1 ) - \log P\^{}}(h,v ; h\_j =
+0)$. However this time we don't have exact correspondence with an RBM
+because only the final step involves \(\epsilon\), not the
+reverberations in the RBM above it that generates \(h\). So it's not
+enough to consider just the RBM alone, with it's joint being just the
+product of factors in the first line of math above. We need to
+incorporate the last step explicitly, with its slight difference in the
+form of \(\epsilon\). We know the joint decomposes into this:
+\[ \log P^* (h,v) = \log P^*(h) + \log P(v|h)\] where the first term is
+the vanilla RBM probability but the second is the final layer's
+probability, now given by
+\[ \log P(v|h,\epsilon) = \sum_i v_i \log \sigma (\phi_i(h) + \epsilon_i) + (1-v_i) \log (1 - \sigma(\phi_i(h) + \epsilon_i)\]
+
+To carry out Gibbs sampling in the hidden layer of this architecture we
+need to calculate
+\(\psi_j = \log P^*(h,v ; h_j =1 ) - \log P^*(h,v ; h_j = 0)\). Using
+the fact that \(\phi_i(h ; h_j=1) = \phi_i(h ; h_j=0) + W_{ji}\), and
+abbreviating \(\phi_i(h ; h_j=0)\) to \(\phi_i^0\), we obtain
+
+\[\psi_j = \sum_i v_i \log \left( \frac{1+ e^{-\phi_i^0 - \epsilon_i}}{1+e^{-\phi_i^0 - W_{ji} -\epsilon_i}} \frac{1+ e^{\phi_i^0 + W_{ji} + \epsilon}}{1+e^{\phi_i^0 + \epsilon_i}}\right) \;\;+ \;\;\sum_i \log \left(\frac{1+e^{\phi_i^0 + W_{ji}}}{1+ e^{\phi_i^0}}
+\frac{1+e^{\phi_i^0 + \epsilon_i}}{1+ e^{\phi_i^0 + W_{ji} + \epsilon_i}} \right)\]
+
+Now
+\(\phi = \log \frac{1+e^{\phi}}{1+e^{-\phi}} = \log \frac{\sigma(\phi)}{\sigma(-\phi)}\)
+(Marcus' magic identity). So the first term simplifies to $ \sum_i
+v\_i W}\{ji\}$, which is the same as that in a ``vanilla RBM''.
+
+    The second term can also be simplified, using the identity
+\(\log(1-\sigma(\phi)) = \phi - \log(1+e^\phi)\).
+
+    This leads to the following Gibbs Sampler probability of the j-th hidden
+unit being 1: \(p_j = \sigma(\psi_j)\) with
+
+\[\psi_j = \sum_i (W_{ji} v_i + C_{ji}) \] where
+\[C_{ji} \; = \;\log \bigg[ \frac{\sigma (\phi_i^0)}{\sigma (\phi_i^0 + W_{ji})} . \frac{\sigma (\phi_i^0 + W_{ji} + \epsilon_i) }{\sigma (\phi_i^0 + \epsilon_i)} \bigg] \]
+
+Note that \(\sum_i C_{ji}\) can be thought of as correction to vanilla
+RBM Gibbs ``input'' to the hidden node. Weirdly, \(v\) plays no role in
+the \(C\) term!
+
+Written another way this is
+\[C_{ji} = \log \sigma(\phi_i^0)  \; +\log \sigma (\phi_i^0 + W_{ji} + \epsilon_i) \;- \log \sigma (\phi_i^0 + W_{ji})  \;- \log \sigma ( \phi_i^0  + \epsilon _i) \]
+
+    It is clear that adding the single \(\epsilon\) has introduced a
+dependency between the whole of \(h\), which is a worry.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{k+kn}{import} \PY{n+nn}{sympy} \PY{k+kn}{as} \PY{n+nn}{sp}
+        \PY{n}{x}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{z} \PY{o}{=} \PY{n}{sp}\PY{o}{.}\PY{n}{symbols}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{x y z}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{sp}\PY{o}{.}\PY{n}{simplify}\PY{p}{(}\PY{n}{sp}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{x}\PY{o}{\PYZhy{}}\PY{n}{y}\PY{p}{)}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{n}{x}\PY{o}{+}\PY{n}{y}\PY{o}{+}\PY{n}{z}\PY{p}{)}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{x}\PY{o}{\PYZhy{}}\PY{n}{y}\PY{o}{\PYZhy{}}\PY{n}{z}\PY{p}{)}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{n}{x}\PY{o}{+}\PY{n}{y}\PY{p}{)}\PY{p}{)}\PY{p}{)} \PY{p}{)}
+        \PY{n}{sp}\PY{o}{.}\PY{n}{simplify}\PY{p}{(}\PY{n}{sp}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{n}{x}\PY{o}{+}\PY{n}{y}\PY{o}{+}\PY{n}{z}\PY{p}{)}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{n}{x}\PY{o}{+}\PY{n}{y}\PY{p}{)}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{l+m+mi}{1}\PY{o}{+}\PY{n}{sp}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{n}{x}\PY{o}{+}\PY{n}{z}\PY{p}{)}\PY{p}{)} \PY{p}{)}\PY{p}{)} 
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+
+        ---------------------------------------------------------------------------
+    ImportError                               Traceback (most recent call last)
+
+        <ipython-input-4-3362bb49fab4> in <module>()
+    ----> 1 import sympy as sp
+          2 x,y,z = sp.symbols('x y z')
+          3 sp.simplify(sp.log( (1+sp.exp(-x-y)) * (1+sp.exp(x+y+z)) / (1+sp.exp(-x-y-z)) / (1+sp.exp(x+y))) )
+          4 sp.simplify(sp.log( (1+sp.exp(x)) * (1+sp.exp(x+y+z)) / (1+sp.exp(x+y)) / (1+sp.exp(x+z)) ))
+
+
+        ImportError: No module named 'sympy'
+
+    \end{Verbatim}
+
+    \begin{enumerate}
+\def\labelenumi{\arabic{enumi})}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  What happens if \(\epsilon\) feeds into \(u\) as well?
+\item
+  How coupled is it really?
+\item
+  Can we just hack it?
+
+  \begin{enumerate}
+  \def\labelenumii{\alph{enumii})}
+  \itemsep1pt\parskip0pt\parsep0pt
+  \item
+    Conditionals on the size of \(\phi\), \(\epsilon\)
+  \item
+    Truncated Markov chain
+  \end{enumerate}
+\item
+  Linear RBM
+\item
+  Is any hidden node coupling bad?
+\item
+  How to interpret as Blind Source Separation
+\end{enumerate}
+
+    \subsection{\texorpdfstring{What does the correction to standard RBM
+\(\psi\) look
+like?}{What does the correction to standard RBM \textbackslash{}psi look like?}}\label{what-does-the-correction-to-standard-rbm-psi-look-like}
+
+Thought: the ``correction'' is all hinge functions and should have an
+approximation as ``if../else..'' piecewise linear regimes, and this
+ought to have an intuitive hand-wave type explanation that makes sense.
+
+So let's plot the correction contours on axes \(\epsilon_i\) versus
+\(\phi_i\), for (say) a positive \(w_{ij}\). We'll need two plots for
+the two cases \(h_i=0,1\)
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k+kn}{as} \PY{n+nn}{np}
+        \PY{k+kn}{from} \PY{n+nn}{pylab} \PY{k+kn}{import} \PY{o}{*}
+        \PY{k+kn}{import} \PY{n+nn}{numpy.random} \PY{k+kn}{as} \PY{n+nn}{rng}
+        \PY{k}{def} \PY{n+nf}{sigmoid}\PY{p}{(}\PY{n}{x}\PY{p}{)}\PY{p}{:}
+            \PY{k}{return} \PY{l+m+mf}{1.0}\PY{o}{/}\PY{p}{(}\PY{l+m+mf}{1.0} \PY{o}{+} \PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{x}\PY{p}{)}\PY{p}{)}
+        
+        \PY{k}{def} \PY{n+nf}{calc\PYZus{}psi\PYZus{}correction}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{w}\PY{p}{,}\PY{n}{h}\PY{p}{)}\PY{p}{:}
+            \PY{c}{\PYZsh{} note here the Phi is the full weighted sum into the visible node. We\PYZsq{}re explicitly taking care of the hidden activation too. }
+            \PY{n}{correction} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{w}\PY{o}{+}\PY{n}{eps}\PY{o}{\PYZhy{}}\PY{n}{h}\PY{o}{*}\PY{n}{w}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{\PYZhy{}}\PY{n}{h}\PY{o}{*}\PY{n}{w}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{w}\PY{o}{\PYZhy{}}\PY{n}{h}\PY{o}{*}\PY{n}{w}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{eps}\PY{o}{\PYZhy{}}\PY{n}{h}\PY{o}{*}\PY{n}{w}\PY{p}{)}\PY{p}{)} 
+            \PY{k}{return} \PY{n}{correction}
+        
+        \PY{k}{def} \PY{n+nf}{calc\PYZus{}psi0\PYZus{}correction}\PY{p}{(}\PY{n}{phi0}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{w}\PY{p}{)}\PY{p}{:}
+            \PY{c}{\PYZsh{} note here the phi0 is what the weighted sum into the visible node WOULD be IF h=0. }
+            \PY{n}{correction} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi0}\PY{o}{+}\PY{n}{w}\PY{o}{+}\PY{n}{eps}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi0}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi0}\PY{o}{+}\PY{n}{w}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(} \PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi0}\PY{o}{+}\PY{n}{eps}\PY{p}{)}\PY{p}{)} 
+            \PY{k}{return} \PY{n}{correction}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}6}]:} \PY{n}{reach} \PY{o}{=} \PY{l+m+mi}{40}
+        \PY{n}{phi}\PY{p}{,} \PY{n}{eps} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{mgrid}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{n}{reach}\PY{p}{:}\PY{n}{reach}\PY{p}{:}\PY{l+m+mi}{100j}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{n}{reach}\PY{p}{:}\PY{n}{reach}\PY{p}{:}\PY{l+m+mi}{100j}\PY{p}{]}
+        \PY{n}{wgt} \PY{o}{=} \PY{l+m+mf}{3.0}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}7}]:} \PY{n}{levels} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n+nb}{abs}\PY{p}{(}\PY{n}{wgt}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.5}\PY{p}{,} \PY{n+nb}{abs}\PY{p}{(}\PY{n}{wgt}\PY{p}{)}\PY{o}{+}\PY{l+m+mf}{0.5}\PY{p}{,} \PY{n+nb}{abs}\PY{p}{(}\PY{n}{wgt}\PY{p}{)}\PY{o}{/}\PY{l+m+mf}{10.}\PY{p}{)}
+        \PY{n}{cmap} \PY{o}{=} \PY{n}{cm}\PY{o}{.}\PY{n}{RdYlGn}
+        
+        \PY{n}{psi\PYZus{}correction\PYZus{}h0} \PY{o}{=} \PY{n}{calc\PYZus{}psi\PYZus{}correction}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{wgt}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}
+        \PY{n}{C} \PY{o}{=} \PY{n}{contourf}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{psi\PYZus{}correction\PYZus{}h0}\PY{p}{,} \PY{n}{levels}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s}{\PYZsq{}}\PY{l+s}{lower}\PY{l+s}{\PYZsq{}}\PY{p}{,} \PY{n}{cmap}\PY{o}{=}\PY{n}{cm}\PY{o}{.}\PY{n}{get\PYZus{}cmap}\PY{p}{(}\PY{n}{cmap}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{levels}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
+        \PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
+        \PY{n}{title}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{\PYZdl{}h\PYZus{}j=0\PYZdl{}}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{xlabel}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZbs{}}\PY{l+s}{phi\PYZus{}i\PYZdl{}}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{ylabel}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZbs{}}\PY{l+s}{epsilon\PYZus{}i\PYZdl{}}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{axis}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{equal}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+            \begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}7}]:} (-40.0, 50.0, -40.0, 40.0)
+\end{Verbatim}
+        
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{PartRBM_thinking_files/PartRBM_thinking_16_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \section{The learning algorithm}\label{the-learning-algorithm}
+
+Stochastic ascent of the log likelihood.
+
+SWITCHING NOTATION HERE IS A PAIN, BUT IT BECOMES MORE STRAIGHT-UP TO
+DITCH EPSILON AND INSTEAD PUT A/B SUPERSCIPTS ON PHI AND H, TO DENOTE
+THE TWO NETWORKS. NEED TO MAKE A DECISION ON WHICH IS BETTER AND USE IT
+EVERYWHERE I GUESS.
+
+Handy shorthands: * \(\phi_i = \sum_j h_j W_{ji}\) *
+\(\phi_i^B = \sum_j h_j^B W_{ji}^B\) *
+\(\phi_i^\text{AB} = \phi_i^A + \phi_i^B\)
+
+We have that \[
+\log P^\star(h^A, h^B, v) = \log P^\star(h^A) + \log P^\star(h^B) + \log P^\star(v \mid h^A, h^B)
+\]
+
+The first term is: $ \log P\textsuperscript{\star(h}A) = \sum\_i
+\log (1 + e\textsuperscript{\{\phi}A\_i\}) = -\sum\_i
+\log (\sigma(\phi\^{}A\_i))$
+
+Second is the same\ldots{}
+
+Third is $\sum\_i v\_i\log \sigma(\phi\_i\^{}\text{AB}) ; + ; (1-v\_i)
+\log \sigma(- \phi\_i\^{}\text{AB}) $
+
+So now we differentiate it w.r.t. some particular weight \(W_{ml}^A\)
+like this:
+
+First term:
+\(\frac{\partial}{\partial W_{ml}^A} \log P^\star(h^A) = \sigma(\phi^A_l) h_m^A\)
+is the first term, which is just the average of the usual RBM Hebbian
+change.
+
+The second term: is zero.
+
+Third term:
+
+\(\frac{\partial}{\partial W_{ml}^A} \log P^\star(v \mid h^A, h^B) = (v_l-\sigma(\phi_l^\text{AB})) h_m^A\)
+which is ``just the perceptron rool''.
+
+    \subsection{so the learning algorithm
+is\ldots{}}\label{so-the-learning-algorithm-is}
+
+\subsubsection{WAKE PHASE}\label{wake-phase}
+
+use our Gibbs chain to get samples from \(h\) for each
+\(v \in \mathcal{D}\), and do
+
+\(\Delta W_{ji}^A \;\;\; \propto \;\;\; \underbrace{\sigma(\phi^A_i) h_j^A}_\text{mean field Hebbian} \; + \; \underbrace{(v_i - \sigma(\phi_i^\text{AB})) h_j^A}_\text{Perceptron learning rule}\)
+
+and similarly for the other RBM. Note that the \(\phi\)'s are not the
+same in the two terms: the first only sums input from the A side, but
+the second sums from both hidden layers.
+
+Another way to say the same thing would be
+
+\(\Delta W_{ji}^A \;\;\; \propto \;\;\; \big[ v_i \, + \, \sigma(\phi^A_i) \, - \,\sigma(\phi_i^\text{AB}) \big] h_j^A\)
+
+which is like a Hebbian update but with a modified visible activation,
+in effect.
+
+_Q: What do we make of the resemblance between this and the
+approximation, below?}
+
+\subsubsection{SLEEP PHASE}\label{sleep-phase}
+
+use ``regular'' Gibbs sampling _in each model separately} to sample
+independently from the two RBMs, and do
+
+\(\Delta W_{ml}^A \;\;\; \propto \;\;\; - v_l \; h_m^A\)
+
+and similarly for the other RBM.
+
+    \section{Approximations (trying to find a simple
+one)}\label{approximations-trying-to-find-a-simple-one}
+
+Within its ``wedges'' the correction is pretty much flat, so an
+approximation is just to compute true/false on the appropriate
+condition. The red section is where v is ON under full input from both
+nets, but would be OFF if it were the first alone. It's fairly closely
+approximated by \(\sigma(\phi+\epsilon) (1-\sigma(\phi))\). And under
+this condition we SUBTRACT the weight from \(\psi\). Similarly the green
+section is where it's very likely that v is OFF under full input, but
+would be ON if it were the first alone. Close approx to this is
+\((1-\sigma(\phi+\epsilon)) \sigma(\phi)\). And in this case we'd ADD in
+the weight to \(\psi\).
+
+Putting the green and red bits together, maybe a good approximation to
+the correction is just going to be something like
+\[ C_{ji} =  -W_{ji} \bigg[\sigma_{\phi+\epsilon} (1-\sigma_{\phi})  - (1-\sigma_{\phi+\epsilon}) \sigma_{\phi} \bigg] \]
+where hopefully the notation is obvious. But it gets better: that's
+actually just
+\[ C_{ji} =  W_{ji} \bigg[\sigma_{\phi}- \sigma_{\phi+\epsilon} \bigg]\]
+
+And a nice feature of this is that it's just a multiplication by \(W\),
+just like the vanilla part was, which means our correction can be
+thought of as equivalently a correction to \(v_i\), the activity of the
+visible unit. So the Gibbs update is really simple in fact:
+\[\psi_j = \sum_i W_{ji} (v_i - \sigma_{\phi+\epsilon} + \sigma_{\phi})\]
+
+That's freakishly close to the learning rule stuff we got _in the
+exact case\ldots{}} Weird / wonderful?
+
+    \subsubsection{free phase is free}\label{free-phase-is-free}
+
+And in the FREE PHASE the expected \(\psi\) is simply:
+\[\bar{\psi}_j = \sum_i W_{ji} \sigma_{\phi}\] Does that mean that the
+free phase in this model corresponds to what it would be if the two RBMs
+were not even connected? Looks like it (although this is just an
+approximation, isn't it?). BUT OF COURSE IT DOES! In the ``unrolled''
+version of the net, the visibles are not clamped in the free phase and
+hence there's no explaining away going on between the two RBMs: they're
+independent RBMs doing their own thing, in the free phase. It's
+only the wake phase that needs any update to the vanilla Gibbs
+\(\psi\).
+
+Thought: maybe even the wake phase could be implemented via samples
+instead of having to calculate and propogate those sigmoid floats? THINK
+ABOUT THIS SOME MORE.
+
+    \subsubsection{better check that out}\label{better-check-that-out}
+
+Compare my proposed approximate correction
+\[ C_{ji} =  W_{ji} \bigg[\sigma_{\phi}- \sigma_{\phi+\epsilon} \bigg]\]
+with The Truth
+\[C_{ji} \; = \;\log \bigg[ \frac{\sigma (\phi_i^0)}{\sigma (\phi_i^0 + W_{ji})} . \frac{\sigma (\phi_i^0 + W_{ji} + \epsilon_i) }{\sigma (\phi_i^0 + \epsilon_i)} \bigg] \]
+
+I seem to be claiming that $ \log \frac{\sigma(\phi)}{\sigma(\phi+W)}
+\approx  W ; \sigma(\phi)$.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{n}{phi}\PY{p}{,} \PY{n}{eps} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{mgrid}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{n}{reach}\PY{p}{:}\PY{n}{reach}\PY{p}{:}\PY{l+m+mi}{100j}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{n}{reach}\PY{p}{:}\PY{n}{reach}\PY{p}{:}\PY{l+m+mi}{100j}\PY{p}{]}
+        \PY{n}{wgt} \PY{o}{=} \PY{l+m+mf}{2.0}
+        \PY{n}{roughly} \PY{o}{=} \PY{n}{wgt} \PY{o}{*} \PY{p}{(}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{eps}\PY{p}{)}\PY{p}{)}
+        
+        \PY{n}{psi\PYZus{}correction\PYZus{}h0} \PY{o}{=} \PY{n}{calc\PYZus{}psi\PYZus{}correction}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{wgt}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}
+        \PY{n}{contourf}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{roughly} \PY{o}{\PYZhy{}} \PY{n}{psi\PYZus{}correction\PYZus{}h0}\PY{p}{,} \PY{n}{levels}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s}{\PYZsq{}}\PY{l+s}{lower}\PY{l+s}{\PYZsq{}}\PY{p}{,} \PY{n}{cmap}\PY{o}{=}\PY{n}{cm}\PY{o}{.}\PY{n}{get\PYZus{}cmap}\PY{p}{(}\PY{n}{cmap}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{levels}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
+        \PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
+        \PY{n}{title}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{approx correction \PYZhy{} exact correction}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{xlabel}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZbs{}}\PY{l+s}{phi\PYZus{}i\PYZdl{}}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{ylabel}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZbs{}}\PY{l+s}{epsilon\PYZus{}i\PYZdl{}}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{axis}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{equal}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+            \begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}8}]:} (-40.0, 50.0, -40.0, 40.0)
+\end{Verbatim}
+        
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{PartRBM_thinking_files/PartRBM_thinking_22_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{psi\PYZus{}correction\PYZus{}h1} \PY{o}{=} \PY{n}{calc\PYZus{}psi\PYZus{}correction}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{wgt}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+        \PY{n}{contourf}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{eps}\PY{p}{,} \PY{n}{roughly} \PY{o}{\PYZhy{}} \PY{n}{psi\PYZus{}correction\PYZus{}h1}\PY{p}{,} \PY{n}{levels}\PY{p}{,} \PY{n}{origin}\PY{o}{=}\PY{l+s}{\PYZsq{}}\PY{l+s}{lower}\PY{l+s}{\PYZsq{}}\PY{p}{,} \PY{n}{cmap}\PY{o}{=}\PY{n}{cm}\PY{o}{.}\PY{n}{get\PYZus{}cmap}\PY{p}{(}\PY{n}{cmap}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{levels}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
+        \PY{n}{colorbar}\PY{p}{(}\PY{p}{)}
+        \PY{n}{title}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{approx correction \PYZhy{} exact correction}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{xlabel}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZbs{}}\PY{l+s}{phi\PYZus{}i\PYZdl{}}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{ylabel}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{\PYZdl{}}\PY{l+s}{\PYZbs{}}\PY{l+s}{epsilon\PYZus{}i\PYZdl{}}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{axis}\PY{p}{(}\PY{l+s}{\PYZsq{}}\PY{l+s}{equal}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+            \begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}9}]:} (-40.0, 50.0, -40.0, 40.0)
+\end{Verbatim}
+        
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{PartRBM_thinking_files/PartRBM_thinking_23_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \section{TODOs}\label{todos}
+
+The above approximation was just pulled from the aether. It would be
+great to derive it (or something better). To do this we need to simplify
+\[ \log \big[ \frac{\sigma (\phi)}{\sigma(\phi+w)} \big] \;\; \approx w \times \text{something} \]
+
+Implement the learning rule.
+
+Circles and Squares? Try it\ldots{} * visualise the reconstructions *
+and the corrections!
+
+Think of cooler examples.
+
+Think about scaling, eg: * 3 sources? * a binary tree?!
+
+    \subsection{A better approximation}\label{a-better-approximation}
+
+The true correction is composed of the sum of two terms of form
+log(sigmoid(phi)/sigmoid(phi+W)).
+
+The first term is exactly \(\log(\sigma(\phi)/\sigma(\phi+W))\), which
+goes from being \(-W\) at \(\phi=-\infty\) to \(0\) at \(\phi=+\infty\).
+The second term is
+\(\log(\sigma(\phi+\epsilon+W)/\sigma(\phi+\epsilon))\), which goes from
+being \(W\) at \(\phi=-\infty\) to \(0\) at \(\phi=+\infty\).
+
+Each of these is ``roughly sigmoid'', so my approximation is going to
+use a sigmoid in its place. Focussing on the 1st term, the best sigmoid
+has it's ``switching point'' at \(\phi = -W/2\). It should also have a
+``gain'' of \(\alpha = (4/W)*(2\sigma(W/2)-1)\) if you want its slope at
+the switching point to match that of the true correction.
+
+The 2nd term has switching point at \(\phi = -\epsilon-W/2\), and so the
+whole approximation is \[
+\tilde{C} = W \bigg[ \sigma(\phi^0 + W/2) \;\; - \;\; \sigma(\phi^0 + W/2 + \epsilon) \bigg]
+\]
+
+And again, the fact that it's got a multiplication by \(W\) means our
+correction can be thought of as equivalently a correction to \(v_i\),
+the activity of the visible unit. So, filling in all the tedious super
+and subscripts\ldots{}
+
+The Gibbs update for this hopefully improved approximation is: \[
+\begin{align}
+\psi_j &= \sum_i W_{ji} \bigg( v_i - \sigma_i^{AB} \;\;+\;\; \sigma_i^A \bigg) \\
+\text{where}\;\; \sigma_i^{AB} &= \sigma(\phi_i^0 + W_{ji}/2 +\epsilon_i) & \text{ie. both nets}
+\\
+\sigma_i^A &= \sigma(\phi_i^0 + W_{ji}/2) & \text{ie. one net}
+\end{align}
+\] This seems very intuitive to me - it's almost literally ``explaining
+away''. If it works, that's a really nice story to tell.
+
+``Ideally'' by some measure the sigmoids here should also use a ``gain''
+of \(\alpha\) as given. But that's probably not completely
+crucial\ldots{}?
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}14}]:} \PY{c}{\PYZsh{} testing the improved approximation}
+         \PY{n}{W} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{l+m+mf}{10.0}
+         \PY{n}{alpha} \PY{o}{=} \PY{l+m+mi}{4}\PY{o}{*}\PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{W}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{/}\PY{n}{W} \PY{c}{\PYZsh{} this is the scaler that would match the slope at the \PYZsq{}midpoint\PYZsq{}}
+         \PY{n}{phi} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{30}\PY{p}{,} \PY{l+m+mi}{30}\PY{p}{,} \PY{l+m+mi}{1001}\PY{p}{)}
+         \PY{n}{plot}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{p}{)}\PY{o}{/}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{W}\PY{p}{)}\PY{p}{)}\PY{p}{,}\PY{l+s}{\PYZsq{}}\PY{l+s}{k}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{plot}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{n}{W}\PY{o}{*}\PY{n}{sigmoid}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{alpha}\PY{o}{*}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{W}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}\PY{p}{,}\PY{l+s}{\PYZsq{}}\PY{l+s}{b}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+         \PY{k}{print}\PY{p}{(}\PY{n}{alpha}\PY{p}{)}
+\end{Verbatim}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+0.394645719261
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{PartRBM_thinking_files/PartRBM_thinking_26_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}11}]:} \PY{c}{\PYZsh{} Now to put the \PYZdq{}eps\PYZdq{} term in too, to see the entire approximation}
+         \PY{n}{eps} \PY{o}{=} \PY{l+m+mf}{10.0}
+         \PY{n}{truth} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{p}{)}\PY{o}{/}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{W}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{eps}\PY{p}{)}\PY{o}{/}\PY{n}{sigmoid}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{W}\PY{o}{+}\PY{n}{eps}\PY{p}{)}\PY{p}{)}
+         \PY{n}{approx} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{W}\PY{o}{*}\PY{p}{(}\PY{n}{sigmoid}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{alpha}\PY{o}{*}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{W}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{sigmoid}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{alpha}\PY{o}{*}\PY{p}{(}\PY{n}{phi}\PY{o}{+}\PY{n}{eps}\PY{o}{+}\PY{n}{W}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}   \PY{p}{)}
+         \PY{n}{plot}\PY{p}{(}\PY{n}{phi}\PY{p}{,} \PY{n}{truth}\PY{p}{,}\PY{l+s}{\PYZsq{}}\PY{l+s}{k}\PY{l+s}{\PYZsq{}}\PY{p}{,} \PY{n}{phi}\PY{p}{,} \PY{n}{approx}\PY{p}{,}\PY{l+s}{\PYZsq{}}\PY{l+s}{b}\PY{l+s}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+            \begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}11}]:} [<matplotlib.lines.Line2D at 0x3fb96d8>,
+          <matplotlib.lines.Line2D at 0x3c114b8>]
+\end{Verbatim}
+        
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{PartRBM_thinking_files/PartRBM_thinking_27_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+    \end{document}

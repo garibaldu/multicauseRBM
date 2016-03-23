@@ -257,6 +257,7 @@ def load_mnist_digits(digits, dataset_size):
     # THE FOLLOWING WRITES LIST OF DIGIT IMAGES AS A CSV TO A PLAIN TXT FILE
     # np.savetxt(fname='mnist_digits.txt', X=vis_train_pats, fmt='%.2f', delimiter=',')
     vis_train_pats = vis_train_pats*2.0 - 1.0 # so range is somethigng...now.
+    vis_train_pats /= 2.0
     print('visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
     return vis_train_pats
 
@@ -274,8 +275,8 @@ def generate_smooth_bkgd(dataset_size):
         img = img / np.max(np.ravel(img))
         bkgd_imgs[i] = 2*img - 1.0
     vis_train_pats = flatten_dataset(bkgd_imgs)
-    print('visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
-    print('vis_train_pats shape is ', vis_train_pats.shape) 
+    #print('vis_train_pats shape is ', vis_train_pats.shape) 
+    print('gradient visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
     return vis_train_pats
 
 
