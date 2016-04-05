@@ -6,6 +6,7 @@ if __name__ == '__main__':
     parser = optparse.OptionParser(usage="usage %prog [options]")
     parser.add_option("-f", "--L1name", type = "str", dest = "L1name", help = "name for the Layer 1 revRBM")
     parser.add_option("-g", "--L2name", type = "str", dest = "L2name", help = "name for the Layer 2 RBM")
+    parser.add_option("-D", type = "str", dest = "digitsAsStr", help = "digits to use, as comma-separated list (e.g. -D 4,5,6)", default = '4')
     opts, args = parser.parse_args()
     EXIT = False
     if (opts.L1name is None) or (opts.L2name is None):
@@ -16,7 +17,7 @@ if __name__ == '__main__':
         sys.exit(-1)
 
 
-    digits = [6]
+    digits = [int(s) for s in opts.digitsAsStr.split(',')]
     L1_inpats = revrbm.load_mnist_digits(digits, dataset_size=100)
 
     # read in the layer 1 revRBM

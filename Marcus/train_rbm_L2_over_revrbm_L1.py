@@ -12,6 +12,7 @@ if __name__ == '__main__':
     parser.add_option("-d", "--nitems", type = "int", dest = "nitems", default = 500, help = "number of training examplars PER DIGIT")
     parser.add_option("-r", "--rate", type = "float", dest = "rate", help = "learning rate", default = 0.005)
     parser.add_option("-m", "--mom", type = "float", dest = "momentum", help = "momentum", default = 0.9)
+    parser.add_option("-D", type = "str", dest = "digitsAsStr", help = "digits to train on, as comma-separated list (e.g. -D 4,5,6)", default = '4')
     #parser.add_option("-d", "--data", type = "str", dest = "indata", help = "name of a dataset")
 
     opts, args = parser.parse_args()
@@ -23,8 +24,9 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(-1)
 
-
-    digits = [0,1,2,3,4,5,6,7,8,9]
+    
+    digits = [int(s) for s in opts.digitsAsStr.split(',')]
+    print(digits)
     L1_inpats = revrbm.load_mnist_digits(digits, dataset_size=opts.nitems)
 
     # read in the layer 1 RBM

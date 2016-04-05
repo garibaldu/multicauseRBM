@@ -12,6 +12,7 @@ if __name__ == '__main__':
     parser.add_option("-f", "--nameA", type = "str", dest = "nameA", help = "name for REVRBM A")
     parser.add_option("-g", "--nameB", type = "str", dest = "nameB", help = "name for REVRBM B")
     parser.add_option("-d", "--nitems", type = "int", dest = "nitems", default = 70, help = "number of training examplars PER DIGIT")
+    parser.add_option("-D", type = "str", dest = "digitsAsStr", help = "digits to use, as comma-separated list (e.g. -D 4,5,6)", default = '4')
     opts, args = parser.parse_args()
     EXIT = False
     if (opts.nameA is None) or (opts.nameB is None):
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     else:
         sys.exit('no file for B')
 
-    digits = [2,4,6]
+    digits = [int(s) for s in opts.digitsAsStr.split(',')]
     A_inpats = revrbm.load_mnist_digits(digits, opts.nitems)
     B_inpats = revrbm.generate_smooth_bkgd(opts.nitems)
     num_pats = A_inpats.shape[0]

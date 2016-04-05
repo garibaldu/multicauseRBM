@@ -13,6 +13,7 @@ if __name__ == '__main__':
     parser.add_option("-m", "--mom", type = "float", dest = "momentum", help = "momentum", default = 0.9)
     parser.add_option("-p", "--penalty", type = "float", dest = "L1_penalty", help = "L1 penalty", default = 0.0001)
     parser.add_option("-F", "--newname", type = "str", dest = "newname", help = "name for trained RBM  (defaults to existing name, ignored if new RBM)")
+    parser.add_option("-D", type = "str", dest = "digitsAsStr", help = "digits to train on, as comma-separated list (e.g. -D 4,5,6)", default = '4')
     opts, args = parser.parse_args()
     EXIT = False
     if (opts.name is None):
@@ -23,13 +24,15 @@ if __name__ == '__main__':
         sys.exit(-1)
 
 
-    digits = [2,4]  # the digits we'll train on.
+    digits = [int(s) for s in opts.digitsAsStr.split(',')]
+    inpats = revrbm.load_mnist_digits(digits, opts.nitems) 
+    """
     tmpN = opts.nitems * len(digits)
     print ("opts.nitems = ", opts.nitems)
     inpats = np.zeros((tmpN * 2, 28*28), dtype=float)
     inpats[:tmpN] = revrbm.load_mnist_digits(digits, opts.nitems) 
     inpats[tmpN:] = revrbm.generate_smooth_bkgd(tmpN)
-    #sys.exit(0)
+    """
     revrbm.show_example_images(inpats, filename='examples.png')
     #sys.exit(0)
         
