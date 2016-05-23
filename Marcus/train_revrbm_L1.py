@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser.add_option("-n", "--nhids", type = "int", dest = "num_hids", default = 200, help = "number of hidden units (ignored unless new net)")
     parser.add_option("-r", "--rate", type = "float", dest = "rate", help = "learning rate", default = 0.001)
     parser.add_option("-m", "--mom", type = "float", dest = "momentum", help = "momentum", default = 0.9)
-    parser.add_option("-p", "--penalty", type = "float", dest = "L1_penalty", help = "L1 penalty", default = 0.0001)
+    parser.add_option("-p", "--penalty", type = "float", dest = "L1_penalty", help = "L1 penalty", default = 0.0)
     parser.add_option("-F", "--newname", type = "str", dest = "newname", help = "name for trained RBM  (defaults to existing name, ignored if new RBM)")
     parser.add_option("-D", type = "str", dest = "digitsAsStr", help = "digits to train on, as comma-separated list (e.g. -D 4,5,6)", default = '4')
     opts, args = parser.parse_args()

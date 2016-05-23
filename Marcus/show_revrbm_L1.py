@@ -32,8 +32,8 @@ if __name__ == '__main__':
     r.DROPOUT = False
     r.make_weights_figure()
     r.make_dynamics_figure(inpats)
-    r.rename(r.name + '_scrambled')
-    r.make_dynamics_figure(inpats, SCRAMBLE=True)
+    #r.rename(r.name + '_scrambled')
+    #xr.make_dynamics_figure(inpats, SCRAMBLE=True)
 
     hid_pats = revrbm.random_hiddens_for_rbm(r, 100)
     Steps = 10

@@ -48,7 +48,6 @@ class RBM(object):
         self.hid_bias_change = 0.0
         self.vis_bias_change = 0.0
 
-        
     def rename(self, newname):
         """ give the RBM a new name """
         self.name = newname
@@ -56,9 +55,13 @@ class RBM(object):
     def pushup(self, vis_pats):
         """ push visible pats into hidden, AND DRAW BERNOULLI SAMPLES """
         hid_prob1 = sigmoid(np.dot(vis_pats, self.W.T) + self.hid_bias)
-        return 1*(hid_prob1 > rng.random(size=hid_prob1.shape))
+        #return 1*(hid_prob1 > rng.random(size=hid_prob1.shape))
+        # ReLU alternative:
+        tmp = np.dot(vis_pats, self.W.T) + self.hid_bias
+        tmp = tmp + rng.normal(0.0, 0.001 + np.sqrt(sigmoid(tmp)), size=tmp.shape)
+        return np.maximum(0.0, tmp)
 
-    def pushdown(self, hid_pats):
+    def pushdown(self, hid_pats, noise=True):
         """ push hidden pats into visible, BUT JUST CALC PROBS """
         if self.DROPOUT:
             dropout = rng.randint(2, size=(hid_pats.shape[0], self.num_hid))
@@ -66,6 +69,8 @@ class RBM(object):
         else:
             FACTOR = 0.5
             vis = np.dot(hid_pats, FACTOR*self.W) + self.vis_bias
+        if noise:
+            vis += 0.5*rng.normal(size = (self.num_vis))
         return vis
         # OR....  
         #return 1*(vis_prob1 > rng.random(size=vis_prob1.shape))
@@ -94,10 +99,26 @@ class RBM(object):
                 start_index = next_index  # ready for next time
 
                 # push visible pats into hidden
+                print("going to pushup....")
                 hid_first = self.pushup(vis_minibatch)
+                print("hid_first: ", hid_first.min(), hid_first.max())
                 # Einstein alternative suggested by Paul Mathews.
                 Hebb = np.einsum('ij,ik->jk', hid_first, vis_minibatch) 
 
+                hiddens = hid_first
+                for step in range(25):
+                    # push hidden pats into visible 
+                    vis_reconstruction = self.pushdown(hiddens, noise=True)
+                    # push reconstructed visible pats back into hidden
+                    hiddens = self.pushup(vis_reconstruction)
+                # push hidden pats into visible 
+                vis_reconstruction = self.pushdown(hiddens, noise=False)
+                # push reconstructed visible pats back into hidden
+                hiddens = self.pushup(vis_reconstruction)
+                print("hiddens: ", hiddens.min(), hiddens.max())
+
+                hid_second = hiddens
+                
                 # push hidden pats into visible 
                 vis_reconstruction = self.pushdown(hid_first)
                 # push reconstructed visible pats back into hidden
@@ -111,10 +132,9 @@ class RBM(object):
                 # Now we have to do the visible and hidden bias weights as well.
                 self.hid_bias_change = rate * (hid_first.mean(0) - hid_second.mean(0))   +  momentum * self.hid_bias_change
                 self.hid_bias += self.hid_bias_change
-                self.vis_bias_change = rate * (vis_minibatch.mean(0) - vis_reconstruction.mean(0))   + momentum * self.vis_bias_change
-                self.vis_bias += self.vis_bias_change
 
-                self.vis_bias = 0.0*self.vis_bias_change
+                # self.vis_bias_change = rate * (vis_minibatch.mean(0) - vis_reconstruction.mean(0))   + momentum * self.vis_bias_change
+                # self.vis_bias += self.vis_bias_change
 
             
             if (t % announce_every == 0): 
@@ -146,9 +166,9 @@ class RBM(object):
                     img = self.vis_bias.reshape(28,28)
                     plt.text(0,-2,'bias', fontsize=8, color='red')
                 else:
-                    j = rng.randint(self.num_hid) # random choice of hidden node
+                    j = i % self.num_hid #rng.randint(self.num_hid) # random choice of hidden node
                     img = self.W[j].reshape(28,28)
-                    plt.text(0,-2,'hid %d' %(j), fontsize=8)
+                    plt.text(0,-2,'h%d %.1f, %.1f' %(j, np.min(self.W[j]), np.max(self.W[j])), fontsize=8)
 
                 plt.imshow(img, interpolation='nearest',cmap='RdBu', vmin=-maxw, vmax=maxw)
                 # setting vmin and vmax there ensures zero weights aren't coloured.
@@ -206,16 +226,16 @@ class RBM(object):
             print('doing alternating Gibbs Sampling until t=%d' % (next_stop))
             while total_time < next_stop:
                 hid = self.pushup(Vis_test)
-                Vis_test = self.pushdown(hid)
+                Vis_test = self.pushdown(hid, noise=False)
                 total_time += 1
                 
             for n in range(num_examples):
                 i += 1
                 plt.subplot(num_rows,num_examples,i)
-                plt.imshow(Vis_test[n].reshape(28,28), cmap='Greys', vmin=-1., vmax=1., interpolation='nearest')
+                plt.imshow(Vis_test[n].reshape(28,28), cmap='Greys',interpolation='nearest') #, vmin=-1., vmax=1.,
                 plt.axis('off')
-                plt.text(0,-2,'iter %d' %(total_time), fontsize=8)
-            next_stop = max(1, next_stop) * 2  # wait X times longer each time before showing the next sample.
+                plt.text(0,-2,'t=%d %.1f, %.1f' %(total_time, np.min(Vis_test[n]), np.max(Vis_test[n])), fontsize=8)
+            next_stop = 2**s #max(1, next_stop) * 2  # wait X times longer each time before showing the next sample.
 
         filename = '%s_gibbs_chains.png' % (self.name)
         plt.savefig(filename)
@@ -256,8 +276,8 @@ def load_mnist_digits(digits, dataset_size):
     vis_train_pats = vis_train_pats[rand_order]
     # THE FOLLOWING WRITES LIST OF DIGIT IMAGES AS A CSV TO A PLAIN TXT FILE
     # np.savetxt(fname='mnist_digits.txt', X=vis_train_pats, fmt='%.2f', delimiter=',')
-    vis_train_pats = vis_train_pats*2.0 - 1.0 # so range is somethigng...now.
-    vis_train_pats /= 2.0
+    vis_train_pats = vis_train_pats*2.0 - 1.0 # so range is something...now.
+    vis_train_pats *= 2.0 # 0.5
     print('visibles range from %.2f to %.2f' % (vis_train_pats.min(), vis_train_pats.max()))
     return vis_train_pats
 
@@ -290,14 +310,14 @@ def flatten_dataset(images):
     return smushed.reshape((smushed.shape[0], -1))
 
 def show_example_images(pats, filename='examples.png'):
-    rows = 7
-    cols = 10
+    rows = 6
+    cols = 6
     i=0
     plt.clf()
     for r in range(rows):
         for c in range(cols):
             plt.subplot(rows,cols,i+1)
-            j = rng.randint(0,len(pats))
+            j = r+rows*c # rng.randint(0,len(pats))
             plt.imshow(pats[j].reshape(28,28), cmap='Greys', interpolation='nearest', vmin=-1.0, vmax=1.0)
             maxval = pats[j].max()
             minval = pats[j].min()
