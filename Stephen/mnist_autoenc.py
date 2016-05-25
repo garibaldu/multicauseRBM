@@ -30,7 +30,7 @@ def flatten_dataset(images):
 
 # Read the dataset in (code from sheet)
 train_in = load_mnist_digits([5], 200)
-test_in = load_mnist_digits([5], 200)
+test_in = load_mnist_digits([0,1,2,3,4,5,6,7,8,9], 200)
 #f = gzip.open('/Users/srmarsla/Teaching/372/Labs/Code/Pcn/mnist.pkl.gz','rb')
 #tset, vset, teset = cPickle.load(f)
 #f.close()
@@ -42,14 +42,16 @@ test_tgt = test_in   # we're doing autoencoding...
 
 print np.shape(train_in)
 learning_rate = 0.01
-nhidden = 20
-niterations = 2500
-hidden_type='relu' #linear, relu, or logistic
+nhidden = 50
+niterations = 1000
+hidden_type='linear' #linear, relu, or logistic
 
 net = mlp_autoenc.mlp(train_in,train_tgt,nhidden,outtype='linear',hidtype=hidden_type)
 net.mlptrain(train_in, train_tgt, 0.001, niterations=101, momentum=0.5)
 net.mlptrain(train_in, train_tgt, learning_rate, niterations)
 outputs = net.mlpfwd(test_in)
+#for t in range(1):
+#    outputs = net.mlpfwd(outputs)
 
 
 
@@ -65,6 +67,8 @@ for r in range(5):
     pl.subplot(5,5,i+1)
     pl.imshow(outputs[pair_num].reshape(28,28),interpolation='nearest', cmap=pl.cm.gray, vmin=-1.,vmax=1.)
     pl.text(0,0,'recon %d' %(pair_num) )
+    RMSerror = 0.5*np.sum((outputs[pair_num] - test_in[pair_num])**2)
+    pl.text(0,5,'%.1f' %(RMSerror) )
     pl.axis('off')
     i += 2
     pair_num += 1
@@ -77,6 +81,8 @@ for r in range(5):
     pl.subplot(5,5,i+1)
     pl.imshow(outputs[pair_num].reshape(28,28),interpolation='nearest', cmap=pl.cm.gray, vmin=-1.,vmax=1.)
     pl.text(0,0,'recon %d' %(pair_num) )
+    RMSerror = 0.5*np.sum((outputs[pair_num] - test_in[pair_num])**2)
+    pl.text(0,5,'%.1f' %(RMSerror) )
     pl.axis('off')
     i += 1
     pair_num += 1
