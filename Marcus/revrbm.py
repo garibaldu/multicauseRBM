@@ -1,4 +1,4 @@
-import math, time
+import math, time, sys
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy.random as rng
@@ -9,16 +9,18 @@ def inverse_sigmoid(prob1):
     return np.log(prob1/(1-prob1))
 
 class RBM(object):
-    """ 
-    An RBM has weights, visible biases, and hidden biases.
+    """An RBM has weights, visible biases, and hidden biases.
 
     You can either make a new one, or read an old one in from a .npz file.
 
-    An RBM can be told to train itself, given some data set of visible patterns. eg: rbm.train(indata, learning_params)
+    An RBM can be told to train itself, given some data set of visible
+    patterns. eg: rbm.train(indata, learning_params). The training can
+    be via Contrastive Divergence, or as an auto-encoder.
 
-    It can save itself in pickled form
+    It can save itself in pickled form.
 
-    It can make pretty pics of itself in PNG.
+    It can make pretty pics of itself.
+
     """
 
     def __init__(self, filename, num_hid=0, num_vis=0, DROPOUT=True, hid_type='logistic'):
@@ -26,9 +28,9 @@ class RBM(object):
             self.name = filename
             self.num_hid = num_hid
             self.num_vis = num_vis
-            self.W = np.asarray( 0.1*rng.normal(size = (num_hid, num_vis)),order= 'fortran' )
-            self.hid_bias = 0.01 * rng.normal(size = (1, num_hid))
-            self.vis_bias = 0.01 * rng.normal(size = (1, num_vis))
+            self.W = np.asarray( 0.01*rng.normal(size = (num_hid, num_vis)),order= 'fortran' )
+            self.hid_bias = 0.001 * rng.normal(size = (1, num_hid))
+            self.vis_bias = 0.001 * rng.normal(size = (1, num_vis))
         else:
             print('Reading in pickled RBM from %s' % (filename))
             # read in from a saved npz file
@@ -45,10 +47,8 @@ class RBM(object):
 
         self.DROPOUT = DROPOUT
         self.hid_type = hid_type
+        self.vis_type = 'linear'
         print ('dropout is %s, hidden units of type %s' %(self.DROPOUT, self.hid_type))
-        self.W_change = 0.0
-        self.hid_bias_change = 0.0
-        self.vis_bias_change = 0.0
 
     def rename(self, newname):
         """ give the RBM a new name """
@@ -95,41 +95,47 @@ class RBM(object):
         Train the RBM's weights on the supplied data, using CD1 with momentum, an L1 penalty, and (optionally) dropout.
         """
         print('training with rate %.5f, momentum %.2f, L1 penalty %.6f, minibatches of %d' % (rate, momentum, L1_penalty, minibatch_size))
-        announce_every = num_iterations / 5
+        announce_every = 1 #num_iterations / 5
         start = time.time()
         num_pats = indata.shape[0]
+        W_change = 0.0
+        hid_bias_change = 0.0
+        vis_bias_change = 0.0
 
-        TRAINING = 'CD'
+        TRAINING = 'AE'  # CD or AE (contrastive divergence or auto-encoder)
         
         for t in range(num_iterations+1):
             start_index = 0
+            C = 0.0
             while start_index < num_pats-1:
                 next_index = min(start_index + minibatch_size, num_pats)
                 vis_minibatch = indata[start_index : next_index]
+                ndata = np.shape(vis_minibatch)[0] # how many in this minibatch
                 start_index = next_index  # ready for next time
 
                 if TRAINING == 'CD':
-                    W_grad, hid_bias_grad =  self.CD_gradient(vis_minibatch, 5)
+                    W_grad, hid_bias_grad =  self.CD_gradient(vis_minibatch, CD_steps=5)
                 elif TRAINING == 'AE':
-                    W_grad, hid_bias_grad, error =  autoencoder_gradient(self,vis_minibatch)
-                    print("RMS: %.1f" % (error))
-            
-                self.W_change = rate * W_grad  +  momentum * self.W_change
-                self.W += self.W_change - L1_penalty * np.sign(self.W)
+                    W_grad, hid_bias_grad =  self.autoencoder_gradient(vis_minibatch)
 
+                W_change = rate * W_grad  +  momentum * W_change
+                self.W += W_change - L1_penalty * np.sign(self.W)
+                
                 # Now we have to do the visible and hidden bias weights as well.
-                self.hid_bias_change = rate * hid_bias_grad  + momentum * self.hid_bias_change
-                self.hid_bias += self.hid_bias_change
+                hid_bias_change = rate * hid_bias_grad  + momentum * hid_bias_change
+                self.hid_bias += hid_bias_change
 
                 # IGNORING VISIBLE BIASES STILL???????????????
                 # self.vis_bias_change = rate * (vis_minibatch.mean(0) - vis_reconstruction.mean(0))   + momentum * self.vis_bias_change
                 # self.vis_bias += self.vis_bias_change
 
+            outputs = self.pushdown(self.pushup(indata, noise=False), noise=False)
+            C = 0.5*np.sum((outputs - indata)**2)
             
-            if (t % announce_every == 0): 
-                C = np.power(self.pushdown(self.pushup(vis_minibatch)) - vis_minibatch, 2.0).mean()
-                print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.4f' % (t, time.time() - start, C))
-
+            if (t % announce_every == 0):
+                print (outputs[0,3:6])
+                #### ARGH! outputs changes even if rate and penalty are ZERO!!
+                print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.1f' % (t, time.time() - start, C/num_pats))
         return
 
     
@@ -177,37 +183,40 @@ class RBM(object):
         """This RBM, with this data, can calculate the gradient for its
         weights and biases under the auto-encoder loss. So do it...
         """
-            
-        AE_outputs = self.pushdown(self.pushup(inputs))
         ndata = np.shape(inputs)[0]
+        targets = inputs # it's an autoencoder...
+        hiddens = self.pushup(inputs, noise=False)
+        outputs = self.pushdown(hiddens, noise=False)
+
         
-        outtype = 'linear'
+        out_type = 'linear'
         # Different types of output neurons
-        if outtype == 'linear':
-            deltao = (AE_outputs-targets)/self.ndata  # why the division??
-        elif outtype == 'logistic':
-            deltao = (AE_outputs-targets)*AE_outputs*(1.0-AE_outputs)
-        elif self.outtype == 'softmax':
-            deltao = (AE_outputs-targets)*(AE_outputs*(-AE_outputs)+AE_outputs)/self.ndata
+        if self.vis_type == 'linear':
+            deltao = (outputs-targets)
+        elif self.vis_type == 'logistic':
+            deltao = (outputs-targets)*outputs*(1.0-outputs)
+        elif self.vis_type == 'softmax':
+            deltao = (outputs-targets)*(outputs*(-outputs)+outputs) #WHAT??!
         else:
-            print "bogus outtype"
-                
-        if self.hidtype == 'linear':
-            deltah = np.dot(deltao,np.transpose(self.weights1.T))
-        elif self.hidtype == 'relu':
-            deltah = np.maximum(0,np.sign(self.hidden)) * (np.dot(deltao,np.transpose(self.weights1.T)))
-        elif self.hidtype == 'logistic':
-            deltah = self.hidden*(1.0-self.hidden)*(np.dot(deltao,np.transpose(self.weights1.T)))
+            print ("bogus vis_type")
+        if self.hid_type == 'linear':
+            deltah = np.dot(deltao,np.transpose(self.W))
+        elif self.hid_type == 'relu':
+            deltah = np.maximum(0,np.sign(hiddens)) * (np.dot(deltao,np.transpose(self.W)))
+        elif self.hid_type == 'logistic':
+            deltah = hiddens*(1.0-hiddens)*(np.dot(deltao,np.transpose(self.W)))
         else:
-            print "bogus hidtype"
+            print ("bogus hid_type")
                    
         w1_gradient = (np.dot(np.transpose(inputs),deltah))
-        w2_gradient = (np.dot(np.transpose(self.hidden),deltao))
-        weights_gradient = 0.5*(w1_gradient + w2_gradient.T)
-        hid_bias_gradient = np.sum(deltah,0)
-        error = 0.5*np.sum((AE_outputs-inputs)**2)
-        return weights_gradient, hid_bias_gradient, error
+        w2_gradient = (np.dot(np.transpose(hiddens),deltao))
+        weights_gradient =  0.5*(w1_gradient.T + w2_gradient) / ndata
+        hid_bias_gradient =  np.sum(deltah,0) / ndata
+        #error = 0.5*np.sum((outputs-inputs)**2) / ndata
+        #print ("\t\t error: %.1f" % error)
+        return weights_gradient, hid_bias_gradient
 
+    
     def get_num_vis(self):
         return self.num_vis
     
@@ -286,9 +295,8 @@ class RBM(object):
         num_rows = 6
         plt.clf()
         total_time = 0
-        print('here we go...')
         for s in range(num_rows):
-            print('doing alternating Gibbs Sampling until t=%d' % (next_stop))
+            #print('doing alternating Gibbs Sampling until t=%d' % (next_stop))
             while total_time < next_stop:
                 hid = self.pushup(Vis_test)
                 Vis_test = self.pushdown(hid, noise=False)
