@@ -21,7 +21,7 @@ class RBM(object):
     It can make pretty pics of itself in PNG.
     """
 
-    def __init__(self, filename, num_hid=0, num_vis=0, DROPOUT=True):
+    def __init__(self, filename, num_hid=0, num_vis=0, DROPOUT=True, hid_type='logistic'):
         if (num_hid>0 and num_vis>0):
             self.name = filename
             self.num_hid = num_hid
@@ -44,6 +44,8 @@ class RBM(object):
             print ('NAME: %s, is an RBM with %d hids and %d vis' % (self.name, self.num_hid, self.num_vis))
 
         self.DROPOUT = DROPOUT
+        self.hid_type = hid_type
+        print ('dropout is %s, hidden units of type %s' %(self.DROPOUT, self.hid_type))
         self.W_change = 0.0
         self.hid_bias_change = 0.0
         self.vis_bias_change = 0.0
@@ -52,24 +54,30 @@ class RBM(object):
         """ give the RBM a new name """
         self.name = newname
         
-    def pushup(self, vis_pats):
-        """ push visible pats into hidden, AND DRAW BERNOULLI SAMPLES """
-        hid_prob1 = sigmoid(np.dot(vis_pats, self.W.T) + self.hid_bias)
-        #return 1*(hid_prob1 > rng.random(size=hid_prob1.shape))
-        # ReLU alternative:
-        tmp = np.dot(vis_pats, self.W.T) + self.hid_bias
-        tmp = tmp + rng.normal(0.0, 0.001 + np.sqrt(sigmoid(tmp)), size=tmp.shape)
-        return np.maximum(0.0, tmp)
+    def pushup(self, vis_pats, noise=True):
+        """ push visible pats into hidden layer"""
+        psi = np.dot(vis_pats, self.W.T) + self.hid_bias
+        if self.hid_type == 'logistic': # BERNOULLI units
+            hid_prob1 = sigmoid(psi)
+            if noise == False:
+                return hid_prob1
+            elif noise == True:
+                return 1*(hid_prob1 > rng.random(size=hid_prob1.shape))
+        elif self.hid_type == 'relu':  # ReLU units
+            if noise == True:
+                psi = psi + rng.normal(0.,0.001+np.sqrt(sigmoid(psi)), size=psi.shape)
+            return np.maximum(0.0, psi)
+
 
     def pushdown(self, hid_pats, noise=True):
-        """ push hidden pats into visible, BUT JUST CALC PROBS """
+        """ push hidden pats into visible """
         if self.DROPOUT:
             dropout = rng.randint(2, size=(hid_pats.shape[0], self.num_hid))
             vis = np.dot(hid_pats*dropout, self.W) + self.vis_bias
         else:
             FACTOR = 0.5
             vis = np.dot(hid_pats, FACTOR*self.W) + self.vis_bias
-        if noise:
+        if noise == True:
             vis += 0.5*rng.normal(size = (self.num_vis))
         return vis
         # OR....  
@@ -98,41 +106,16 @@ class RBM(object):
                 vis_minibatch = indata[start_index : next_index]
                 start_index = next_index  # ready for next time
 
-                # push visible pats into hidden
-                print("going to pushup....")
-                hid_first = self.pushup(vis_minibatch)
-                print("hid_first: ", hid_first.min(), hid_first.max())
-                # Einstein alternative suggested by Paul Mathews.
-                Hebb = np.einsum('ij,ik->jk', hid_first, vis_minibatch) 
-
-                hiddens = hid_first
-                for step in range(25):
-                    # push hidden pats into visible 
-                    vis_reconstruction = self.pushdown(hiddens, noise=True)
-                    # push reconstructed visible pats back into hidden
-                    hiddens = self.pushup(vis_reconstruction)
-                # push hidden pats into visible 
-                vis_reconstruction = self.pushdown(hiddens, noise=False)
-                # push reconstructed visible pats back into hidden
-                hiddens = self.pushup(vis_reconstruction)
-                print("hiddens: ", hiddens.min(), hiddens.max())
-
-                hid_second = hiddens
-                
-                # push hidden pats into visible 
-                vis_reconstruction = self.pushdown(hid_first)
-                # push reconstructed visible pats back into hidden
-                hid_second = self.pushup(vis_reconstruction)
-
-                AntiHebb = np.einsum('ij,ik->jk', hid_second, vis_reconstruction) # sim to Hebb
-
-                self.W_change = rate * (Hebb - AntiHebb)/minibatch_size  +  momentum * self.W_change
+                W_grad, hid_bias_grad =  self.CD_gradient(vis_minibatch, 5)
+            
+                self.W_change = rate * W_grad  +  momentum * self.W_change
                 self.W += self.W_change - L1_penalty * np.sign(self.W)
 
                 # Now we have to do the visible and hidden bias weights as well.
-                self.hid_bias_change = rate * (hid_first.mean(0) - hid_second.mean(0))   +  momentum * self.hid_bias_change
+                self.hid_bias_change = rate * hid_bias_grad  + momentum * self.hid_bias_change
                 self.hid_bias += self.hid_bias_change
 
+                # IGNORING VISIBLE BIASES STILL???????????????
                 # self.vis_bias_change = rate * (vis_minibatch.mean(0) - vis_reconstruction.mean(0))   + momentum * self.vis_bias_change
                 # self.vis_bias += self.vis_bias_change
 
@@ -142,6 +125,127 @@ class RBM(object):
                 print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.4f' % (t, time.time() - start, C))
 
         return
+
+    
+    def CD_gradient(self, inputs, CD_steps=1):
+        """This RBM, with this data, can calculate the gradient for its
+        weights and biases under the CD loss. So do it...
+        """
+        ndata = np.shape(inputs)[0]
+        assert (CD_steps > 0)
+
+        # WAKE PHASE followed by HEBB
+        # push visible pats into hidden
+        hid_first = self.pushup(inputs)
+        # (Einstein alternative suggested by Paul Mathews)
+        Hebb = np.einsum('ij,ik->jk', hid_first, inputs) 
+
+        # SLEEP PHASE followed by HEBB
+        hiddens = hid_first
+        for step in range(CD_steps):
+            # push hidden pats into visible 
+            vis_reconstruction = self.pushdown(hiddens, noise=True)
+            # push reconstructed visible pats back into hidden
+            hiddens = self.pushup(vis_reconstruction, noise=True)
+
+        # the final step is noiseless.
+        vis_reconstruction = self.pushdown(hiddens, noise=False)
+        # push reconstructed visible pats back into hidden
+        hiddens = self.pushup(vis_reconstruction, noise=False)
+
+        hid_second = hiddens
+                
+        # push hidden pats into visible 
+        vis_reconstruction = self.pushdown(hid_first, noise=False)
+        # push reconstructed visible pats back into hidden
+        hid_second = self.pushup(vis_reconstruction)
+
+        AntiHebb = np.einsum('ij,ik->jk', hid_second, vis_reconstruction)
+        
+        weights_gradient = (Hebb - AntiHebb)/ndata
+        hid_bias_gradient = hid_first.mean(0) - hid_second.mean(0)
+        return weights_gradient, hid_bias_gradient
+            
+
+
+        
+    def train_as_autoencoder(self, indata, num_iterations, rate, momentum, L1_penalty, minibatch_size):
+        """
+        Train the RBM's weights as if it were an autoencoder with tied weights.
+        """
+        print('training with rate %.5f, momentum %.2f, L1 penalty %.6f, minibatches of %d' % (rate, momentum, L1_penalty, minibatch_size))
+        announce_every = num_iterations / 5
+        start = time.time()
+        num_pats = indata.shape[0]
+
+        # temporary space for the weight changes
+        w1_update = np.zeros((np.shape(self.W.T)))
+        w2_update = np.zeros((np.shape(self.W)))
+        # temporary space for the bias changes
+        hid_bias_update = np.zeros((np.shape(self.hid_bias)))
+        vis_bias_update = np.zeros((np.shape(self.vis_bias)))
+
+        for t in range(num_iterations+1):
+            start_index = 0
+            while start_index < num_pats-1:
+                # put a minibatch into "vis_minibatch"
+                next_index = min(start_index + minibatch_size, num_pats)
+                vis_minibatch = indata[start_index : next_index]
+                start_index = next_index  # just so it's ready for next time
+
+                # this minibatch to estimate the gradient.
+                W_grad, hid_bias_grad, error =  autoencoder_gradient(self,vis_minibatch)
+                print("RMS: %.1f" % (error))
+
+                self.W_change = rate * W_grad  +  momentum * self.W_change
+                self.W += self.W_change - L1_penalty * np.sign(self.W)
+
+                # Now we have to do the visible and hidden bias weights as well.
+                self.hid_bias_change = rate * hid_bias_grad  +  momentum * self.hid_bias_change
+                self.hid_bias += self.hid_bias_change
+
+            
+            if (t % announce_every == 0): 
+                C = np.power(self.pushdown(self.pushup(vis_minibatch)) - vis_minibatch, 2.0).mean()
+                print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.4f' % (t, time.time() - start, C))
+
+        return
+
+
+    def autoencoder_gradient(self,inputs):
+        """This RBM, with this data, can calculate the gradient for its
+        weights and biases under the auto-encoder loss. So do it...
+        """
+            
+        AE_outputs = self.pushdown(self.pushup(inputs))
+        ndata = np.shape(inputs)[0]
+        
+        outtype = 'linear'
+        # Different types of output neurons
+        if outtype == 'linear':
+            deltao = (AE_outputs-targets)/self.ndata  # why the division??
+        elif outtype == 'logistic':
+            deltao = (AE_outputs-targets)*AE_outputs*(1.0-AE_outputs)
+        elif self.outtype == 'softmax':
+            deltao = (AE_outputs-targets)*(AE_outputs*(-AE_outputs)+AE_outputs)/self.ndata
+        else:
+            print "bogus outtype"
+                
+        if self.hidtype == 'linear':
+            deltah = np.dot(deltao,np.transpose(self.weights1.T))
+        elif self.hidtype == 'relu':
+            deltah = np.maximum(0,np.sign(self.hidden)) * (np.dot(deltao,np.transpose(self.weights1.T)))
+        elif self.hidtype == 'logistic':
+            deltah = self.hidden*(1.0-self.hidden)*(np.dot(deltao,np.transpose(self.weights1.T)))
+        else:
+            print "bogus hidtype"
+                   
+        w1_gradient = (np.dot(np.transpose(inputs),deltah))
+        w2_gradient = (np.dot(np.transpose(self.hidden),deltao))
+        weights_gradient = 0.5*(w1_gradient + w2_gradient.T)
+        hid_bias_gradient = np.sum(deltah,0)
+        error = 0.5*np.sum((AE_outputs-inputs)**2)
+        return weights_gradient, hid_bias_gradient, error
 
     def get_num_vis(self):
         return self.num_vis

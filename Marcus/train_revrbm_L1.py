@@ -41,7 +41,7 @@ if __name__ == '__main__':
         if (opts.newname is not None): # rename the net if a new name is provided
             r.rename(opts.newname)
     else:
-        r = revrbm.RBM(opts.name, opts.num_hids, num_vis=inpats.shape[1], DROPOUT=True)
+        r = revrbm.RBM(opts.name, opts.num_hids, num_vis=inpats.shape[1], DROPOUT=False, hid_type='logistic')
 
 
     r.train(inpats, opts.iterations, opts.rate, opts.momentum, opts.L1_penalty, minibatch_size=50)
