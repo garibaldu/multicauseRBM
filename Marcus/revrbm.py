@@ -99,6 +99,8 @@ class RBM(object):
         start = time.time()
         num_pats = indata.shape[0]
 
+        TRAINING = 'CD'
+        
         for t in range(num_iterations+1):
             start_index = 0
             while start_index < num_pats-1:
@@ -106,7 +108,11 @@ class RBM(object):
                 vis_minibatch = indata[start_index : next_index]
                 start_index = next_index  # ready for next time
 
-                W_grad, hid_bias_grad =  self.CD_gradient(vis_minibatch, 5)
+                if TRAINING == 'CD':
+                    W_grad, hid_bias_grad =  self.CD_gradient(vis_minibatch, 5)
+                elif TRAINING == 'AE':
+                    W_grad, hid_bias_grad, error =  autoencoder_gradient(self,vis_minibatch)
+                    print("RMS: %.1f" % (error))
             
                 self.W_change = rate * W_grad  +  momentum * self.W_change
                 self.W += self.W_change - L1_penalty * np.sign(self.W)
@@ -166,51 +172,6 @@ class RBM(object):
         hid_bias_gradient = hid_first.mean(0) - hid_second.mean(0)
         return weights_gradient, hid_bias_gradient
             
-
-
-        
-    def train_as_autoencoder(self, indata, num_iterations, rate, momentum, L1_penalty, minibatch_size):
-        """
-        Train the RBM's weights as if it were an autoencoder with tied weights.
-        """
-        print('training with rate %.5f, momentum %.2f, L1 penalty %.6f, minibatches of %d' % (rate, momentum, L1_penalty, minibatch_size))
-        announce_every = num_iterations / 5
-        start = time.time()
-        num_pats = indata.shape[0]
-
-        # temporary space for the weight changes
-        w1_update = np.zeros((np.shape(self.W.T)))
-        w2_update = np.zeros((np.shape(self.W)))
-        # temporary space for the bias changes
-        hid_bias_update = np.zeros((np.shape(self.hid_bias)))
-        vis_bias_update = np.zeros((np.shape(self.vis_bias)))
-
-        for t in range(num_iterations+1):
-            start_index = 0
-            while start_index < num_pats-1:
-                # put a minibatch into "vis_minibatch"
-                next_index = min(start_index + minibatch_size, num_pats)
-                vis_minibatch = indata[start_index : next_index]
-                start_index = next_index  # just so it's ready for next time
-
-                # this minibatch to estimate the gradient.
-                W_grad, hid_bias_grad, error =  autoencoder_gradient(self,vis_minibatch)
-                print("RMS: %.1f" % (error))
-
-                self.W_change = rate * W_grad  +  momentum * self.W_change
-                self.W += self.W_change - L1_penalty * np.sign(self.W)
-
-                # Now we have to do the visible and hidden bias weights as well.
-                self.hid_bias_change = rate * hid_bias_grad  +  momentum * self.hid_bias_change
-                self.hid_bias += self.hid_bias_change
-
-            
-            if (t % announce_every == 0): 
-                C = np.power(self.pushdown(self.pushup(vis_minibatch)) - vis_minibatch, 2.0).mean()
-                print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.4f' % (t, time.time() - start, C))
-
-        return
-
 
     def autoencoder_gradient(self,inputs):
         """This RBM, with this data, can calculate the gradient for its
