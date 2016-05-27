@@ -24,15 +24,18 @@ class RBM(object):
     """
 
     def __init__(self, filename, num_hid=0, num_vis=0, DROPOUT=True, hid_type='logistic'):
+        f = open(filename+'.txt', 'a')
         if (num_hid>0 and num_vis>0):
             self.name = filename
             self.num_hid = num_hid
             self.num_vis = num_vis
-            self.W = np.asarray( 0.01*rng.normal(size = (num_hid, num_vis)),order= 'fortran' )
+            rng.seed(99)
+            self.W = np.asarray( 0.1*rng.normal(size = (num_hid, num_vis)),order= 'fortran' )
             self.hid_bias = 0.001 * rng.normal(size = (1, num_hid))
             self.vis_bias = 0.001 * rng.normal(size = (1, num_vis))
         else:
             print('Reading in pickled RBM from %s' % (filename))
+            f.write('Reading in pickled RBM from %s' % (filename))
             # read in from a saved npz file
             if not(filename.endswith('.npz')):
                 filename = filename + '.npz'
@@ -43,13 +46,15 @@ class RBM(object):
                 self.vis_bias = data['vis_bias']
                 self.num_hid = self.W.shape[0]
                 self.num_vis = self.W.shape[1]
-            print ('NAME: %s, is an RBM with %d hids and %d vis' % (self.name, self.num_hid, self.num_vis))
+            print('NAME: %s, is an RBM with %d hids and %d vis' % (self.name, self.num_hid, self.num_vis))
+            f.write('NAME: %s, is an RBM with %d hids and %d vis' % (self.name, self.num_hid, self.num_vis))
 
         self.DROPOUT = DROPOUT
         self.hid_type = hid_type
         self.vis_type = 'linear'
         print ('dropout is %s, hidden units of type %s' %(self.DROPOUT, self.hid_type))
-
+        f.write('dropout is %s, hidden units of type %s' %(self.DROPOUT, self.hid_type))
+        f.close()
         
     def rename(self, newname):
         """ give the RBM a new name """
@@ -96,8 +101,11 @@ class RBM(object):
         Train the RBM's weights on the supplied data, and (optionally) use dropout.
         Loss can be CD or AE (contrastive divergence or auto-encoder).
         """
+        f = open(self.name+'.txt', 'a')
         print('training with Loss %s and L1 penalty %.6f' % (Loss, L1_penalty))
         print('rate %.5f, momentum %.2f, minibatches of %d' % (rate, momentum, minibatch_size))
+        f.write('training with Loss %s and L1 penalty %.6f' % (Loss, L1_penalty))
+        f.write('rate %.5f, momentum %.2f, minibatches of %d' % (rate, momentum, minibatch_size))
         announce_every = num_iterations / 5
         start = time.time()
         num_pats = indata.shape[0]
@@ -111,6 +119,7 @@ class RBM(object):
             C = 0.5*np.sum((outputs - indata)**2)
             if (t % announce_every == 0):
                 print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.1f' % (t, time.time() - start, C/num_pats))
+                f.write('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.1f' % (t, time.time() - start, C/num_pats))
 
 
             start_index = 0
@@ -139,8 +148,8 @@ class RBM(object):
                 # self.vis_bias += self.vis_bias_change
 
             ######## training loop ends
-
-            
+        
+        f.close()
         return
 
     

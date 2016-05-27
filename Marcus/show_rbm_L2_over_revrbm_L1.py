@@ -32,27 +32,3 @@ if __name__ == '__main__':
     else:
         sys.exit("No such L2 RBM! (%s)" % (opts.L2name))
 
-    ########################################################
-   
-
-    L1.DROPOUT = False
-    L2.DROPOUT = False
-    revrbm.make_2layer_dynamics_figure(L1, L2)
-
-   
-    # We start by generating random patterns from the top layer RBM.
-    # The points where DROPOUT is/isn't used appears to be critical to success :-(
-    L2.DROPOUT = True
-    top_pats = rbm.random_hiddens_for_rbm(L2, 100)
-    Steps = 10
-    for t in range(Steps):
-        mid_pats = L2.pushdown(top_pats)
-        top_pats = L2.pushup(mid_pats)
-        if (t >= Steps - 3): # a couple of "smoother" iterations at the end. Bah, humbug.
-            L2.DROPOUT = False
-
-    L1.DROPOUT = False # this seems to matter, which is a little annoying.
-    vis_dreams = L1.pushdown(mid_pats)
-
-    revrbm.show_example_images(vis_dreams, filename='%s_combo_dreams.png'%(L2.name))
-
