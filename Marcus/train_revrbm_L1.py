@@ -11,10 +11,9 @@ if __name__ == '__main__':
     parser.add_option("-n", "--nhids", type = "int", dest = "num_hids", default = 200, help = "number of hidden units (ignored unless new net)")
     parser.add_option("-r", "--rate", type = "float", dest = "rate", help = "learning rate", default = 0.001)
     parser.add_option("-m", "--mom", type = "float", dest = "momentum", help = "momentum", default = 0.9)
-    parser.add_option("-p", "--penalty", type = "float", dest = "L1_penalty", help = "L1 penalty", default = 0.001)
+    parser.add_option("-p", "--penalty", type = "float", dest = "L1_penalty", help = "L1 penalty", default = 0.0)
     parser.add_option("-F", "--newname", type = "str", dest = "newname", help = "name for trained RBM  (defaults to existing name, ignored if new RBM)")
     parser.add_option("-D", type = "str", dest = "digitsAsStr", help = "digits to train on, as comma-separated list (e.g. -D 4,5,6)", default = '4')
-    parser.add_option("-L", type = "str", dest = "Loss", help = "Loss: CD or AE (ContrastiveDiv vs AutoEncoder", default = "CD")
     opts, args = parser.parse_args()
     EXIT = False
     if (opts.name is None):
@@ -34,8 +33,8 @@ if __name__ == '__main__':
     inpats[:tmpN] = revrbm.load_mnist_digits(digits, opts.nitems) 
     inpats[tmpN:] = revrbm.generate_smooth_bkgd(tmpN)
     """
-
-    #revrbm.show_example_images(inpats, filename='examples.png')
+    revrbm.show_example_images(inpats, filename='examples.png')
+    #sys.exit(0)
         
     if os.path.isfile('./saved_nets/' + opts.name + '.npz'):
         r = revrbm.RBM(opts.name) # attempt to read an existing RBM in.
@@ -45,6 +44,23 @@ if __name__ == '__main__':
         r = revrbm.RBM(opts.name, opts.num_hids, num_vis=inpats.shape[1], DROPOUT=False, hid_type='logistic')
 
 
-    r.train(inpats, opts.iterations, opts.Loss, opts.rate, opts.momentum, opts.L1_penalty, minibatch_size=50)
+    r.train(inpats, opts.iterations, opts.rate, opts.momentum, opts.L1_penalty, minibatch_size=50)
     r.save_as_pickle()
+
+
+    ## DISPLAY STUFF (copied from show_revrbm_L1.py)
+    r.DROPOUT = False
+    r.make_weights_figure()
+    r.make_dynamics_figure(inpats)
+    #r.rename(r.name + '_scrambled')
+    #xr.make_dynamics_figure(inpats, SCRAMBLE=True)
+
+    hid_pats = revrbm.random_hiddens_for_rbm(r, 100)
+    Steps = 100
+    for t in range(Steps):
+        vis_dreams = r.pushdown(hid_pats, noise=True)
+        hid_pats = r.pushup(vis_dreams, noise=True)
+    vis_dreams = r.pushdown(hid_pats, noise=False)
+    hid_pats = r.pushup(vis_dreams, noise=False
+    revrbm.show_example_images(vis_dreams, filename='%s_dreams.png'%(r.name))
 
