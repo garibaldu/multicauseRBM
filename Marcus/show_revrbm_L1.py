@@ -39,8 +39,10 @@ if __name__ == '__main__':
     Steps = 10
     for t in range(Steps):
         print ('dream step %d' %(t))
-        vis_dreams = r.pushdown(hid_pats)
-        hid_pats = r.pushup(vis_dreams)
+        vis_dreams = r.pushdown(hid_pats, noise=True)
+        hid_pats = r.pushup(vis_dreams, noise=True)
 
+    vis_dreams = r.pushdown(hid_pats, noise=False)
+    hid_pats = r.pushup(vis_dreams, noise=False)
     revrbm.show_example_images(vis_dreams, filename='%s_dreams.png'%(r.name))
 

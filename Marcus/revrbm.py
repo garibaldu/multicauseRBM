@@ -50,6 +50,7 @@ class RBM(object):
         self.vis_type = 'linear'
         print ('dropout is %s, hidden units of type %s' %(self.DROPOUT, self.hid_type))
 
+        
     def rename(self, newname):
         """ give the RBM a new name """
         self.name = newname
@@ -90,32 +91,40 @@ class RBM(object):
         return psi
 
         
-    def train(self, indata, num_iterations, rate, momentum, L1_penalty, minibatch_size):
+    def train(self, indata, num_iterations, Loss, rate, momentum, L1_penalty, minibatch_size):
         """
-        Train the RBM's weights on the supplied data, using CD1 with momentum, an L1 penalty, and (optionally) dropout.
+        Train the RBM's weights on the supplied data, and (optionally) use dropout.
+        Loss can be CD or AE (contrastive divergence or auto-encoder).
         """
-        print('training with rate %.5f, momentum %.2f, L1 penalty %.6f, minibatches of %d' % (rate, momentum, L1_penalty, minibatch_size))
-        announce_every = 1 #num_iterations / 5
+        print('training with Loss %s and L1 penalty %.6f' % (Loss, L1_penalty))
+        print('rate %.5f, momentum %.2f, minibatches of %d' % (rate, momentum, minibatch_size))
+        announce_every = num_iterations / 5
         start = time.time()
         num_pats = indata.shape[0]
         W_change = 0.0
         hid_bias_change = 0.0
         vis_bias_change = 0.0
 
-        TRAINING = 'AE'  # CD or AE (contrastive divergence or auto-encoder)
-        
+
         for t in range(num_iterations+1):
+            outputs = self.pushdown(self.pushup(indata,noise=False),noise=False)
+            C = 0.5*np.sum((outputs - indata)**2)
+            if (t % announce_every == 0):
+                print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.1f' % (t, time.time() - start, C/num_pats))
+
+
             start_index = 0
             C = 0.0
+            ######## training loop starts
             while start_index < num_pats-1:
                 next_index = min(start_index + minibatch_size, num_pats)
                 vis_minibatch = indata[start_index : next_index]
                 ndata = np.shape(vis_minibatch)[0] # how many in this minibatch
                 start_index = next_index  # ready for next time
 
-                if TRAINING == 'CD':
-                    W_grad, hid_bias_grad =  self.CD_gradient(vis_minibatch, CD_steps=5)
-                elif TRAINING == 'AE':
+                if Loss == 'CD':
+                    W_grad, hid_bias_grad =  self.CD_gradient(vis_minibatch, CD_steps=2)
+                elif Loss == 'AE':
                     W_grad, hid_bias_grad =  self.autoencoder_gradient(vis_minibatch)
 
                 W_change = rate * W_grad  +  momentum * W_change
@@ -129,13 +138,9 @@ class RBM(object):
                 # self.vis_bias_change = rate * (vis_minibatch.mean(0) - vis_reconstruction.mean(0))   + momentum * self.vis_bias_change
                 # self.vis_bias += self.vis_bias_change
 
-            outputs = self.pushdown(self.pushup(indata, noise=False), noise=False)
-            C = 0.5*np.sum((outputs - indata)**2)
+            ######## training loop ends
+
             
-            if (t % announce_every == 0):
-                print (outputs[0,3:6])
-                #### ARGH! outputs changes even if rate and penalty are ZERO!!
-                print ('Iteration %5d \t TIME (secs): %.1f,  RMSreconstruction: %.1f' % (t, time.time() - start, C/num_pats))
         return
 
     
@@ -214,7 +219,7 @@ class RBM(object):
         hid_bias_gradient =  np.sum(deltah,0) / ndata
         #error = 0.5*np.sum((outputs-inputs)**2) / ndata
         #print ("\t\t error: %.1f" % error)
-        return weights_gradient, hid_bias_gradient
+        return -1.0 * weights_gradient, -1.* hid_bias_gradient
 
     
     def get_num_vis(self):
@@ -298,7 +303,7 @@ class RBM(object):
         for s in range(num_rows):
             #print('doing alternating Gibbs Sampling until t=%d' % (next_stop))
             while total_time < next_stop:
-                hid = self.pushup(Vis_test)
+                hid = self.pushup(Vis_test, noise=True)
                 Vis_test = self.pushdown(hid, noise=False)
                 total_time += 1
                 
