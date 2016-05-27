@@ -1,14 +1,14 @@
 #!/bin/bash
 
-DIGITS='1,2,3'
-python train_revrbm_L1.py -D $DIGITS -t 100 -n 50 -L CD -f CDtrained  
-python train_revrbm_L1.py -D $DIGITS -t 100 -n 50 -L AE -f AEtrained  
+DIGITS='1,2,3,4,5'
+python train_revrbm_L1.py -D $DIGITS -t 1000 -n 200 -L CD -f CDtrained  
+python train_revrbm_L1.py -D $DIGITS -t 1000 -n 200 -L AE -f AEtrained  
 
 python train_rbm_L2_over_revrbm_L1.py -D $DIGITS -f CDtrained -g CDtrainedL2
 python train_rbm_L2_over_revrbm_L1.py -D $DIGITS -f AEtrained -g AEtrainedL2
 
-rm saved_nets/CDtrained.npz
-rm saved_nets/AEtrained.npz
+mv saved_nets/CDtrained.npz $DIGITS
+mv saved_nets/AEtrained.npz $DIGITS
 rm saved_nets/CDtrainedL2.npz
 rm saved_nets/AEtrainedL2.npz
 
